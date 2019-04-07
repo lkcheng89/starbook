@@ -32,7 +32,7 @@ namespace ASCOM.Starbook
             Telescope.starbook.IPAddress = IPAddress.Parse(string.Format("{0}.{1}.{2}.{3}",
                 textBoxIPAddress1.Text, textBoxIPAddress2.Text, textBoxIPAddress3.Text, textBoxIPAddress4.Text));
 
-            if (checkBoxSetLocation.Checked)
+            if (checkBoxSetLocation.Enabled && checkBoxSetLocation.Checked)
             {
                 Telescope.Starbook.DMS latitude = new Telescope.Starbook.DMS();
 
@@ -80,7 +80,7 @@ namespace ASCOM.Starbook
                 }
             }
 
-            if (checkBoxSetDateTime.Checked)
+            if (checkBoxSetDateTime.Enabled && checkBoxSetDateTime.Checked)
             {
                 int year = int.Parse(textBoxYear.Text);
                 int month = int.Parse(textBoxMonth.Text);
@@ -99,7 +99,7 @@ namespace ASCOM.Starbook
                 }
             }
 
-            if (checkBoxSetGuideRate.Checked)
+            if (checkBoxSetGuideRate.Enabled && checkBoxSetGuideRate.Checked)
             {
                 Telescope.Starbook.Response response = Telescope.starbook.SetSpeed(comboBoxGuideRate.SelectedIndex);
 
