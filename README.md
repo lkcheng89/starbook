@@ -1,2 +1,2 @@
-# astronomy
-Repository for Astronomy Projects
+# starbook
+ASCOM Driver for Vixen Starbook
