@@ -20,11 +20,45 @@ namespace ASCOM.Starbook
         public SetupDialogForm()
         {
             InitializeComponent();
-            // Initialise current values of user settings from the ASCOM Profile
-            InitUI();
+            InitializeComponentProfile();
         }
 
-        private void cmdOK_Click(object sender, EventArgs e) // OK button event handler
+        private void InitializeComponentProfile()
+        {
+            chkTraceLogger.Checked = Telescope.traceLogger.Enabled;
+            // set the list of com ports to those that are currently available
+
+            byte[] ipAddress = Telescope.starbook.IPAddress.GetAddressBytes();
+
+            if (ipAddress.Length == 4)
+            {
+                this.textBoxIPAddress1.Text = ipAddress[0].ToString();
+                this.textBoxIPAddress2.Text = ipAddress[1].ToString();
+                this.textBoxIPAddress3.Text = ipAddress[2].ToString();
+                this.textBoxIPAddress4.Text = ipAddress[3].ToString();
+            }
+
+            comboBoxGuideRate.SelectedIndex = Telescope.guideRate;
+
+            textBoxGuideRate0.Text = Telescope.guideRates[0].ToString();
+            textBoxGuideRate1.Text = Telescope.guideRates[1].ToString();
+            textBoxGuideRate2.Text = Telescope.guideRates[2].ToString();
+            textBoxGuideRate3.Text = Telescope.guideRates[3].ToString();
+            textBoxGuideRate4.Text = Telescope.guideRates[4].ToString();
+            textBoxGuideRate5.Text = Telescope.guideRates[5].ToString();
+            textBoxGuideRate6.Text = Telescope.guideRates[6].ToString();
+            textBoxGuideRate7.Text = Telescope.guideRates[7].ToString();
+            textBoxGuideRate8.Text = Telescope.guideRates[8].ToString();
+
+            Util util = new Util();
+            labelPlatformVersion.Text = string.Format("Platform Version: {0}.{1}", util.MajorVersion, util.MinorVersion);
+            //labelPlatformVersion.Text = string.Format("Platform Version: {0}.{1} {4}, Build {0}.{1}.{2}.{3}", util.MajorVersion, util.MinorVersion, util.ServicePack, util.BuildNumber, util.ServicePack > 0 ? string.Format("SP{0}", util.ServicePack) : string.Empty);
+
+            Version version = Assembly.GetExecutingAssembly().GetName().Version;
+            labelDriverVersion.Text = String.Format("Driver Version: {0}.{1}", version.Major, version.Minor);
+        }
+
+        private void buttonOK_Click(object sender, EventArgs e) // OK button event handler
         {
             // Place any validation constraint checks here
             // Update the state variables with results from the dialogue
@@ -124,12 +158,12 @@ namespace ASCOM.Starbook
             Telescope.traceLogger.Enabled = chkTraceLogger.Checked;
         }
 
-        private void cmdCancel_Click(object sender, EventArgs e) // Cancel button event handler
+        private void buttonCancel_Click(object sender, EventArgs e) // Cancel button event handler
         {
             Close();
         }
 
-        private void BrowseToAscom(object sender, EventArgs e) // Click on ASCOM logo event handler
+        private void pictureBox_Click(object sender, EventArgs e) // Click on ASCOM logo event handler
         {
             try
             {
@@ -146,39 +180,16 @@ namespace ASCOM.Starbook
             }
         }
 
-        private void InitUI()
+        private void labelEmail_Click(object sender, EventArgs e)
         {
-            chkTraceLogger.Checked = Telescope.traceLogger.Enabled;
-            // set the list of com ports to those that are currently available
-
-            byte[] ipAddress = Telescope.starbook.IPAddress.GetAddressBytes();
-
-            if (ipAddress.Length == 4)
+            try
             {
-                this.textBoxIPAddress1.Text = ipAddress[0].ToString();
-                this.textBoxIPAddress2.Text = ipAddress[1].ToString();
-                this.textBoxIPAddress3.Text = ipAddress[2].ToString();
-                this.textBoxIPAddress4.Text = ipAddress[3].ToString();
+                System.Diagnostics.Process.Start(string.Format("mailto:{0}", labelEmail.Text));
             }
-
-            comboBoxGuideRate.SelectedIndex = Telescope.guideRate;
-
-            textBoxGuideRate0.Text = Telescope.guideRates[0].ToString();
-            textBoxGuideRate1.Text = Telescope.guideRates[1].ToString();
-            textBoxGuideRate2.Text = Telescope.guideRates[2].ToString();
-            textBoxGuideRate3.Text = Telescope.guideRates[3].ToString();
-            textBoxGuideRate4.Text = Telescope.guideRates[4].ToString();
-            textBoxGuideRate5.Text = Telescope.guideRates[5].ToString();
-            textBoxGuideRate6.Text = Telescope.guideRates[6].ToString();
-            textBoxGuideRate7.Text = Telescope.guideRates[7].ToString();
-            textBoxGuideRate8.Text = Telescope.guideRates[8].ToString();
-
-            Util util = new Util();
-            labelPlatformVersion.Text = string.Format("Platform Version: {0}.{1}", util.MajorVersion, util.MinorVersion);
-            //labelPlatformVersion.Text = string.Format("Platform Version: {0}.{1} {4}, Build {0}.{1}.{2}.{3}", util.MajorVersion, util.MinorVersion, util.ServicePack, util.BuildNumber, util.ServicePack > 0 ? string.Format("SP{0}", util.ServicePack) : string.Empty);
-
-            Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            labelDriverVersion.Text = String.Format("Driver Version: {0}.{1}", version.Major, version.Minor);
+            catch (System.Exception other)
+            {
+                MessageBox.Show(other.Message);
+            }
         }
 
         private void buttonCheck_Click(object sender, EventArgs e)

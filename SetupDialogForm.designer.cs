@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.cmdOK = new System.Windows.Forms.Button();
+            this.buttonOK = new System.Windows.Forms.Button();
             this.labelIPAddress = new System.Windows.Forms.Label();
-            this.picASCOM = new System.Windows.Forms.PictureBox();
+            this.pictureBox = new System.Windows.Forms.PictureBox();
             this.chkTraceLogger = new System.Windows.Forms.CheckBox();
             this.textBoxIPAddress1 = new System.Windows.Forms.TextBox();
             this.textBoxStatus = new System.Windows.Forms.TextBox();
@@ -80,43 +80,43 @@
             this.labelPlatformVersion = new System.Windows.Forms.Label();
             this.labelDriverVersion = new System.Windows.Forms.Label();
             this.labelCopyright = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.cmdCancel = new System.Windows.Forms.Button();
+            this.labelEmail = new System.Windows.Forms.Label();
+            this.buttonCancel = new System.Windows.Forms.Button();
             this.groupBoxGuideRate = new System.Windows.Forms.GroupBox();
-            this.label2 = new System.Windows.Forms.Label();
+            this.labelGuideRateNote = new System.Windows.Forms.Label();
+            this.checkBoxSetGuideRate = new System.Windows.Forms.CheckBox();
+            this.labelGuideRateX = new System.Windows.Forms.Label();
+            this.labelGuideRates = new System.Windows.Forms.Label();
             this.labelGuideRate = new System.Windows.Forms.Label();
             this.textBoxGuideRate1 = new System.Windows.Forms.TextBox();
-            this.textBoxGuideRate2 = new System.Windows.Forms.TextBox();
-            this.textBoxGuideRate0 = new System.Windows.Forms.TextBox();
-            this.comboBoxGuideRate = new System.Windows.Forms.ComboBox();
-            this.textBoxGuideRate3 = new System.Windows.Forms.TextBox();
-            this.textBoxGuideRate4 = new System.Windows.Forms.TextBox();
-            this.textBoxGuideRate5 = new System.Windows.Forms.TextBox();
-            this.textBoxGuideRate6 = new System.Windows.Forms.TextBox();
-            this.textBoxGuideRate7 = new System.Windows.Forms.TextBox();
             this.textBoxGuideRate8 = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.checkBoxSetGuideRate = new System.Windows.Forms.CheckBox();
-            ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).BeginInit();
+            this.textBoxGuideRate7 = new System.Windows.Forms.TextBox();
+            this.textBoxGuideRate6 = new System.Windows.Forms.TextBox();
+            this.textBoxGuideRate5 = new System.Windows.Forms.TextBox();
+            this.textBoxGuideRate4 = new System.Windows.Forms.TextBox();
+            this.textBoxGuideRate3 = new System.Windows.Forms.TextBox();
+            this.textBoxGuideRate2 = new System.Windows.Forms.TextBox();
+            this.comboBoxGuideRate = new System.Windows.Forms.ComboBox();
+            this.textBoxGuideRate0 = new System.Windows.Forms.TextBox();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             this.groupBoxConnection.SuspendLayout();
             this.groupBoxLocation.SuspendLayout();
             this.groupBoxDateTime.SuspendLayout();
             this.groupBoxGuideRate.SuspendLayout();
             this.SuspendLayout();
             // 
-            // cmdOK
+            // buttonOK
             // 
-            this.cmdOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.cmdOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.cmdOK.Location = new System.Drawing.Point(586, 659);
-            this.cmdOK.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.cmdOK.Name = "cmdOK";
-            this.cmdOK.Size = new System.Drawing.Size(88, 42);
-            this.cmdOK.TabIndex = 0;
-            this.cmdOK.Text = "OK";
-            this.cmdOK.UseVisualStyleBackColor = true;
-            this.cmdOK.Click += new System.EventHandler(this.cmdOK_Click);
+            this.buttonOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.buttonOK.Location = new System.Drawing.Point(586, 659);
+            this.buttonOK.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.buttonOK.Name = "buttonOK";
+            this.buttonOK.Size = new System.Drawing.Size(88, 42);
+            this.buttonOK.TabIndex = 0;
+            this.buttonOK.Text = "OK";
+            this.buttonOK.UseVisualStyleBackColor = true;
+            this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
             // 
             // labelIPAddress
             // 
@@ -128,20 +128,20 @@
             this.labelIPAddress.TabIndex = 0;
             this.labelIPAddress.Text = "IP Address";
             // 
-            // picASCOM
+            // pictureBox
             // 
-            this.picASCOM.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.picASCOM.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picASCOM.Image = global::ASCOM.Starbook.Properties.Resources.ASCOM;
-            this.picASCOM.Location = new System.Drawing.Point(283, 576);
-            this.picASCOM.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.picASCOM.Name = "picASCOM";
-            this.picASCOM.Size = new System.Drawing.Size(48, 56);
-            this.picASCOM.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.picASCOM.TabIndex = 3;
-            this.picASCOM.TabStop = false;
-            this.picASCOM.Click += new System.EventHandler(this.BrowseToAscom);
-            this.picASCOM.DoubleClick += new System.EventHandler(this.BrowseToAscom);
+            this.pictureBox.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.pictureBox.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.pictureBox.Image = global::ASCOM.Starbook.Properties.Resources.ASCOM;
+            this.pictureBox.Location = new System.Drawing.Point(283, 576);
+            this.pictureBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.pictureBox.Name = "pictureBox";
+            this.pictureBox.Size = new System.Drawing.Size(48, 56);
+            this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.pictureBox.TabIndex = 3;
+            this.pictureBox.TabStop = false;
+            this.pictureBox.Click += new System.EventHandler(this.pictureBox_Click);
+            this.pictureBox.DoubleClick += new System.EventHandler(this.pictureBox_Click);
             // 
             // chkTraceLogger
             // 
@@ -651,40 +651,41 @@
             this.labelCopyright.TabIndex = 0;
             this.labelCopyright.Text = "Copyright © 2019 Lung-Kai Cheng";
             // 
-            // label1
+            // labelEmail
             // 
-            this.label1.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.label1.AutoSize = true;
-            this.label1.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.label1.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.SystemColors.Highlight;
-            this.label1.Location = new System.Drawing.Point(363, 606);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(175, 22);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "lkcheng89@gmail.com";
+            this.labelEmail.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.labelEmail.AutoSize = true;
+            this.labelEmail.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.labelEmail.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelEmail.ForeColor = System.Drawing.SystemColors.Highlight;
+            this.labelEmail.Location = new System.Drawing.Point(363, 606);
+            this.labelEmail.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelEmail.Name = "labelEmail";
+            this.labelEmail.Size = new System.Drawing.Size(175, 22);
+            this.labelEmail.TabIndex = 0;
+            this.labelEmail.Text = "lkcheng89@gmail.com";
+            this.labelEmail.Click += new System.EventHandler(this.labelEmail_Click);
             // 
-            // cmdCancel
+            // buttonCancel
             // 
-            this.cmdCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.cmdCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cmdCancel.Location = new System.Drawing.Point(586, 659);
-            this.cmdCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.cmdCancel.Name = "cmdCancel";
-            this.cmdCancel.Size = new System.Drawing.Size(88, 42);
-            this.cmdCancel.TabIndex = 1;
-            this.cmdCancel.Text = "Cancel";
-            this.cmdCancel.UseVisualStyleBackColor = true;
-            this.cmdCancel.Visible = false;
-            this.cmdCancel.Click += new System.EventHandler(this.cmdCancel_Click);
+            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.buttonCancel.Location = new System.Drawing.Point(586, 659);
+            this.buttonCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.buttonCancel.Name = "buttonCancel";
+            this.buttonCancel.Size = new System.Drawing.Size(88, 42);
+            this.buttonCancel.TabIndex = 1;
+            this.buttonCancel.Text = "Cancel";
+            this.buttonCancel.UseVisualStyleBackColor = true;
+            this.buttonCancel.Visible = false;
+            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
             // 
             // groupBoxGuideRate
             // 
-            this.groupBoxGuideRate.Controls.Add(this.label3);
+            this.groupBoxGuideRate.Controls.Add(this.labelGuideRateNote);
             this.groupBoxGuideRate.Controls.Add(this.checkBoxSetGuideRate);
-            this.groupBoxGuideRate.Controls.Add(this.label4);
-            this.groupBoxGuideRate.Controls.Add(this.label2);
+            this.groupBoxGuideRate.Controls.Add(this.labelGuideRateX);
+            this.groupBoxGuideRate.Controls.Add(this.labelGuideRates);
             this.groupBoxGuideRate.Controls.Add(this.labelGuideRate);
             this.groupBoxGuideRate.Controls.Add(this.textBoxGuideRate1);
             this.groupBoxGuideRate.Controls.Add(this.textBoxGuideRate8);
@@ -703,15 +704,49 @@
             this.groupBoxGuideRate.TabStop = false;
             this.groupBoxGuideRate.Text = "Pulse Guide Setting";
             // 
-            // label2
+            // labelGuideRateNote
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(25, 75);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(97, 22);
-            this.label2.TabIndex = 0;
-            this.label2.Text = "Guide Rates";
+            this.labelGuideRateNote.AutoSize = true;
+            this.labelGuideRateNote.Location = new System.Drawing.Point(134, 113);
+            this.labelGuideRateNote.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelGuideRateNote.Name = "labelGuideRateNote";
+            this.labelGuideRateNote.Size = new System.Drawing.Size(199, 22);
+            this.labelGuideRateNote.TabIndex = 0;
+            this.labelGuideRateNote.Text = "X = Times of Sidereal Rate";
+            // 
+            // checkBoxSetGuideRate
+            // 
+            this.checkBoxSetGuideRate.AutoSize = true;
+            this.checkBoxSetGuideRate.Checked = true;
+            this.checkBoxSetGuideRate.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxSetGuideRate.Enabled = false;
+            this.checkBoxSetGuideRate.Location = new System.Drawing.Point(464, 112);
+            this.checkBoxSetGuideRate.Name = "checkBoxSetGuideRate";
+            this.checkBoxSetGuideRate.Size = new System.Drawing.Size(143, 26);
+            this.checkBoxSetGuideRate.TabIndex = 6;
+            this.checkBoxSetGuideRate.Text = "Set Guide Rate";
+            this.checkBoxSetGuideRate.UseVisualStyleBackColor = true;
+            this.checkBoxSetGuideRate.CheckedChanged += new System.EventHandler(this.checkBoxSetDateTime_CheckedChanged);
+            // 
+            // labelGuideRateX
+            // 
+            this.labelGuideRateX.AutoSize = true;
+            this.labelGuideRateX.Location = new System.Drawing.Point(622, 79);
+            this.labelGuideRateX.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelGuideRateX.Name = "labelGuideRateX";
+            this.labelGuideRateX.Size = new System.Drawing.Size(19, 22);
+            this.labelGuideRateX.TabIndex = 0;
+            this.labelGuideRateX.Text = "X";
+            // 
+            // labelGuideRates
+            // 
+            this.labelGuideRates.AutoSize = true;
+            this.labelGuideRates.Location = new System.Drawing.Point(25, 75);
+            this.labelGuideRates.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelGuideRates.Name = "labelGuideRates";
+            this.labelGuideRates.Size = new System.Drawing.Size(97, 22);
+            this.labelGuideRates.TabIndex = 0;
+            this.labelGuideRates.Text = "Guide Rates";
             // 
             // labelGuideRate
             // 
@@ -731,6 +766,54 @@
             this.textBoxGuideRate1.TabIndex = 4;
             this.textBoxGuideRate1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
+            // textBoxGuideRate8
+            // 
+            this.textBoxGuideRate8.Location = new System.Drawing.Point(570, 72);
+            this.textBoxGuideRate8.Name = "textBoxGuideRate8";
+            this.textBoxGuideRate8.Size = new System.Drawing.Size(48, 29);
+            this.textBoxGuideRate8.TabIndex = 2;
+            this.textBoxGuideRate8.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // textBoxGuideRate7
+            // 
+            this.textBoxGuideRate7.Location = new System.Drawing.Point(516, 72);
+            this.textBoxGuideRate7.Name = "textBoxGuideRate7";
+            this.textBoxGuideRate7.Size = new System.Drawing.Size(48, 29);
+            this.textBoxGuideRate7.TabIndex = 2;
+            this.textBoxGuideRate7.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // textBoxGuideRate6
+            // 
+            this.textBoxGuideRate6.Location = new System.Drawing.Point(462, 72);
+            this.textBoxGuideRate6.Name = "textBoxGuideRate6";
+            this.textBoxGuideRate6.Size = new System.Drawing.Size(48, 29);
+            this.textBoxGuideRate6.TabIndex = 2;
+            this.textBoxGuideRate6.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // textBoxGuideRate5
+            // 
+            this.textBoxGuideRate5.Location = new System.Drawing.Point(408, 72);
+            this.textBoxGuideRate5.Name = "textBoxGuideRate5";
+            this.textBoxGuideRate5.Size = new System.Drawing.Size(48, 29);
+            this.textBoxGuideRate5.TabIndex = 2;
+            this.textBoxGuideRate5.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // textBoxGuideRate4
+            // 
+            this.textBoxGuideRate4.Location = new System.Drawing.Point(354, 72);
+            this.textBoxGuideRate4.Name = "textBoxGuideRate4";
+            this.textBoxGuideRate4.Size = new System.Drawing.Size(48, 29);
+            this.textBoxGuideRate4.TabIndex = 2;
+            this.textBoxGuideRate4.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // textBoxGuideRate3
+            // 
+            this.textBoxGuideRate3.Location = new System.Drawing.Point(300, 72);
+            this.textBoxGuideRate3.Name = "textBoxGuideRate3";
+            this.textBoxGuideRate3.Size = new System.Drawing.Size(48, 29);
+            this.textBoxGuideRate3.TabIndex = 2;
+            this.textBoxGuideRate3.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
             // textBoxGuideRate2
             // 
             this.textBoxGuideRate2.Location = new System.Drawing.Point(246, 72);
@@ -738,14 +821,6 @@
             this.textBoxGuideRate2.Size = new System.Drawing.Size(48, 29);
             this.textBoxGuideRate2.TabIndex = 2;
             this.textBoxGuideRate2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // textBoxGuideRate0
-            // 
-            this.textBoxGuideRate0.Location = new System.Drawing.Point(138, 72);
-            this.textBoxGuideRate0.Name = "textBoxGuideRate0";
-            this.textBoxGuideRate0.Size = new System.Drawing.Size(48, 29);
-            this.textBoxGuideRate0.TabIndex = 2;
-            this.textBoxGuideRate0.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // comboBoxGuideRate
             // 
@@ -766,87 +841,13 @@
             this.comboBoxGuideRate.Size = new System.Drawing.Size(48, 30);
             this.comboBoxGuideRate.TabIndex = 10;
             // 
-            // textBoxGuideRate3
+            // textBoxGuideRate0
             // 
-            this.textBoxGuideRate3.Location = new System.Drawing.Point(300, 72);
-            this.textBoxGuideRate3.Name = "textBoxGuideRate3";
-            this.textBoxGuideRate3.Size = new System.Drawing.Size(48, 29);
-            this.textBoxGuideRate3.TabIndex = 2;
-            this.textBoxGuideRate3.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // textBoxGuideRate4
-            // 
-            this.textBoxGuideRate4.Location = new System.Drawing.Point(354, 72);
-            this.textBoxGuideRate4.Name = "textBoxGuideRate4";
-            this.textBoxGuideRate4.Size = new System.Drawing.Size(48, 29);
-            this.textBoxGuideRate4.TabIndex = 2;
-            this.textBoxGuideRate4.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // textBoxGuideRate5
-            // 
-            this.textBoxGuideRate5.Location = new System.Drawing.Point(408, 72);
-            this.textBoxGuideRate5.Name = "textBoxGuideRate5";
-            this.textBoxGuideRate5.Size = new System.Drawing.Size(48, 29);
-            this.textBoxGuideRate5.TabIndex = 2;
-            this.textBoxGuideRate5.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // textBoxGuideRate6
-            // 
-            this.textBoxGuideRate6.Location = new System.Drawing.Point(462, 72);
-            this.textBoxGuideRate6.Name = "textBoxGuideRate6";
-            this.textBoxGuideRate6.Size = new System.Drawing.Size(48, 29);
-            this.textBoxGuideRate6.TabIndex = 2;
-            this.textBoxGuideRate6.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // textBoxGuideRate7
-            // 
-            this.textBoxGuideRate7.Location = new System.Drawing.Point(516, 72);
-            this.textBoxGuideRate7.Name = "textBoxGuideRate7";
-            this.textBoxGuideRate7.Size = new System.Drawing.Size(48, 29);
-            this.textBoxGuideRate7.TabIndex = 2;
-            this.textBoxGuideRate7.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // textBoxGuideRate8
-            // 
-            this.textBoxGuideRate8.Location = new System.Drawing.Point(570, 72);
-            this.textBoxGuideRate8.Name = "textBoxGuideRate8";
-            this.textBoxGuideRate8.Size = new System.Drawing.Size(48, 29);
-            this.textBoxGuideRate8.TabIndex = 2;
-            this.textBoxGuideRate8.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(134, 113);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(199, 22);
-            this.label3.TabIndex = 0;
-            this.label3.Text = "X = Times of Sidereal Rate";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(622, 79);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(19, 22);
-            this.label4.TabIndex = 0;
-            this.label4.Text = "X";
-            // 
-            // checkBoxSetGuideRate
-            // 
-            this.checkBoxSetGuideRate.AutoSize = true;
-            this.checkBoxSetGuideRate.Checked = true;
-            this.checkBoxSetGuideRate.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxSetGuideRate.Enabled = false;
-            this.checkBoxSetGuideRate.Location = new System.Drawing.Point(464, 112);
-            this.checkBoxSetGuideRate.Name = "checkBoxSetGuideRate";
-            this.checkBoxSetGuideRate.Size = new System.Drawing.Size(143, 26);
-            this.checkBoxSetGuideRate.TabIndex = 6;
-            this.checkBoxSetGuideRate.Text = "Set Guide Rate";
-            this.checkBoxSetGuideRate.UseVisualStyleBackColor = true;
-            this.checkBoxSetGuideRate.CheckedChanged += new System.EventHandler(this.checkBoxSetDateTime_CheckedChanged);
+            this.textBoxGuideRate0.Location = new System.Drawing.Point(138, 72);
+            this.textBoxGuideRate0.Name = "textBoxGuideRate0";
+            this.textBoxGuideRate0.Size = new System.Drawing.Size(48, 29);
+            this.textBoxGuideRate0.TabIndex = 2;
+            this.textBoxGuideRate0.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // SetupDialogForm
             // 
@@ -858,14 +859,14 @@
             this.Controls.Add(this.groupBoxLocation);
             this.Controls.Add(this.labelDriverVersion);
             this.Controls.Add(this.labelPlatformVersion);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.labelEmail);
             this.Controls.Add(this.labelCopyright);
             this.Controls.Add(this.labelFirmwareVersion);
             this.Controls.Add(this.groupBoxConnection);
             this.Controls.Add(this.chkTraceLogger);
-            this.Controls.Add(this.picASCOM);
-            this.Controls.Add(this.cmdOK);
-            this.Controls.Add(this.cmdCancel);
+            this.Controls.Add(this.pictureBox);
+            this.Controls.Add(this.buttonOK);
+            this.Controls.Add(this.buttonCancel);
             this.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
@@ -875,7 +876,7 @@
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Starbook Driver Setup";
-            ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
             this.groupBoxConnection.ResumeLayout(false);
             this.groupBoxConnection.PerformLayout();
             this.groupBoxLocation.ResumeLayout(false);
@@ -891,9 +892,9 @@
 
         #endregion
 
-        private System.Windows.Forms.Button cmdOK;
+        private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Label labelIPAddress;
-        private System.Windows.Forms.PictureBox picASCOM;
+        private System.Windows.Forms.PictureBox pictureBox;
         private System.Windows.Forms.CheckBox chkTraceLogger;
         private System.Windows.Forms.TextBox textBoxIPAddress1;
         private System.Windows.Forms.TextBox textBoxStatus;
@@ -942,10 +943,10 @@
         private System.Windows.Forms.Label labelDriverVersion;
         private System.Windows.Forms.Label labelTimezoneHour;
         private System.Windows.Forms.Label labelCopyright;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button cmdCancel;
+        private System.Windows.Forms.Label labelEmail;
+        private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.GroupBox groupBoxGuideRate;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label labelGuideRates;
         private System.Windows.Forms.Label labelGuideRate;
         private System.Windows.Forms.TextBox textBoxGuideRate1;
         private System.Windows.Forms.TextBox textBoxGuideRate2;
@@ -956,9 +957,9 @@
         private System.Windows.Forms.TextBox textBoxGuideRate4;
         private System.Windows.Forms.TextBox textBoxGuideRate3;
         private System.Windows.Forms.ComboBox comboBoxGuideRate;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label labelGuideRateNote;
         private System.Windows.Forms.TextBox textBoxGuideRate8;
-        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label labelGuideRateX;
         private System.Windows.Forms.CheckBox checkBoxSetGuideRate;
     }
 }

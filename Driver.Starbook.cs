@@ -21,25 +21,30 @@ namespace ASCOM.Starbook
 {
     public partial class Telescope : ITelescopeV3
     {
+        [ComVisible(false)]
         public class Starbook
         {
             #region Inner Enum & Struct
 
+            [ComVisible(false)]
             public enum State
             {
                 Init, Guide, Scope, Chart, User, Unknown
             }
 
+            [ComVisible(false)]
             public enum Response
             {
                 OK, ErrorIllegalState, ErrorFormat, ErrorBelowHorizon, ErrorUnknown
             }
 
+            [ComVisible(false)]
             public enum Direction
             {
                 Unknown, Positive, Negative, North, South, East, West
             }
 
+            [ComVisible(false)]
             public struct HMS
             {
                 public HMS(int hour, int minute, int second)
@@ -98,6 +103,7 @@ namespace ASCOM.Starbook
                 }
             }
 
+            [ComVisible(false)]
             public struct DMS
             {
                 public DMS(int degree, int minute, int second, Direction direction = Direction.Unknown)
@@ -235,6 +241,7 @@ namespace ASCOM.Starbook
                 }
             }
 
+            [ComVisible(false)]
             public struct Status
             {
                 public HMS RA { get; set; }
@@ -243,11 +250,19 @@ namespace ASCOM.Starbook
                 public bool Goto { get; set; }
             }
 
+            [ComVisible(false)]
             public struct Place
             {
                 public DMS Latitude { get; set; }
                 public DMS Longitude { get; set; }
                 public int Timezone { get; set; }
+            }
+
+            [ComVisible(false)]
+            public struct XY
+            {
+                public int X { get; set; }
+                public int Y { get; set; }
             }
 
             #endregion
@@ -331,28 +346,20 @@ namespace ASCOM.Starbook
 
             public Place GetPlace()
             {
-                Place place = new Place(); string s;
+                Place place = new Place();
 
-                Dictionary<string, string> dictionary = this.HandshakeDictionary("GETPLACE");
-
-                if (dictionary.TryGetValue("latitude", out s))
+                foreach (KeyValuePair<string, string> item in this.HandshakeDictionary("GETPLACE"))
                 {
-                    place.Latitude = new DMS(s);
+                    switch (item.Key)
+                    {
+                        case "latitude":
+                            place.Latitude = new DMS(item.Value); break;
+                        case "longitude":
+                            place.Longitude = new DMS(item.Value); break;
+                        case "timezone":
+                            place.Timezone = int.Parse(item.Value); break;
+                    }
                 }
-
-                if (dictionary.TryGetValue("longitude", out s))
-                {
-                    place.Longitude = new DMS(s);
-                }
-
-                int timezone;
-
-                if (!dictionary.TryGetValue("timezone", out s) || !int.TryParse(s, out timezone))
-                {
-                    timezone = 0;
-                }
-
-                place.Timezone = timezone;
 
                 return place;
             }
@@ -372,13 +379,13 @@ namespace ASCOM.Starbook
                 switch (direction)
                 {
                     case Direction.North:
-                        return this.Handshake("MOVE?NORTH=1&SOUTH=0");
+                        return this.Handshake("MOVE?NORTH=1&SOUTH=0&EAST=0&WEST=0");
                     case Direction.South:
-                        return this.Handshake("MOVE?NORTH=0&SOUTH=1");
+                        return this.Handshake("MOVE?NORTH=0&SOUTH=1&EAST=0&WEST=0");
                     case Direction.East:
-                        return this.Handshake("MOVE?EAST=1&WEST=0");
+                        return this.Handshake("MOVE?NORTH=0&SOUTH=0&EAST=1&WEST=0");
                     case Direction.West:
-                        return this.Handshake("MOVE?EAST=0&WEST=1");
+                        return this.Handshake("MOVE?NORTH=0&SOUTH=0&EAST=0&WEST=1");
                     default:
                         return Response.ErrorFormat;
                 }
@@ -423,6 +430,36 @@ namespace ASCOM.Starbook
             public Response SetSpeed(int speed)
             {
                 return this.Handshake(string.Format("SETSPEED?SPEED={0}", speed));
+            }
+
+            public int GetRound()
+            {
+                int round;
+
+                if (!int.TryParse(this.HandshakeString("GETROUND"), out round))
+                {
+                    round = 0;
+                }
+
+                return round;
+            }
+
+            public XY GetXY()
+            {
+                XY xy = new XY();
+
+                foreach (KeyValuePair<string, string> item in this.HandshakeDictionary("GETXY"))
+                {
+                    switch (item.Key)
+                    {
+                        case "X":
+                            xy.X = int.Parse(item.Value); break;
+                        case "Y":
+                            xy.Y = int.Parse(item.Value); break;
+                    }
+                }
+
+                return xy;
             }
 
             public string Command(string command)
