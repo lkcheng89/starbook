@@ -60,7 +60,7 @@ namespace ASCOM.Starbook
                 {
                     this.Hour = (int)Math.Floor(value); value -= this.Hour; value *= 60;
                     this.Minute = (int)Math.Floor(value); value -= this.Minute; value *= 60;
-                    this.Second = (int)Math.Floor(value);
+                    this.Second = (int)Math.Floor(value + 0.5);
                 }
 
                 public HMS(string s)
@@ -72,10 +72,10 @@ namespace ASCOM.Starbook
                     {
                         this.Hour = int.Parse(match.Groups["Hour"].Value);
 
-                        double minute = double.Parse(match.Groups["Minute"].Value);
+                        double value = double.Parse(match.Groups["Minute"].Value);
 
-                        this.Minute = (int)Math.Floor(minute);
-                        this.Second = (int)Math.Floor((minute - this.Minute) * 60 + 0.5);
+                        this.Minute = (int)Math.Floor(value); value -= this.Minute; value *= 60;
+                        this.Second = (int)Math.Floor(value + 0.5);
                     }
                     else
                     {
@@ -145,13 +145,16 @@ namespace ASCOM.Starbook
                 public DMS(string s)
                     : this()
                 {
-                    Match match = Regex.Match(s, @"(?<Position>\w)?(?<Negative>-)?(?<Degree>\d+)\+(?<Minute>\d+)");
+                    Match match = Regex.Match(s, @"(?<Position>\w)?(?<Negative>-)?(?<Degree>\d+)\+(?<Minute>\d+(\.\d+)?)");
 
                     if (match.Success)
                     {
                         this.Degree = int.Parse(match.Groups["Degree"].Value);
-                        this.Minute = int.Parse(match.Groups["Minute"].Value);
-                        this.Second = 0;
+
+                        double value = double.Parse(match.Groups["Minute"].Value);
+
+                        this.Minute = (int)Math.Floor(value); value -= this.Minute; value *= 60;
+                        this.Second = (int)Math.Floor(value + 0.5);
 
                         Group position = match.Groups["Position"];
 
@@ -237,7 +240,14 @@ namespace ASCOM.Starbook
                             direction = "W"; break;
                     }
 
-                    return string.Format("{0}{1:00}+{2:00}", direction, this.Degree, this.Minute);
+                    if (this.Second == 0)
+                    {
+                        return string.Format("{0}{1:00}+{2:00}", direction, this.Degree, this.Minute);
+                    }
+                    else
+                    {
+                        return string.Format("{0}{1:00}+{2:00.0}", direction, this.Degree, this.Minute + this.Second / 60.0);
+                    }
                 }
             }
 
@@ -276,12 +286,6 @@ namespace ASCOM.Starbook
                 this.web = new WebClient();
             }
 
-            public Starbook(string ipAddress)
-                : this(IPAddress.Parse(ipAddress))
-            {
-
-            }
-
             public IPAddress IPAddress { get; set; }
 
             public string Version
@@ -292,7 +296,7 @@ namespace ASCOM.Starbook
 
                     Dictionary<string, string> dictionary = this.HandshakeDictionary("VERSION");
 
-                    if (!dictionary.TryGetValue("version", out version))
+                    if (!dictionary.TryGetValue("VERSION", out version))
                     {
                         version = string.Empty;
                     }
@@ -331,7 +335,7 @@ namespace ASCOM.Starbook
 
                 Dictionary<string, string> dictionary = this.HandshakeDictionary("GETTIME");
 
-                if (!dictionary.TryGetValue("time", out timeString) || !DateTime.TryParseExact(timeString, "yyyy+MM+dd+HH+mm+ss", null, DateTimeStyles.None, out time))
+                if (!dictionary.TryGetValue("TIME", out timeString) || !DateTime.TryParseExact(timeString, "yyyy+MM+dd+HH+mm+ss", null, DateTimeStyles.None, out time))
                 {
                     time = DateTime.MinValue;
                 }
@@ -352,11 +356,11 @@ namespace ASCOM.Starbook
                 {
                     switch (item.Key)
                     {
-                        case "latitude":
+                        case "LATITUDE":
                             place.Latitude = new DMS(item.Value); break;
-                        case "longitude":
+                        case "LONGITUDE":
                             place.Longitude = new DMS(item.Value); break;
-                        case "timezone":
+                        case "TIMEZONE":
                             place.Timezone = int.Parse(item.Value); break;
                     }
                 }
@@ -462,6 +466,11 @@ namespace ASCOM.Starbook
                 return xy;
             }
 
+            public Response Save()
+            {
+                return this.Handshake("SAVESETTING");
+            }
+
             public string Command(string command)
             {
                 return this.HandshakeString(command);
@@ -499,15 +508,22 @@ namespace ASCOM.Starbook
                 return response;
             }
 
-            private Dictionary<string, string> HandshakeDictionary(string command)
+            private Dictionary<string, string> HandshakeDictionary(string command, Dictionary<string, string> dictionary = null)
             {
-                Dictionary<string, string> dictionary = new Dictionary<string, string>();
+                if (dictionary == null)
+                {
+                    dictionary = new Dictionary<string, string>();
+                }
+                else
+                {
+                    dictionary.Clear();
+                }
 
                 MatchCollection matches = Regex.Matches(this.HandshakeString(command), @"(?<Name>[^&=]+)=(?<Value>[^&]+)");
 
                 foreach (Match natch in matches)
                 {
-                    string name = natch.Groups["Name"].Value;
+                    string name = natch.Groups["Name"].Value.ToUpper();
                     string value = natch.Groups["Value"].Value;
 
                     dictionary[name] = value;

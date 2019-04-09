@@ -143,6 +143,16 @@ namespace ASCOM.Starbook
                 }
             }
 
+            if ((checkBoxSetLocation.Enabled && checkBoxSetLocation.Checked) || (checkBoxSetDateTime.Enabled && checkBoxSetDateTime.Checked) || (checkBoxSetGuideRate.Enabled && checkBoxSetGuideRate.Checked))
+            {
+                Telescope.Starbook.Response response = Telescope.starbook.Save();
+
+                if (response != Telescope.Starbook.Response.OK)
+                {
+                    MessageBox.Show(string.Format("Cannot save setting: {0}", response));
+                }
+            }
+
             Telescope.guideRate = comboBoxGuideRate.SelectedIndex;
 
             Telescope.guideRates[0] = double.Parse(textBoxGuideRate0.Text);
