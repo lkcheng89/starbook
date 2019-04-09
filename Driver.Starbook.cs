@@ -242,11 +242,11 @@ namespace ASCOM.Starbook
 
                     if (this.Second == 0)
                     {
-                        return string.Format("{0}{1:00}+{2:00}", direction, this.Degree, this.Minute);
+                        return string.Format("{0}{1:000}+{2:00}", direction, this.Degree, this.Minute);
                     }
                     else
                     {
-                        return string.Format("{0}{1:00}+{2:00.0}", direction, this.Degree, this.Minute + this.Second / 60.0);
+                        return string.Format("{0}{1:000}+{2:00.0}", direction, this.Degree, this.Minute + this.Second / 60.0);
                     }
                 }
             }
