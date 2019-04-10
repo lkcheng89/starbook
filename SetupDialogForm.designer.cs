@@ -113,7 +113,7 @@
             this.buttonOK.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(88, 42);
-            this.buttonOK.TabIndex = 0;
+            this.buttonOK.TabIndex = 65;
             this.buttonOK.Text = "OK";
             this.buttonOK.UseVisualStyleBackColor = true;
             this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
@@ -125,7 +125,7 @@
             this.labelIPAddress.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelIPAddress.Name = "labelIPAddress";
             this.labelIPAddress.Size = new System.Drawing.Size(85, 22);
-            this.labelIPAddress.TabIndex = 0;
+            this.labelIPAddress.TabIndex = 1;
             this.labelIPAddress.Text = "IP Address";
             // 
             // pictureBox
@@ -151,7 +151,7 @@
             this.chkTraceLogger.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.chkTraceLogger.Name = "chkTraceLogger";
             this.chkTraceLogger.Size = new System.Drawing.Size(129, 26);
-            this.chkTraceLogger.TabIndex = 6;
+            this.chkTraceLogger.TabIndex = 64;
             this.chkTraceLogger.Text = "Trace Logger";
             this.chkTraceLogger.UseVisualStyleBackColor = true;
             // 
@@ -230,7 +230,7 @@
             this.labelLatitude.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelLatitude.Name = "labelLatitude";
             this.labelLatitude.Size = new System.Drawing.Size(70, 22);
-            this.labelLatitude.TabIndex = 0;
+            this.labelLatitude.TabIndex = 12;
             this.labelLatitude.Text = "Latitude";
             // 
             // labelLongitude
@@ -240,7 +240,7 @@
             this.labelLongitude.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelLongitude.Name = "labelLongitude";
             this.labelLongitude.Size = new System.Drawing.Size(82, 22);
-            this.labelLongitude.TabIndex = 0;
+            this.labelLongitude.TabIndex = 18;
             this.labelLongitude.Text = "Longitude";
             // 
             // labelLatitudeDegree
@@ -250,7 +250,7 @@
             this.labelLatitudeDegree.Margin = new System.Windows.Forms.Padding(0);
             this.labelLatitudeDegree.Name = "labelLatitudeDegree";
             this.labelLatitudeDegree.Size = new System.Drawing.Size(16, 22);
-            this.labelLatitudeDegree.TabIndex = 3;
+            this.labelLatitudeDegree.TabIndex = 14;
             this.labelLatitudeDegree.Text = "°";
             // 
             // labelLatitudeMinute
@@ -260,7 +260,7 @@
             this.labelLatitudeMinute.Margin = new System.Windows.Forms.Padding(0);
             this.labelLatitudeMinute.Name = "labelLatitudeMinute";
             this.labelLatitudeMinute.Size = new System.Drawing.Size(14, 22);
-            this.labelLatitudeMinute.TabIndex = 5;
+            this.labelLatitudeMinute.TabIndex = 16;
             this.labelLatitudeMinute.Text = "\'";
             // 
             // textBoxLatitudeDegree
@@ -269,7 +269,7 @@
             this.textBoxLatitudeDegree.Name = "textBoxLatitudeDegree";
             this.textBoxLatitudeDegree.ReadOnly = true;
             this.textBoxLatitudeDegree.Size = new System.Drawing.Size(48, 29);
-            this.textBoxLatitudeDegree.TabIndex = 2;
+            this.textBoxLatitudeDegree.TabIndex = 13;
             this.textBoxLatitudeDegree.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxLatitudeMinute
@@ -278,7 +278,7 @@
             this.textBoxLatitudeMinute.Name = "textBoxLatitudeMinute";
             this.textBoxLatitudeMinute.ReadOnly = true;
             this.textBoxLatitudeMinute.Size = new System.Drawing.Size(48, 29);
-            this.textBoxLatitudeMinute.TabIndex = 4;
+            this.textBoxLatitudeMinute.TabIndex = 15;
             this.textBoxLatitudeMinute.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // labelLongitudeDegree
@@ -288,7 +288,7 @@
             this.labelLongitudeDegree.Margin = new System.Windows.Forms.Padding(0);
             this.labelLongitudeDegree.Name = "labelLongitudeDegree";
             this.labelLongitudeDegree.Size = new System.Drawing.Size(16, 22);
-            this.labelLongitudeDegree.TabIndex = 3;
+            this.labelLongitudeDegree.TabIndex = 20;
             this.labelLongitudeDegree.Text = "°";
             // 
             // labelLongitudeMinute
@@ -298,7 +298,7 @@
             this.labelLongitudeMinute.Margin = new System.Windows.Forms.Padding(0);
             this.labelLongitudeMinute.Name = "labelLongitudeMinute";
             this.labelLongitudeMinute.Size = new System.Drawing.Size(14, 22);
-            this.labelLongitudeMinute.TabIndex = 5;
+            this.labelLongitudeMinute.TabIndex = 22;
             this.labelLongitudeMinute.Text = "\'";
             // 
             // textBoxLongitudeDegree
@@ -307,7 +307,7 @@
             this.textBoxLongitudeDegree.Name = "textBoxLongitudeDegree";
             this.textBoxLongitudeDegree.ReadOnly = true;
             this.textBoxLongitudeDegree.Size = new System.Drawing.Size(48, 29);
-            this.textBoxLongitudeDegree.TabIndex = 2;
+            this.textBoxLongitudeDegree.TabIndex = 19;
             this.textBoxLongitudeDegree.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxLongitudeMinute
@@ -316,7 +316,7 @@
             this.textBoxLongitudeMinute.Name = "textBoxLongitudeMinute";
             this.textBoxLongitudeMinute.ReadOnly = true;
             this.textBoxLongitudeMinute.Size = new System.Drawing.Size(48, 29);
-            this.textBoxLongitudeMinute.TabIndex = 4;
+            this.textBoxLongitudeMinute.TabIndex = 21;
             this.textBoxLongitudeMinute.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // comboBoxLatitudeDirection
@@ -330,7 +330,7 @@
             this.comboBoxLatitudeDirection.Location = new System.Drawing.Point(270, 37);
             this.comboBoxLatitudeDirection.Name = "comboBoxLatitudeDirection";
             this.comboBoxLatitudeDirection.Size = new System.Drawing.Size(65, 30);
-            this.comboBoxLatitudeDirection.TabIndex = 10;
+            this.comboBoxLatitudeDirection.TabIndex = 17;
             // 
             // comboBoxLongitudeDirection
             // 
@@ -343,7 +343,7 @@
             this.comboBoxLongitudeDirection.Location = new System.Drawing.Point(270, 72);
             this.comboBoxLongitudeDirection.Name = "comboBoxLongitudeDirection";
             this.comboBoxLongitudeDirection.Size = new System.Drawing.Size(65, 30);
-            this.comboBoxLongitudeDirection.TabIndex = 10;
+            this.comboBoxLongitudeDirection.TabIndex = 23;
             // 
             // labelTimezone
             // 
@@ -352,7 +352,7 @@
             this.labelTimezone.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelTimezone.Name = "labelTimezone";
             this.labelTimezone.Size = new System.Drawing.Size(81, 22);
-            this.labelTimezone.TabIndex = 0;
+            this.labelTimezone.TabIndex = 24;
             this.labelTimezone.Text = "Timezone";
             // 
             // textBoxTimezone
@@ -361,7 +361,7 @@
             this.textBoxTimezone.Name = "textBoxTimezone";
             this.textBoxTimezone.ReadOnly = true;
             this.textBoxTimezone.Size = new System.Drawing.Size(48, 29);
-            this.textBoxTimezone.TabIndex = 2;
+            this.textBoxTimezone.TabIndex = 25;
             this.textBoxTimezone.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // groupBoxConnection
@@ -379,7 +379,7 @@
             this.groupBoxConnection.Location = new System.Drawing.Point(12, 13);
             this.groupBoxConnection.Name = "groupBoxConnection";
             this.groupBoxConnection.Size = new System.Drawing.Size(659, 88);
-            this.groupBoxConnection.TabIndex = 11;
+            this.groupBoxConnection.TabIndex = 0;
             this.groupBoxConnection.TabStop = false;
             this.groupBoxConnection.Text = "Connection Setting";
             // 
@@ -415,7 +415,7 @@
             this.groupBoxLocation.Location = new System.Drawing.Point(12, 107);
             this.groupBoxLocation.Name = "groupBoxLocation";
             this.groupBoxLocation.Size = new System.Drawing.Size(659, 154);
-            this.groupBoxLocation.TabIndex = 12;
+            this.groupBoxLocation.TabIndex = 11;
             this.groupBoxLocation.TabStop = false;
             this.groupBoxLocation.Text = "Location Setting";
             // 
@@ -426,7 +426,7 @@
             this.checkBoxSetLocation.Location = new System.Drawing.Point(464, 108);
             this.checkBoxSetLocation.Name = "checkBoxSetLocation";
             this.checkBoxSetLocation.Size = new System.Drawing.Size(127, 26);
-            this.checkBoxSetLocation.TabIndex = 6;
+            this.checkBoxSetLocation.TabIndex = 27;
             this.checkBoxSetLocation.Text = "Set Location";
             this.checkBoxSetLocation.UseVisualStyleBackColor = true;
             this.checkBoxSetLocation.CheckedChanged += new System.EventHandler(this.checkBoxSetLocation_CheckedChanged);
@@ -438,7 +438,7 @@
             this.labelTimezoneHour.Margin = new System.Windows.Forms.Padding(0);
             this.labelTimezoneHour.Name = "labelTimezoneHour";
             this.labelTimezoneHour.Size = new System.Drawing.Size(19, 22);
-            this.labelTimezoneHour.TabIndex = 3;
+            this.labelTimezoneHour.TabIndex = 26;
             this.labelTimezoneHour.Text = "h";
             // 
             // groupBoxDateTime
@@ -460,18 +460,20 @@
             this.groupBoxDateTime.Location = new System.Drawing.Point(12, 280);
             this.groupBoxDateTime.Name = "groupBoxDateTime";
             this.groupBoxDateTime.Size = new System.Drawing.Size(659, 123);
-            this.groupBoxDateTime.TabIndex = 12;
+            this.groupBoxDateTime.TabIndex = 28;
             this.groupBoxDateTime.TabStop = false;
             this.groupBoxDateTime.Text = "Date && Time Setting";
             // 
             // checkBoxSyncSystemTime
             // 
             this.checkBoxSyncSystemTime.AutoSize = true;
+            this.checkBoxSyncSystemTime.Checked = true;
+            this.checkBoxSyncSystemTime.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBoxSyncSystemTime.Enabled = false;
             this.checkBoxSyncSystemTime.Location = new System.Drawing.Point(464, 75);
             this.checkBoxSyncSystemTime.Name = "checkBoxSyncSystemTime";
             this.checkBoxSyncSystemTime.Size = new System.Drawing.Size(165, 26);
-            this.checkBoxSyncSystemTime.TabIndex = 6;
+            this.checkBoxSyncSystemTime.TabIndex = 42;
             this.checkBoxSyncSystemTime.Text = "Sync System Time";
             this.checkBoxSyncSystemTime.UseVisualStyleBackColor = true;
             this.checkBoxSyncSystemTime.CheckedChanged += new System.EventHandler(this.checkBoxSyncSystemTime_CheckedChanged);
@@ -483,7 +485,7 @@
             this.checkBoxSetDateTime.Location = new System.Drawing.Point(464, 40);
             this.checkBoxSetDateTime.Name = "checkBoxSetDateTime";
             this.checkBoxSetDateTime.Size = new System.Drawing.Size(154, 26);
-            this.checkBoxSetDateTime.TabIndex = 6;
+            this.checkBoxSetDateTime.TabIndex = 41;
             this.checkBoxSetDateTime.Text = "Set Date && Time";
             this.checkBoxSetDateTime.UseVisualStyleBackColor = true;
             this.checkBoxSetDateTime.CheckedChanged += new System.EventHandler(this.checkBoxSetDateTime_CheckedChanged);
@@ -495,7 +497,7 @@
             this.labelTime.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelTime.Name = "labelTime";
             this.labelTime.Size = new System.Drawing.Size(46, 22);
-            this.labelTime.TabIndex = 0;
+            this.labelTime.TabIndex = 35;
             this.labelTime.Text = "Time";
             // 
             // labelDate
@@ -505,7 +507,7 @@
             this.labelDate.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelDate.Name = "labelDate";
             this.labelDate.Size = new System.Drawing.Size(45, 22);
-            this.labelDate.TabIndex = 0;
+            this.labelDate.TabIndex = 29;
             this.labelDate.Text = "Date";
             // 
             // textBoxMinute
@@ -514,7 +516,7 @@
             this.textBoxMinute.Name = "textBoxMinute";
             this.textBoxMinute.ReadOnly = true;
             this.textBoxMinute.Size = new System.Drawing.Size(48, 29);
-            this.textBoxMinute.TabIndex = 4;
+            this.textBoxMinute.TabIndex = 38;
             this.textBoxMinute.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxMonth
@@ -523,7 +525,7 @@
             this.textBoxMonth.Name = "textBoxMonth";
             this.textBoxMonth.ReadOnly = true;
             this.textBoxMonth.Size = new System.Drawing.Size(48, 29);
-            this.textBoxMonth.TabIndex = 4;
+            this.textBoxMonth.TabIndex = 32;
             this.textBoxMonth.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxSecond
@@ -532,7 +534,7 @@
             this.textBoxSecond.Name = "textBoxSecond";
             this.textBoxSecond.ReadOnly = true;
             this.textBoxSecond.Size = new System.Drawing.Size(48, 29);
-            this.textBoxSecond.TabIndex = 2;
+            this.textBoxSecond.TabIndex = 40;
             this.textBoxSecond.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxHour
@@ -541,7 +543,7 @@
             this.textBoxHour.Name = "textBoxHour";
             this.textBoxHour.ReadOnly = true;
             this.textBoxHour.Size = new System.Drawing.Size(48, 29);
-            this.textBoxHour.TabIndex = 2;
+            this.textBoxHour.TabIndex = 36;
             this.textBoxHour.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxDay
@@ -550,7 +552,7 @@
             this.textBoxDay.Name = "textBoxDay";
             this.textBoxDay.ReadOnly = true;
             this.textBoxDay.Size = new System.Drawing.Size(48, 29);
-            this.textBoxDay.TabIndex = 2;
+            this.textBoxDay.TabIndex = 34;
             this.textBoxDay.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // labelColon1
@@ -560,7 +562,7 @@
             this.labelColon1.Margin = new System.Windows.Forms.Padding(0);
             this.labelColon1.Name = "labelColon1";
             this.labelColon1.Size = new System.Drawing.Size(15, 22);
-            this.labelColon1.TabIndex = 3;
+            this.labelColon1.TabIndex = 37;
             this.labelColon1.Text = ":";
             // 
             // textBoxYear
@@ -569,7 +571,7 @@
             this.textBoxYear.Name = "textBoxYear";
             this.textBoxYear.ReadOnly = true;
             this.textBoxYear.Size = new System.Drawing.Size(48, 29);
-            this.textBoxYear.TabIndex = 2;
+            this.textBoxYear.TabIndex = 30;
             this.textBoxYear.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // labelColon2
@@ -579,7 +581,7 @@
             this.labelColon2.Margin = new System.Windows.Forms.Padding(0);
             this.labelColon2.Name = "labelColon2";
             this.labelColon2.Size = new System.Drawing.Size(15, 22);
-            this.labelColon2.TabIndex = 5;
+            this.labelColon2.TabIndex = 39;
             this.labelColon2.Text = ":";
             // 
             // labelSlash1
@@ -589,7 +591,7 @@
             this.labelSlash1.Margin = new System.Windows.Forms.Padding(0);
             this.labelSlash1.Name = "labelSlash1";
             this.labelSlash1.Size = new System.Drawing.Size(17, 22);
-            this.labelSlash1.TabIndex = 3;
+            this.labelSlash1.TabIndex = 31;
             this.labelSlash1.Text = "/";
             // 
             // labelSlash2
@@ -599,7 +601,7 @@
             this.labelSlash2.Margin = new System.Windows.Forms.Padding(0);
             this.labelSlash2.Name = "labelSlash2";
             this.labelSlash2.Size = new System.Drawing.Size(17, 22);
-            this.labelSlash2.TabIndex = 5;
+            this.labelSlash2.TabIndex = 33;
             this.labelSlash2.Text = "/";
             // 
             // labelFirmwareVersion
@@ -610,11 +612,12 @@
             this.labelFirmwareVersion.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelFirmwareVersion.Name = "labelFirmwareVersion";
             this.labelFirmwareVersion.Size = new System.Drawing.Size(142, 22);
-            this.labelFirmwareVersion.TabIndex = 0;
+            this.labelFirmwareVersion.TabIndex = 59;
             this.labelFirmwareVersion.Text = "Firmware Version:";
             // 
             // timer
             // 
+            this.timer.Enabled = true;
             this.timer.Interval = 500;
             this.timer.Tick += new System.EventHandler(this.timer_Tick);
             // 
@@ -626,18 +629,18 @@
             this.labelPlatformVersion.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelPlatformVersion.Name = "labelPlatformVersion";
             this.labelPlatformVersion.Size = new System.Drawing.Size(136, 22);
-            this.labelPlatformVersion.TabIndex = 0;
+            this.labelPlatformVersion.TabIndex = 60;
             this.labelPlatformVersion.Text = "Platform Version:";
             // 
             // labelDriverVersion
             // 
             this.labelDriverVersion.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.labelDriverVersion.AutoSize = true;
-            this.labelDriverVersion.Location = new System.Drawing.Point(13, 635);
+            this.labelDriverVersion.Location = new System.Drawing.Point(13, 638);
             this.labelDriverVersion.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelDriverVersion.Name = "labelDriverVersion";
             this.labelDriverVersion.Size = new System.Drawing.Size(117, 22);
-            this.labelDriverVersion.TabIndex = 0;
+            this.labelDriverVersion.TabIndex = 61;
             this.labelDriverVersion.Text = "Driver Version:";
             // 
             // labelCopyright
@@ -648,7 +651,7 @@
             this.labelCopyright.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelCopyright.Name = "labelCopyright";
             this.labelCopyright.Size = new System.Drawing.Size(254, 22);
-            this.labelCopyright.TabIndex = 0;
+            this.labelCopyright.TabIndex = 62;
             this.labelCopyright.Text = "Copyright © 2019 Lung-Kai Cheng";
             // 
             // labelEmail
@@ -662,7 +665,7 @@
             this.labelEmail.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelEmail.Name = "labelEmail";
             this.labelEmail.Size = new System.Drawing.Size(175, 22);
-            this.labelEmail.TabIndex = 0;
+            this.labelEmail.TabIndex = 63;
             this.labelEmail.Text = "lkcheng89@gmail.com";
             this.labelEmail.Click += new System.EventHandler(this.labelEmail_Click);
             // 
@@ -674,7 +677,7 @@
             this.buttonCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(88, 42);
-            this.buttonCancel.TabIndex = 1;
+            this.buttonCancel.TabIndex = 66;
             this.buttonCancel.Text = "Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Visible = false;
@@ -700,7 +703,7 @@
             this.groupBoxGuideRate.Location = new System.Drawing.Point(12, 409);
             this.groupBoxGuideRate.Name = "groupBoxGuideRate";
             this.groupBoxGuideRate.Size = new System.Drawing.Size(659, 155);
-            this.groupBoxGuideRate.TabIndex = 12;
+            this.groupBoxGuideRate.TabIndex = 43;
             this.groupBoxGuideRate.TabStop = false;
             this.groupBoxGuideRate.Text = "Pulse Guide Setting";
             // 
@@ -711,7 +714,7 @@
             this.labelGuideRateNote.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelGuideRateNote.Name = "labelGuideRateNote";
             this.labelGuideRateNote.Size = new System.Drawing.Size(199, 22);
-            this.labelGuideRateNote.TabIndex = 0;
+            this.labelGuideRateNote.TabIndex = 57;
             this.labelGuideRateNote.Text = "X = Times of Sidereal Rate";
             // 
             // checkBoxSetGuideRate
@@ -723,9 +726,10 @@
             this.checkBoxSetGuideRate.Location = new System.Drawing.Point(464, 112);
             this.checkBoxSetGuideRate.Name = "checkBoxSetGuideRate";
             this.checkBoxSetGuideRate.Size = new System.Drawing.Size(143, 26);
-            this.checkBoxSetGuideRate.TabIndex = 6;
+            this.checkBoxSetGuideRate.TabIndex = 58;
             this.checkBoxSetGuideRate.Text = "Set Guide Rate";
             this.checkBoxSetGuideRate.UseVisualStyleBackColor = true;
+            this.checkBoxSetGuideRate.Visible = false;
             this.checkBoxSetGuideRate.CheckedChanged += new System.EventHandler(this.checkBoxSetDateTime_CheckedChanged);
             // 
             // labelGuideRateX
@@ -735,7 +739,7 @@
             this.labelGuideRateX.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelGuideRateX.Name = "labelGuideRateX";
             this.labelGuideRateX.Size = new System.Drawing.Size(19, 22);
-            this.labelGuideRateX.TabIndex = 0;
+            this.labelGuideRateX.TabIndex = 56;
             this.labelGuideRateX.Text = "X";
             // 
             // labelGuideRates
@@ -745,7 +749,7 @@
             this.labelGuideRates.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelGuideRates.Name = "labelGuideRates";
             this.labelGuideRates.Size = new System.Drawing.Size(97, 22);
-            this.labelGuideRates.TabIndex = 0;
+            this.labelGuideRates.TabIndex = 46;
             this.labelGuideRates.Text = "Guide Rates";
             // 
             // labelGuideRate
@@ -755,7 +759,7 @@
             this.labelGuideRate.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelGuideRate.Name = "labelGuideRate";
             this.labelGuideRate.Size = new System.Drawing.Size(90, 22);
-            this.labelGuideRate.TabIndex = 0;
+            this.labelGuideRate.TabIndex = 44;
             this.labelGuideRate.Text = "Guide Rate";
             // 
             // textBoxGuideRate1
@@ -763,7 +767,7 @@
             this.textBoxGuideRate1.Location = new System.Drawing.Point(192, 72);
             this.textBoxGuideRate1.Name = "textBoxGuideRate1";
             this.textBoxGuideRate1.Size = new System.Drawing.Size(48, 29);
-            this.textBoxGuideRate1.TabIndex = 4;
+            this.textBoxGuideRate1.TabIndex = 48;
             this.textBoxGuideRate1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate8
@@ -771,7 +775,7 @@
             this.textBoxGuideRate8.Location = new System.Drawing.Point(570, 72);
             this.textBoxGuideRate8.Name = "textBoxGuideRate8";
             this.textBoxGuideRate8.Size = new System.Drawing.Size(48, 29);
-            this.textBoxGuideRate8.TabIndex = 2;
+            this.textBoxGuideRate8.TabIndex = 55;
             this.textBoxGuideRate8.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate7
@@ -779,7 +783,7 @@
             this.textBoxGuideRate7.Location = new System.Drawing.Point(516, 72);
             this.textBoxGuideRate7.Name = "textBoxGuideRate7";
             this.textBoxGuideRate7.Size = new System.Drawing.Size(48, 29);
-            this.textBoxGuideRate7.TabIndex = 2;
+            this.textBoxGuideRate7.TabIndex = 54;
             this.textBoxGuideRate7.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate6
@@ -787,7 +791,7 @@
             this.textBoxGuideRate6.Location = new System.Drawing.Point(462, 72);
             this.textBoxGuideRate6.Name = "textBoxGuideRate6";
             this.textBoxGuideRate6.Size = new System.Drawing.Size(48, 29);
-            this.textBoxGuideRate6.TabIndex = 2;
+            this.textBoxGuideRate6.TabIndex = 53;
             this.textBoxGuideRate6.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate5
@@ -795,7 +799,7 @@
             this.textBoxGuideRate5.Location = new System.Drawing.Point(408, 72);
             this.textBoxGuideRate5.Name = "textBoxGuideRate5";
             this.textBoxGuideRate5.Size = new System.Drawing.Size(48, 29);
-            this.textBoxGuideRate5.TabIndex = 2;
+            this.textBoxGuideRate5.TabIndex = 52;
             this.textBoxGuideRate5.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate4
@@ -803,7 +807,7 @@
             this.textBoxGuideRate4.Location = new System.Drawing.Point(354, 72);
             this.textBoxGuideRate4.Name = "textBoxGuideRate4";
             this.textBoxGuideRate4.Size = new System.Drawing.Size(48, 29);
-            this.textBoxGuideRate4.TabIndex = 2;
+            this.textBoxGuideRate4.TabIndex = 51;
             this.textBoxGuideRate4.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate3
@@ -811,7 +815,7 @@
             this.textBoxGuideRate3.Location = new System.Drawing.Point(300, 72);
             this.textBoxGuideRate3.Name = "textBoxGuideRate3";
             this.textBoxGuideRate3.Size = new System.Drawing.Size(48, 29);
-            this.textBoxGuideRate3.TabIndex = 2;
+            this.textBoxGuideRate3.TabIndex = 50;
             this.textBoxGuideRate3.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate2
@@ -819,7 +823,7 @@
             this.textBoxGuideRate2.Location = new System.Drawing.Point(246, 72);
             this.textBoxGuideRate2.Name = "textBoxGuideRate2";
             this.textBoxGuideRate2.Size = new System.Drawing.Size(48, 29);
-            this.textBoxGuideRate2.TabIndex = 2;
+            this.textBoxGuideRate2.TabIndex = 49;
             this.textBoxGuideRate2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // comboBoxGuideRate
@@ -839,14 +843,14 @@
             this.comboBoxGuideRate.Location = new System.Drawing.Point(138, 37);
             this.comboBoxGuideRate.Name = "comboBoxGuideRate";
             this.comboBoxGuideRate.Size = new System.Drawing.Size(48, 30);
-            this.comboBoxGuideRate.TabIndex = 10;
+            this.comboBoxGuideRate.TabIndex = 45;
             // 
             // textBoxGuideRate0
             // 
             this.textBoxGuideRate0.Location = new System.Drawing.Point(138, 72);
             this.textBoxGuideRate0.Name = "textBoxGuideRate0";
             this.textBoxGuideRate0.Size = new System.Drawing.Size(48, 29);
-            this.textBoxGuideRate0.TabIndex = 2;
+            this.textBoxGuideRate0.TabIndex = 47;
             this.textBoxGuideRate0.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // SetupDialogForm

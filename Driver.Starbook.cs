@@ -138,7 +138,7 @@ namespace ASCOM.Starbook
             /// Place contains the following fields:
             /// [*] LATITUDE: Latitude which is formatted as [N|S][DDD]+[MM]
             /// [*] LONGITUDE: Longitude which is formatted as [E|W][DDD]+[MM]
-            /// [*] TIMEZONE: Timezone which is ranged from [-12] to [12]
+            /// [*] TIMEZONE: Timezone which is ranged from [-12] to [14]
             /// </returns>
             /// 
             public Place GetPlace()
@@ -332,60 +332,77 @@ namespace ASCOM.Starbook
             /// <summary>
             /// Get screenshot of starbook controller.
             /// </summary>
-            /// <param name="width">Width of sceenshot (Default is 320 pixels)</param>
-            /// <param name="height">Height of sceenshot (Default is 240 pixels)</param>
-            /// <param name="bits">Bit-depth of sceenshot (Default is 12 bits)</param>
+            /// <param name="width">Width of sceenshot (Default is 160 pixels)</param>
+            /// <param name="height">Height of sceenshot (Default is 160 pixels)</param>
+            /// <param name="color">Color or monochrome (Default is monochrome)</param>
             /// <returns>Screenshot as Bitmap object</returns>
             /// 
-            public Bitmap Screensot(int width = 320, int height = 240, int bits = 12)
+            public Bitmap Screensot(int width = 160, int height = 160, bool color = false)
             {
                 Bitmap screenshot = new Bitmap(width, height);
 
-                if (bits == 12) // Only support 12bits currently
+                byte[] bytes = this.HandshakeBytes("GETSCREEN.BIN"); // TODO: Starbook returns response without header, to fix it!
+                int byteCount = (width * height * 12 + 7) / 8;
+
+                if (bytes.Length == byteCount)
                 {
-                    byte[] bytes = this.HandshakeBytes("getscreen.bin");
-                    int byteCount = (width * height * bits + 7) / 8;
+                    byte[][] screenshotBytes = new byte[height][];
+                    int screenshotBytesStride = width * 3;
 
-                    if (bytes.Length == byteCount)
+                    for (int y = 0; y < height; y++)
                     {
-                        byte[][] screenshotBytes = new byte[height][];
-                        int screenshotBytesStride = width * 3;
+                        screenshotBytes[y] = new byte[screenshotBytesStride];
+                    }
 
-                        for (int y = 0; y < height; y++)
-                        {
-                            screenshotBytes[y] = new byte[screenshotBytesStride];
-                        }
-
+                    if (color)
+                    {
                         for (int index = 0, x = 0, y = 0, z = 0; index < bytes.Length - 2; )
                         {
                             byte byte1 = bytes[index++];
                             byte byte2 = bytes[index++];
                             byte byte3 = bytes[index++];
 
-                            screenshotBytes[y][z++] = (byte)((byte2 & 0x0F) >> 0);
-                            screenshotBytes[y][z++] = (byte)((byte1 & 0xF0) >> 4);
-                            screenshotBytes[y][z++] = (byte)((byte1 & 0x0F) >> 0); if (++x >= width) { x = 0; y++; z = 0; }
+                            screenshotBytes[y][z++] = (byte)((byte2 & 0x0F) << 4);
+                            screenshotBytes[y][z++] = (byte)((byte1 & 0xF0) << 0);
+                            screenshotBytes[y][z++] = (byte)((byte1 & 0x0F) << 4); if (++x >= width) { if (++y >= height) break; x = z = 0; }
 
-                            screenshotBytes[y][z++] = (byte)((byte3 & 0xF0) >> 4);
-                            screenshotBytes[y][z++] = (byte)((byte3 & 0x0F) >> 0);
-                            screenshotBytes[y][z++] = (byte)((byte2 & 0xF0) >> 4); if (++x >= width) { x = 0; y++; z = 0; }
+                            screenshotBytes[y][z++] = (byte)((byte3 & 0xF0) << 0);
+                            screenshotBytes[y][z++] = (byte)((byte3 & 0x0F) << 4);
+                            screenshotBytes[y][z++] = (byte)((byte2 & 0xF0) << 0); if (++x >= width) { if (++y >= height) break; x = z = 0; }
                         }
-
-                        BitmapData screenshotData = screenshot.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
-
-                        if (screenshotData != null)
+                    }
+                    else
+                    {
+                        for (int index = 0, x = 0, y = 0, z = 0; index < bytes.Length; index++)
                         {
-                            IntPtr screenshotDataScan = screenshotData.Scan0;
-                            int screenshotDataStride = screenshotData.Stride;
+                            byte byte1 = (byte)((bytes[index] & 0x0F) << 4);
+                            byte byte2 = (byte)((bytes[index] & 0xF0) << 0);
 
-                            for (int y = 0; y < height; y++)
-                            {
-                                Marshal.Copy(screenshotBytes[y], 0, screenshotDataScan, screenshotBytesStride);
-                                screenshotDataScan = IntPtr.Add(screenshotDataScan, screenshotDataStride);
-                            }
+                            screenshotBytes[y][z++] = byte1;
+                            screenshotBytes[y][z++] = byte1;
+                            screenshotBytes[y][z++] = byte1; if (++x >= width) { if (++y >= height) break; x = z = 0; }
 
-                            screenshot.UnlockBits(screenshotData);
+                            screenshotBytes[y][z++] = byte2;
+                            screenshotBytes[y][z++] = byte2;
+                            screenshotBytes[y][z++] = byte2; if (++x >= width) { if (++y >= height) break; x = z = 0; }
                         }
+                    }
+
+                    BitmapData screenshotData = screenshot.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+
+                    if (screenshotData != null)
+                    {
+                        IntPtr screenshotDataScan = screenshotData.Scan0;
+                        int screenshotDataStride = screenshotData.Stride;
+
+                        for (int y = 0; y < height; y++)
+                        {
+                            Marshal.Copy(screenshotBytes[y], 0, screenshotDataScan, screenshotBytesStride);
+                            screenshotDataScan = IntPtr.Add(screenshotDataScan, screenshotDataStride);
+                        }
+
+                        screenshot.UnlockBits(screenshotData);
+                        screenshot.RotateFlip(RotateFlipType.Rotate180FlipNone);
                     }
                 }
 
@@ -413,6 +430,7 @@ namespace ASCOM.Starbook
             private string HandshakeString(string command)
             {
                 string strinq;
+#if true
 
                 try
                 {
@@ -422,6 +440,42 @@ namespace ASCOM.Starbook
                 {
                     strinq = string.Empty;
                 }
+#else
+                Dictionary<string, string> handshakes = new Dictionary<string, string>();
+
+                handshakes["VERSION"] = "VERSION=2.7B50";
+                handshakes["GETSTATUS"] = "RA=0+0.0&DEC=0+0&GOTO=0&STATE=INIT";
+                handshakes["GETPLACE"] = "LATITUDE=N00+00&LONGITUDE=E000+00&TIMEZONE=0";
+                handshakes["GETTIME"] = string.Format("TIME={0:yyyy+MM+dd+HH+mm+ss}", DateTime.Now);
+                handshakes["GETROUND"] = "4320000";
+                handshakes["GETXY"] = "X=0&Y=0";
+                handshakes["SETPLACE"] = "OK";
+                handshakes["SETTIME"] = "OK";
+                handshakes["SETSPEED"] = "OK";
+                handshakes["SAVESETTING"] = "OK";
+                handshakes["START"] = "OK";
+                handshakes["RESET"] = "OK";
+                handshakes["GOHOME"] = "OK";
+                handshakes["MOVE"] = "OK";
+                handshakes["GOTORADEC"] = "OK";
+                handshakes["ALIGN"] = "OK";
+
+                int index = command.IndexOf('?');
+
+                if (index >= 0)
+                {
+                    command = command.Substring(0, index);
+                }
+
+                if (handshakes.TryGetValue(command, out strinq))
+                {
+                    strinq = string.Format("<!--{0}-->", strinq);
+                }
+                else
+                {
+                    strinq = string.Empty;
+                }
+#endif
 
                 Match match = Regex.Match(strinq, @"<!--(?<String>.*)-->");
 
@@ -636,7 +690,7 @@ namespace ASCOM.Starbook
                 public DMS(string s)
                     : this()
                 {
-                    Match match = Regex.Match(s, @"(?<Position>\w)?(?<Negative>-)?(?<Degree>\d+)\+(?<Minute>\d+(\.\d+)?)");
+                    Match match = Regex.Match(s, @"(?<Position>[NSEW])?(?<Negative>-)?(?<Degree>\d+)\+(?<Minute>\d+(\.\d+)?)");
 
                     if (match.Success)
                     {
