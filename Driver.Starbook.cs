@@ -7,7 +7,9 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
+using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -341,7 +343,7 @@ namespace ASCOM.Starbook
             {
                 Bitmap screenshot = new Bitmap(width, height);
 
-                byte[] bytes = this.HandshakeBytes("GETSCREEN.BIN"); // TODO: Starbook returns response without header, to fix it!
+                byte[] bytes = this.HandshakeBytes("GETSCREEN.BIN", false);
                 int byteCount = (width * height * 12 + 7) / 8;
 
                 if (bytes.Length == byteCount)
@@ -515,13 +517,50 @@ namespace ASCOM.Starbook
                 return dictionary;
             }
 
-            private byte[] HandshakeBytes(string command)
+            private byte[] HandshakeBytes(string command, bool web = true)
             {
                 byte[] bytes;
 
                 try
                 {
-                    bytes = this.web.DownloadData(string.Format("http://{0}/{1}", this.IPAddress, command));
+                    if (web)
+                    {
+                        bytes = this.web.DownloadData(string.Format("http://{0}/{1}", this.IPAddress, command));
+                    }
+                    else
+                    {
+                        using (TcpClient tcpClient = new TcpClient())
+                        {
+                            tcpClient.Connect(new IPEndPoint(this.IPAddress, 80));
+
+                            using (NetworkStream networkStream = tcpClient.GetStream())
+                            {
+                                byte[] request = Encoding.UTF8.GetBytes(string.Format("GET /{0} HTTP/1.1\r\n\r\n", command));
+
+                                networkStream.Write(request, 0, request.Length);
+                                networkStream.Flush();
+
+                                using (MemoryStream memoryStream = new MemoryStream())
+                                {
+                                    byte[] packet = new byte[8192];
+
+                                    while (true)
+                                    {
+                                        int read = networkStream.Read(packet, 0, packet.Length);
+
+                                        if (read <= 0)
+                                        {
+                                            break;
+                                        }
+
+                                        memoryStream.Write(packet, 0, read);
+                                    }
+
+                                    bytes = memoryStream.ToArray();
+                                }
+                            }
+                        }
+                    }
                 }
                 catch
                 {
