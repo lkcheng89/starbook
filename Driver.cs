@@ -2,7 +2,7 @@
 // --------------------------------------------------------------------------------
 // TODO fill in this information for your driver, then remove this line!
 //
-// ASCOM Telescope driver for Starbook
+// ASCOM Driver for Vixen Starbook
 //
 // Description:	Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam 
 //				nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam 
@@ -35,13 +35,13 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 using ASCOM;
 using ASCOM.Astrometry;
 using ASCOM.Astrometry.AstroUtils;
-using ASCOM.Utilities;
 using ASCOM.DeviceInterface;
-using System.Threading;
+using ASCOM.Utilities;
 
 namespace ASCOM.Starbook
 {
@@ -85,7 +85,7 @@ namespace ASCOM.Starbook
         internal static string traceLoggerProfileName = "TraceLogger";
         internal static string traceLoggerDefault = "False";
 
-        internal static Starbook starbook = new Starbook(IPAddress.None); // Variables to hold the currrent device configuration
+        internal static Starbook starbook = new Starbook(); // Variables to hold the currrent device configuration
         internal static short slewSettleTime;
         internal static int guideRate;
         internal static double[] guideRates;
