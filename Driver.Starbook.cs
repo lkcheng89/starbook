@@ -28,10 +28,13 @@ namespace ASCOM.Starbook
         [ComVisible(false)]
         public class Starbook
         {
-            WebClient web = new WebClient();
+            WebClientTimeout web;
 
             public Starbook()
             {
+                this.web = new WebClientTimeout();
+                this.web.Timeout = 5000;
+
                 this.IPAddress = IPAddress.Parse("169.254.1.1");
             }
 
@@ -608,12 +611,12 @@ namespace ASCOM.Starbook
 
             #endregion
 
-            #region Inner Enum & Struct
+            #region Inner Enum & Struct & Class
 
             [ComVisible(false)]
             public enum State
             {
-                Init, Guide, Scope, Chart, User, Unknown
+                Unknown, Init, Guide, Scope, Chart, User
             }
 
             [ComVisible(false)]
@@ -850,6 +853,29 @@ namespace ASCOM.Starbook
             {
                 public int X { get; set; }
                 public int Y { get; set; }
+            }
+
+            [ComVisible(false)]
+            private class WebClientTimeout : WebClient
+            {
+                public WebClientTimeout()
+                {
+                    this.Timeout = 0;
+                }
+
+                public int Timeout { get; set; }
+
+                protected override WebRequest GetWebRequest(Uri uri)
+                {
+                    WebRequest webRequest = base.GetWebRequest(uri);
+
+                    if (this.Timeout > 0)
+                    {
+                        webRequest.Timeout = this.Timeout;
+                    }
+
+                    return webRequest;
+                }
             }
 
             #endregion
