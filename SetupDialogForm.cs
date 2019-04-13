@@ -231,6 +231,11 @@ namespace ASCOM.Starbook
 
         private bool CheckComponentGuideRate(TextBox textBoxGuideRate, int textBoxGuideRateIndex, out double guideRate)
         {
+            if (textBoxGuideRate.Text == "NaN")
+            {
+                guideRate = double.NaN; return true;
+            }
+
             if (!double.TryParse(textBoxGuideRate.Text, out guideRate))
             {
                 MessageBox.Show(this, string.Format("Format of guide rate {0} is incorrect.", textBoxGuideRateIndex), "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);

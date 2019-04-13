@@ -110,6 +110,11 @@ namespace ASCOM.Starbook
         /// </summary>
         internal static TraceLogger traceLogger;
 
+        private double parkDeclination;
+        private double parkRightAscension;
+
+        private bool pulseGuiding;
+
         private double targetDeclination;
         private double targetRightAscension;
 
@@ -129,6 +134,11 @@ namespace ASCOM.Starbook
             astroUtilities = new AstroUtils(); // Initialise astro utilities object
 
             //TODO: Implement your additional construction here
+
+            parkRightAscension = double.NaN;
+            parkDeclination = double.NaN;
+
+            pulseGuiding = false;
 
             targetRightAscension = double.NaN;
             targetDeclination = double.NaN;
@@ -170,7 +180,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                ArrayList actions = new ArrayList(); actions.Add("Move"); actions.Add("Stop"); actions.Add("Command");
+                ArrayList actions = new ArrayList();
                 foreach (string action in actions)
                 {
                     traceLogger.LogMessage("SupportedActions Get", action);
@@ -181,71 +191,26 @@ namespace ASCOM.Starbook
 
         public string Action(string actionName, string actionParameters)
         {
-            if (actionName == "Move")
-            {
-                Starbook.Response response;
-
-                switch (actionParameters)
-                {
-                    case "North":
-                        response = starbook.Move(Starbook.Direction.North); break;
-                    case "South":
-                        response = starbook.Move(Starbook.Direction.South); break;
-                    case "East":
-                        response = starbook.Move(Starbook.Direction.East); break;
-                    case "West":
-                        response = starbook.Move(Starbook.Direction.West); break;
-                    case "None":
-                        response = starbook.NoMove(); break;
-                    default:
-                        response = Starbook.Response.ErrorFormat; break;
-                }
-
-                return response.ToString();
-            }
-            else if (actionName == "Stop")
-            {
-                return starbook.Stop().ToString();
-            }
-            else if (actionName == "Command")
-            {
-                return starbook.Command(actionParameters);
-            }
-            else
-            {
-                LogMessage("", "Action {0}, parameters {1} not implemented", actionName, actionParameters);
-                throw new ASCOM.ActionNotImplementedException("Action " + actionName + " is not implemented by this driver");
-            }
+            LogMessage("", "Action {0}, parameters {1} not implemented", actionName, actionParameters);
+            throw new ASCOM.ActionNotImplementedException("Action " + actionName + " is not implemented by this driver");
         }
 
         public void CommandBlind(string command, bool raw)
         {
             CheckConnected("CommandBlind");
-            // Call CommandString and return as soon as it finishes
-            this.CommandString(command, raw);
-            // or
-            throw new ASCOM.MethodNotImplementedException("CommandBlind");
-            // DO NOT have both these sections!  One or the other
+            Telescope.starbook.Command(command);
         }
 
         public bool CommandBool(string command, bool raw)
         {
             CheckConnected("CommandBool");
-            string ret = CommandString(command, raw);
-            // TODO decode the return string and return true or false
-            // or
-            throw new ASCOM.MethodNotImplementedException("CommandBool");
-            // DO NOT have both these sections!  One or the other
+            Telescope.starbook.Command(command); return false;
         }
 
         public string CommandString(string command, bool raw)
         {
             CheckConnected("CommandString");
-            // it's a good idea to put all the low level communication with the device here,
-            // then all communication calls this function
-            // you need something to ensure that only one command is in progress at a time
-
-            throw new ASCOM.MethodNotImplementedException("CommandString");
+            return Telescope.starbook.Command(command);
         }
 
         public void Dispose()
@@ -412,8 +377,12 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("AtPark", "Get - " + false.ToString());
-                return false;
+                Telescope.Starbook.Status status = Telescope.starbook.GetStatus();
+                double rightAscension = status.RA.Value;
+                double declination = status.Dec.Value;
+                bool atPark = (rightAscension == parkRightAscension && declination == parkDeclination);
+                traceLogger.LogMessage("AtPark", "Get - " + atPark.ToString());
+                return atPark;
             }
         }
 
@@ -446,8 +415,8 @@ namespace ASCOM.Starbook
             traceLogger.LogMessage("CanMoveAxis", "Get - " + Axis.ToString());
             switch (Axis)
             {
-                case TelescopeAxes.axisPrimary: return false;
-                case TelescopeAxes.axisSecondary: return false;
+                case TelescopeAxes.axisPrimary: return true;
+                case TelescopeAxes.axisSecondary: return true;
                 case TelescopeAxes.axisTertiary: return false;
                 default: throw new InvalidValueException("CanMoveAxis", Axis.ToString(), "0 to 2");
             }
@@ -457,8 +426,8 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanPark", "Get - " + false.ToString());
-                return false;
+                traceLogger.LogMessage("CanPark", "Get - " + true.ToString());
+                return true;
             }
         }
 
@@ -493,8 +462,8 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanSetPark", "Get - " + false.ToString());
-                return false;
+                traceLogger.LogMessage("CanSetPark", "Get - " + true.ToString());
+                return true;
             }
         }
 
@@ -583,8 +552,8 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanUnpark", "Get - " + false.ToString());
-                return false;
+                traceLogger.LogMessage("CanUnpark", "Get - " + true.ToString());
+                return true;
             }
         }
 
@@ -658,23 +627,44 @@ namespace ASCOM.Starbook
             }
         }
 
-        private double GuideRate(int guideRate)
+        public static double GuideRate(int guideRate)
         {
-            return 0;
+            return Telescope.guideRates[guideRate] * (15.041 / 3600);
+        }
+
+        public static int GuideRate(double guideRate)
+        {
+            guideRate /= (15.041 / 3600);
+
+            double guideRateDifference = double.MaxValue;
+            int guideRateIndex = 0;
+
+            for (int index = 0; index <= 8; index++)
+            {
+                double difference = Math.Abs(guideRate - Telescope.guideRates[index]);
+
+                if (guideRateDifference > difference)
+                {
+                    guideRateDifference = difference;
+                    guideRateIndex = index;
+                }
+            }
+
+            return guideRateIndex;
         }
 
         public double GuideRateDeclination
         {
             get
             {
-                double guideRate = guideRates[Telescope.guideRate] * 15.041;
+                double guideRate = GuideRate(Telescope.guideRate);
                 traceLogger.LogMessage("GuideRateDeclination Get", guideRate.ToString());
                 return guideRate;
             }
             set
             {
-                traceLogger.LogMessage("GuideRateDeclination Set", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("GuideRateDeclination", true);
+                Telescope.Starbook.Response response = Telescope.starbook.SetSpeed(Telescope.guideRate = GuideRate(value));
+                traceLogger.LogMessage("GuideRateDeclination Set", string.Format("{0}: {1}", value, response));
             }
         }
 
@@ -682,14 +672,14 @@ namespace ASCOM.Starbook
         {
             get
             {
-                double guideRate = guideRates[Telescope.guideRate] * 15.041;
+                double guideRate = GuideRate(Telescope.guideRate);
                 traceLogger.LogMessage("GuideRateRightAscension Get", guideRate.ToString());
                 return guideRate;
             }
             set
             {
-                traceLogger.LogMessage("GuideRateRightAscension Set", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("GuideRateRightAscension", true);
+                Telescope.Starbook.Response response = Telescope.starbook.SetSpeed(Telescope.guideRate = GuideRate(value));
+                traceLogger.LogMessage("GuideRateRightAscension Set", string.Format("{0}: {1}", value, response));
             }
         }
 
@@ -697,22 +687,40 @@ namespace ASCOM.Starbook
         {
             get
             {
-                bool qoto = starbook.GetStatus().Goto;
-                traceLogger.LogMessage("IsPulseGuiding Get", qoto.ToString());
-                return qoto;
+                traceLogger.LogMessage("IsPulseGuiding Get", pulseGuiding.ToString());
+                return pulseGuiding;
             }
         }
 
         public void MoveAxis(TelescopeAxes Axis, double Rate)
         {
-            traceLogger.LogMessage("MoveAxis", "Not implemented");
-            throw new ASCOM.MethodNotImplementedException("MoveAxis");
+            switch (Axis)
+            {
+                case TelescopeAxes.axisPrimary:
+                    Telescope.starbook.SetSpeed(Telescope.guideRate = GuideRate(Math.Abs(Rate)));
+                    Telescope.starbook.Move(Rate >= 0 ? Telescope.Starbook.Direction.East : Telescope.Starbook.Direction.West);
+                    break;
+                case TelescopeAxes.axisSecondary:
+                    Telescope.starbook.SetSpeed(Telescope.guideRate = GuideRate(Math.Abs(Rate)));
+                    Telescope.starbook.Move(Rate >= 0 ? Telescope.Starbook.Direction.North : Telescope.Starbook.Direction.South);
+                    break;
+                case TelescopeAxes.axisTertiary:
+                    traceLogger.LogMessage("MoveAxis", "Not implemented: axisTertiary");
+                    throw new ASCOM.MethodNotImplementedException("MoveAxis");
+            }
         }
 
         public void Park()
         {
-            traceLogger.LogMessage("Park", "Not implemented");
-            throw new ASCOM.MethodNotImplementedException("Park");
+            if (double.IsNaN(parkRightAscension) || double.IsNaN(parkDeclination))
+            {
+                throw new ASCOM.InvalidOperationException("Park: RightAscension/Declination is not set by SetPark.");
+            }
+
+            Telescope.Starbook.HMS rightAscension = new Starbook.HMS(parkRightAscension);
+            Telescope.Starbook.DMS declination = new Starbook.DMS(parkDeclination);
+            Telescope.Starbook.Response response = Telescope.starbook.Goto(rightAscension, declination);
+            traceLogger.LogMessage("Park", response.ToString());
         }
 
         public void PulseGuide(GuideDirections Direction, int Duration)
@@ -735,12 +743,16 @@ namespace ASCOM.Starbook
 
             if (response == Starbook.Response.OK)
             {
+                pulseGuiding = true;
+
                 if (Duration > 0)
                 {
                     Thread.Sleep(Duration);
                 }
 
                 starbook.NoMove();
+                
+                pulseGuiding = false;
             }
 
             traceLogger.LogMessage("PulseGuide", response.ToString());
@@ -773,8 +785,10 @@ namespace ASCOM.Starbook
 
         public void SetPark()
         {
-            traceLogger.LogMessage("SetPark", "Not implemented");
-            throw new ASCOM.MethodNotImplementedException("SetPark");
+            Telescope.Starbook.Status status = Telescope.starbook.GetStatus();
+            parkRightAscension = status.RA.Value;
+            parkDeclination = status.Dec.Value;
+            traceLogger.LogMessage("SetPark", string.Format("{0} {1}", parkRightAscension, parkDeclination));
         }
 
         public PierSide SideOfPier
@@ -931,6 +945,11 @@ namespace ASCOM.Starbook
 
         public void SlewToTarget()
         {
+            if (double.IsNaN(targetRightAscension) || double.IsNaN(targetDeclination))
+            {
+                throw new ASCOM.InvalidOperationException("SlewToTarget: Target RightAscension/Declination is not set.");
+            }
+
             Starbook.HMS rightAscension = new Starbook.HMS(targetRightAscension);
             Starbook.DMS declination = new Starbook.DMS(targetDeclination);
             Starbook.Response response = starbook.Goto(rightAscension, declination);
@@ -960,6 +979,11 @@ namespace ASCOM.Starbook
 
         public void SlewToTargetAsync()
         {
+            if (double.IsNaN(targetRightAscension) || double.IsNaN(targetDeclination))
+            {
+                throw new ASCOM.InvalidOperationException("SlewToTargetAsync: Target RightAscension/Declination is not set.");
+            }
+
             Starbook.HMS rightAscension = new Starbook.HMS(targetRightAscension);
             Starbook.DMS declination = new Starbook.DMS(targetDeclination);
             Starbook.Response response = starbook.Goto(rightAscension, declination);
@@ -992,6 +1016,11 @@ namespace ASCOM.Starbook
 
         public void SyncToTarget()
         {
+            if (double.IsNaN(targetRightAscension) || double.IsNaN(targetDeclination))
+            {
+                throw new ASCOM.InvalidOperationException("SyncToTarget: Target RightAscension/Declination is not set.");
+            }
+
             Starbook.HMS rightAscension = new Starbook.HMS(targetRightAscension);
             Starbook.DMS declination = new Starbook.DMS(targetDeclination);
             Starbook.Response response = starbook.Align(rightAscension, declination);
@@ -1002,7 +1031,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("TargetDeclination Get", targetDeclination.ToString());
+                traceLogger.LogMessage("TargetDeclination Get", double.IsNaN(targetDeclination) ? "NaN" : targetDeclination.ToString());
                 return targetDeclination;
             }
             set
@@ -1016,7 +1045,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("TargetRightAscension Get", targetRightAscension.ToString());
+                traceLogger.LogMessage("TargetRightAscension Get", double.IsNaN(targetRightAscension) ? "NaN" : targetRightAscension.ToString());
                 return targetRightAscension;
             }
             set
@@ -1091,8 +1120,7 @@ namespace ASCOM.Starbook
 
         public void Unpark()
         {
-            traceLogger.LogMessage("Unpark", "Not implemented");
-            throw new ASCOM.MethodNotImplementedException("Unpark");
+            traceLogger.LogMessage("Unpark", "");
         }
 
         #endregion
@@ -1219,7 +1247,14 @@ namespace ASCOM.Starbook
                 {
                     for (int index = 0; index < 9; index++)
                     {
-                        guideRates[index] = double.Parse(guideRateStrings[index]);
+                        if (guideRateStrings[index] == "NaN")
+                        {
+                            guideRates[index] = double.NaN;
+                        }
+                        else
+                        {
+                            guideRates[index] = double.Parse(guideRateStrings[index]);
+                        }
                     }
                 }
 
@@ -1249,7 +1284,14 @@ namespace ASCOM.Starbook
 
                 for (int index = 0; index < 9; index++)
                 {
-                    guideRateStrings[index] = guideRates[index].ToString();
+                    if (double.IsNaN(guideRates[index]))
+                    {
+                        guideRateStrings[index] = "NaN";
+                    }
+                    else
+                    {
+                        guideRateStrings[index] = guideRates[index].ToString();
+                    }
                 }
 
                 driverProfile.WriteValue(driverID, guideRatesProfileName, string.Join(",", guideRateStrings));
