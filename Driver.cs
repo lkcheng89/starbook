@@ -697,12 +697,28 @@ namespace ASCOM.Starbook
             switch (Axis)
             {
                 case TelescopeAxes.axisPrimary:
-                    Telescope.starbook.SetSpeed(Telescope.guideRate = GuideRate(Math.Abs(Rate)));
-                    Telescope.starbook.Move(Rate >= 0 ? Telescope.Starbook.Direction.East : Telescope.Starbook.Direction.West);
+                    if (Rate == 0)
+                    {
+                        Telescope.starbook.NoMove();
+                        Telescope.starbook.SetSpeed(Telescope.guideRate);
+                    }
+                    else
+                    {
+                        Telescope.starbook.SetSpeed(GuideRate(Math.Abs(Rate)));
+                        Telescope.starbook.Move(Rate > 0 ? Telescope.Starbook.Direction.East : Telescope.Starbook.Direction.West);
+                    }
                     break;
                 case TelescopeAxes.axisSecondary:
-                    Telescope.starbook.SetSpeed(Telescope.guideRate = GuideRate(Math.Abs(Rate)));
-                    Telescope.starbook.Move(Rate >= 0 ? Telescope.Starbook.Direction.North : Telescope.Starbook.Direction.South);
+                    if (Rate == 0)
+                    {
+                        Telescope.starbook.NoMove();
+                        Telescope.starbook.SetSpeed(Telescope.guideRate);
+                    }
+                    else
+                    {
+                        Telescope.starbook.SetSpeed(GuideRate(Math.Abs(Rate)));
+                        Telescope.starbook.Move(Rate > 0 ? Telescope.Starbook.Direction.North : Telescope.Starbook.Direction.South);
+                    }
                     break;
                 case TelescopeAxes.axisTertiary:
                     traceLogger.LogMessage("MoveAxis", "Not implemented: axisTertiary");
