@@ -342,7 +342,7 @@ namespace ASCOM.Starbook
             /// <param name="color">Color or monochrome (Default is monochrome)</param>
             /// <returns>Screenshot as Bitmap object</returns>
             /// 
-            public Bitmap Screensot(int width = 160, int height = 160, bool color = false)
+            public Bitmap Screenshot(int width = 160, int height = 160, bool color = false)
             {
                 Bitmap screenshot = new Bitmap(width, height);
 
