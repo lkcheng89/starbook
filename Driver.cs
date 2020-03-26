@@ -113,6 +113,9 @@ namespace ASCOM.Starbook
         private double parkDeclination;
         private double parkRightAscension;
 
+        private Starbook.Place placeCache;
+        private bool placeCached;
+
         private bool pulseGuiding;
 
         private double targetDeclination;
@@ -137,6 +140,8 @@ namespace ASCOM.Starbook
 
             parkRightAscension = double.NaN;
             parkDeclination = double.NaN;
+
+            placeCached = false;
 
             pulseGuiding = false;
 
@@ -341,7 +346,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("Altitude", "Not implemented");
+                traceLogger.LogMessage("Altitude Get", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("Altitude", false);
             }
         }
@@ -368,7 +373,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("AtHome", "Get - " + false.ToString());
+                traceLogger.LogMessage("AtHome Get", false.ToString());
                 return false;
             }
         }
@@ -377,18 +382,21 @@ namespace ASCOM.Starbook
         {
             get
             {
-                Telescope.Starbook.Status status = Telescope.starbook.GetStatus();
+                if (starbook.GetStatus(out Telescope.Starbook.Status status) != Starbook.Response.OK)
+                {
+                    throw new ASCOM.InvalidOperationException("AtPark Get: Status is not available.");
+                }
                 double rightAscension = status.RA.Value;
                 double declination = status.Dec.Value;
                 bool atPark = (rightAscension == parkRightAscension && declination == parkDeclination);
-                traceLogger.LogMessage("AtPark", "Get - " + atPark.ToString());
+                traceLogger.LogMessage("AtPark Get", atPark.ToString());
                 return atPark;
             }
         }
 
         public IAxisRates AxisRates(TelescopeAxes Axis)
         {
-            traceLogger.LogMessage("AxisRates", "Get - " + Axis.ToString());
+            traceLogger.LogMessage("AxisRates Get", Axis.ToString());
             return new AxisRates(Axis);
         }
 
@@ -405,20 +413,20 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanFindHome", "Get - " + true.ToString());
+                traceLogger.LogMessage("CanFindHome Get", true.ToString());
                 return true;
             }
         }
 
         public bool CanMoveAxis(TelescopeAxes Axis)
         {
-            traceLogger.LogMessage("CanMoveAxis", "Get - " + Axis.ToString());
+            traceLogger.LogMessage("CanMoveAxis Get", Axis.ToString());
             switch (Axis)
             {
                 case TelescopeAxes.axisPrimary: return true;
                 case TelescopeAxes.axisSecondary: return true;
                 case TelescopeAxes.axisTertiary: return false;
-                default: throw new InvalidValueException("CanMoveAxis", Axis.ToString(), "0 to 2");
+                default: throw new InvalidValueException("CanMoveAxis Get", Axis.ToString(), "0 to 2");
             }
         }
 
@@ -426,7 +434,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanPark", "Get - " + true.ToString());
+                traceLogger.LogMessage("CanPark Get", true.ToString());
                 return true;
             }
         }
@@ -435,7 +443,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanPulseGuide", "Get - " + true.ToString());
+                traceLogger.LogMessage("CanPulseGuide Get", true.ToString());
                 return true;
             }
         }
@@ -444,8 +452,8 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanSetDeclinationRate", "Get - " + false.ToString());
-                return true;
+                traceLogger.LogMessage("CanSetDeclinationRate Get", false.ToString());
+                return false;
             }
         }
 
@@ -453,7 +461,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanSetGuideRates", "Get - " + true.ToString());
+                traceLogger.LogMessage("CanSetGuideRates Get", true.ToString());
                 return true;
             }
         }
@@ -462,7 +470,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanSetPark", "Get - " + true.ToString());
+                traceLogger.LogMessage("CanSetPark Get", true.ToString());
                 return true;
             }
         }
@@ -471,7 +479,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanSetPierSide", "Get - " + false.ToString());
+                traceLogger.LogMessage("CanSetPierSide Get", false.ToString());
                 return false;
             }
         }
@@ -480,8 +488,8 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanSetRightAscensionRate", "Get - " + false.ToString());
-                return true;
+                traceLogger.LogMessage("CanSetRightAscensionRate Get", false.ToString());
+                return false;
             }
         }
 
@@ -489,8 +497,8 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanSetTracking", "Get - " + true.ToString());
-                return false;
+                traceLogger.LogMessage("CanSetTracking Get", true.ToString());
+                return true;
             }
         }
 
@@ -498,7 +506,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanSlew", "Get - " + true.ToString());
+                traceLogger.LogMessage("CanSlew Get", true.ToString());
                 return true;
             }
         }
@@ -507,7 +515,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanSlewAltAz", "Get - " + false.ToString());
+                traceLogger.LogMessage("CanSlewAltAz Get", false.ToString());
                 return false;
             }
         }
@@ -516,7 +524,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanSlewAltAzAsync", "Get - " + false.ToString());
+                traceLogger.LogMessage("CanSlewAltAzAsync Get", false.ToString());
                 return false;
             }
         }
@@ -525,7 +533,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanSlewAsync", "Get - " + true.ToString());
+                traceLogger.LogMessage("CanSlewAsync Get", true.ToString());
                 return true;
             }
         }
@@ -534,7 +542,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanSync", "Get - " + true.ToString());
+                traceLogger.LogMessage("CanSync Get", true.ToString());
                 return true;
             }
         }
@@ -543,7 +551,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanSyncAltAz", "Get - " + false.ToString());
+                traceLogger.LogMessage("CanSyncAltAz Get", false.ToString());
                 return false;
             }
         }
@@ -552,7 +560,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                traceLogger.LogMessage("CanUnpark", "Get - " + true.ToString());
+                traceLogger.LogMessage("CanUnpark Get", true.ToString());
                 return true;
             }
         }
@@ -561,8 +569,12 @@ namespace ASCOM.Starbook
         {
             get
             {
-                double declination = starbook.GetStatus().Dec.Value;
-                traceLogger.LogMessage("Declination", "Get - " + declination.ToString());
+                if (starbook.GetStatus(out Telescope.Starbook.Status status) != Starbook.Response.OK)
+                {
+                    throw new ASCOM.InvalidOperationException("Declination Get: Status is not available.");
+                }
+                double declination = status.Dec.Value;
+                traceLogger.LogMessage("Declination Get", declination.ToString());
                 return declination;
             }
         }
@@ -572,7 +584,7 @@ namespace ASCOM.Starbook
             get
             {
                 double declination = 0.0;
-                traceLogger.LogMessage("DeclinationRate", "Get - " + declination.ToString());
+                traceLogger.LogMessage("DeclinationRate Get", declination.ToString());
                 return declination;
             }
             set
@@ -606,8 +618,8 @@ namespace ASCOM.Starbook
         {
             get
             {
-                EquatorialCoordinateType equatorialSystem = EquatorialCoordinateType.equTopocentric;
-                traceLogger.LogMessage("DeclinationRate", "Get - " + equatorialSystem.ToString());
+                EquatorialCoordinateType equatorialSystem = EquatorialCoordinateType.equJ2000;
+                traceLogger.LogMessage("EquatorialSystem Get", equatorialSystem.ToString());
                 return equatorialSystem;
             }
         }
@@ -629,7 +641,7 @@ namespace ASCOM.Starbook
 
         public static double GuideRate(int guideRate)
         {
-            return Telescope.guideRates[guideRate] * (15.041 / 3600);
+            return guideRates[guideRate] * (15.041 / 3600);
         }
 
         public static int GuideRate(double guideRate)
@@ -641,7 +653,7 @@ namespace ASCOM.Starbook
 
             for (int index = 0; index <= 8; index++)
             {
-                double difference = Math.Abs(guideRate - Telescope.guideRates[index]);
+                double difference = Math.Abs(guideRate - guideRates[index]);
 
                 if (guideRateDifference > difference)
                 {
@@ -663,8 +675,8 @@ namespace ASCOM.Starbook
             }
             set
             {
-                Telescope.Starbook.Response response = Telescope.starbook.SetSpeed(Telescope.guideRate = GuideRate(value));
-                traceLogger.LogMessage("GuideRateDeclination Set", string.Format("{0}: {1}", value, response));
+                Starbook.Response response = starbook.SetSpeed(guideRate = GuideRate(value));
+                traceLogger.LogMessage("GuideRateDeclination Set", response.ToString());
             }
         }
 
@@ -678,8 +690,8 @@ namespace ASCOM.Starbook
             }
             set
             {
-                Telescope.Starbook.Response response = Telescope.starbook.SetSpeed(Telescope.guideRate = GuideRate(value));
-                traceLogger.LogMessage("GuideRateRightAscension Set", string.Format("{0}: {1}", value, response));
+                Starbook.Response response = starbook.SetSpeed(guideRate = GuideRate(value));
+                traceLogger.LogMessage("GuideRateRightAscension Set", response.ToString());
             }
         }
 
@@ -697,32 +709,38 @@ namespace ASCOM.Starbook
             switch (Axis)
             {
                 case TelescopeAxes.axisPrimary:
+                {
                     if (Rate == 0)
                     {
-                        Telescope.starbook.NoMove();
-                        Telescope.starbook.SetSpeed(Telescope.guideRate);
+                        starbook.NoMove();
+                        starbook.SetSpeed(guideRate);
                     }
                     else
                     {
-                        Telescope.starbook.SetSpeed(GuideRate(Math.Abs(Rate)));
-                        Telescope.starbook.Move(Rate > 0 ? Telescope.Starbook.Direction.East : Telescope.Starbook.Direction.West);
+                        starbook.SetSpeed(GuideRate(Math.Abs(Rate)));
+                        starbook.Move(Rate > 0 ? Starbook.Direction.East : Starbook.Direction.West);
                     }
                     break;
+                }
                 case TelescopeAxes.axisSecondary:
+                {
                     if (Rate == 0)
                     {
-                        Telescope.starbook.NoMove();
-                        Telescope.starbook.SetSpeed(Telescope.guideRate);
+                        starbook.NoMove();
+                        starbook.SetSpeed(guideRate);
                     }
                     else
                     {
-                        Telescope.starbook.SetSpeed(GuideRate(Math.Abs(Rate)));
-                        Telescope.starbook.Move(Rate > 0 ? Telescope.Starbook.Direction.North : Telescope.Starbook.Direction.South);
+                        starbook.SetSpeed(GuideRate(Math.Abs(Rate)));
+                        starbook.Move(Rate > 0 ? Starbook.Direction.North : Starbook.Direction.South);
                     }
                     break;
+                }
                 case TelescopeAxes.axisTertiary:
+                {
                     traceLogger.LogMessage("MoveAxis", "Not implemented: axisTertiary");
                     throw new ASCOM.MethodNotImplementedException("MoveAxis");
+                }
             }
         }
 
@@ -733,8 +751,16 @@ namespace ASCOM.Starbook
                 throw new ASCOM.InvalidOperationException("Park: RightAscension/Declination is not set by SetPark.");
             }
 
-            Telescope.Starbook.HMS rightAscension = new Starbook.HMS(parkRightAscension);
-            Telescope.Starbook.DMS declination = new Starbook.DMS(parkDeclination);
+            if (!Starbook.HMS.FromValue(parkRightAscension, out Starbook.HMS rightAscension))
+            {
+                throw new ASCOM.InvalidValueException("Park: RightAscension is not valid.");
+            }
+
+            if (!Starbook.DMS.FromValue(parkDeclination, out Starbook.DMS declination))
+            {
+                throw new ASCOM.InvalidValueException("Park: Declination is not valid.");
+            }
+
             Telescope.Starbook.Response response = Telescope.starbook.Goto(rightAscension, declination);
             traceLogger.LogMessage("Park", response.ToString());
         }
@@ -778,8 +804,12 @@ namespace ASCOM.Starbook
         {
             get
             {
-                double rightAscension = starbook.GetStatus().RA.Value;
-                traceLogger.LogMessage("RightAscension", "Get - " + rightAscension.ToString());
+                if (starbook.GetStatus(out Telescope.Starbook.Status status) != Starbook.Response.OK)
+                {
+                    throw new ASCOM.InvalidOperationException("RightAscension Get: Status is not available.");
+                }
+                double rightAscension = status.RA.Value;
+                traceLogger.LogMessage("RightAscension Get", rightAscension.ToString());
                 return rightAscension;
             }
         }
@@ -789,7 +819,7 @@ namespace ASCOM.Starbook
             get
             {
                 double rightAscensionRate = 0.0;
-                traceLogger.LogMessage("RightAscensionRate", "Get - " + rightAscensionRate.ToString());
+                traceLogger.LogMessage("RightAscensionRate Get", rightAscensionRate.ToString());
                 return rightAscensionRate;
             }
             set
@@ -801,7 +831,10 @@ namespace ASCOM.Starbook
 
         public void SetPark()
         {
-            Telescope.Starbook.Status status = Telescope.starbook.GetStatus();
+            if (starbook.GetStatus(out Telescope.Starbook.Status status) != Starbook.Response.OK)
+            {
+                throw new ASCOM.InvalidOperationException("SetPark: Status is not available.");
+            }
             parkRightAscension = status.RA.Value;
             parkDeclination = status.Dec.Value;
             traceLogger.LogMessage("SetPark", string.Format("{0} {1}", parkRightAscension, parkDeclination));
@@ -842,7 +875,7 @@ namespace ASCOM.Starbook
                 // Reduce to the range 0 to 24 hours
                 siderealTime = astroUtilities.ConditionRA(siderealTime);
 
-                traceLogger.LogMessage("SiderealTime", "Get - " + siderealTime.ToString());
+                traceLogger.LogMessage("SiderealTime Get", siderealTime.ToString());
                 return siderealTime;
             }
         }
@@ -866,16 +899,41 @@ namespace ASCOM.Starbook
         {
             get
             {
-                double latitude = starbook.GetPlace().Latitude.Value;
+                if (!placeCached)
+                {
+                    if (starbook.GetPlace(out placeCache) != Starbook.Response.OK)
+                    {
+                        throw new ASCOM.InvalidOperationException("SiteLatitude Get: Place is not available.");
+                    }
+                    placeCached = true;
+                }
+                double latitude = placeCache.Latitude.Value;
                 traceLogger.LogMessage("SiteLatitude Get", latitude.ToString());
                 return latitude;
             }
             set
             {
-                Starbook.Place place = starbook.GetPlace();
-                place.Latitude = new Starbook.DMS(Math.Abs(value), value >= 0 ? Starbook.Direction.North : Starbook.Direction.South);
+                if (!Starbook.DMS.FromValue(value, out Starbook.DMS latitude, Starbook.Direction.North, Starbook.Direction.South))
+                {
+                    throw new ASCOM.InvalidValueException("SiteLatitude Set: Value is not valid.");
+                }
+                if (!placeCached)
+                {
+                    if (starbook.GetPlace(out placeCache) != Starbook.Response.OK)
+                    {
+                        throw new ASCOM.InvalidOperationException("SiteLatitude Set: Place is not available.");
+                    }
+                    placeCached = true;
+                }
+                Starbook.Place place = placeCache;
+                place.Latitude = latitude;
                 Starbook.Response response = starbook.SetPlace(place);
-                traceLogger.LogMessage("SiteLatitude Set", string.Format("{0}: {1}", value, response));
+                if (response == Starbook.Response.OK)
+                {
+                    this.placeCache = place;
+                    this.placeCached = true;
+                }
+                traceLogger.LogMessage("SiteLatitude Set", response.ToString());
             }
         }
 
@@ -883,16 +941,41 @@ namespace ASCOM.Starbook
         {
             get
             {
-                double longitude = starbook.GetPlace().Longitude.Value;
+                if (!placeCached)
+                {
+                    if (starbook.GetPlace(out placeCache) != Starbook.Response.OK)
+                    {
+                        throw new ASCOM.InvalidOperationException("SiteLongitude Get: Place is not available.");
+                    }
+                    placeCached = true;
+                }
+                double longitude = placeCache.Longitude.Value;
                 traceLogger.LogMessage("SiteLongitude Get", longitude.ToString());
                 return longitude;
             }
             set
             {
-                Starbook.Place place = starbook.GetPlace();
-                place.Longitude = new Starbook.DMS(Math.Abs(value), value >= 0 ? Starbook.Direction.East : Starbook.Direction.West);
+                if (!Starbook.DMS.FromValue(value, out Starbook.DMS longitude, Starbook.Direction.East, Starbook.Direction.West))
+                {
+                    throw new ASCOM.InvalidValueException("SiteLongitude Set: Value is not valid.");
+                }
+                if (!placeCached)
+                {
+                    if (starbook.GetPlace(out placeCache) != Starbook.Response.OK)
+                    {
+                        throw new ASCOM.InvalidOperationException("SiteLongitude Set: Place is not available.");
+                    }
+                    placeCached = true;
+                }
+                Starbook.Place place = placeCache;
+                place.Longitude = longitude;
                 Starbook.Response response = starbook.SetPlace(place);
-                traceLogger.LogMessage("SiteLongitude Set", string.Format("{0}: {1}", value, response));
+                if (response == Starbook.Response.OK)
+                {
+                    this.placeCache = place;
+                    this.placeCached = true;
+                }
+                traceLogger.LogMessage("SiteLongitude Set", response.ToString());
             }
         }
 
@@ -924,28 +1007,51 @@ namespace ASCOM.Starbook
 
         public void SlewToCoordinates(double RightAscension, double Declination)
         {
-            Starbook.HMS rightAscension = new Starbook.HMS(targetRightAscension = RightAscension);
-            Starbook.DMS declination = new Starbook.DMS(targetDeclination = Declination);
+            if (Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension))
+            {
+                targetRightAscension = RightAscension;
+            }
+            else
+            {
+                throw new ASCOM.InvalidValueException("SlewToCoordinates: RightAscension is not valid.");
+            }
+
+            if (Starbook.DMS.FromValue(Declination, out Starbook.DMS declination))
+            {
+                targetDeclination = Declination;
+            }
+            else
+            {
+                throw new ASCOM.InvalidValueException("SlewToCoordinates: Declination is not valid.");
+            }
+
             Starbook.Response response = starbook.Goto(rightAscension, declination);
 
+            if (response != Starbook.Response.OK)
+            {
+                throw new ASCOM.InvalidOperationException("SlewToCoordinates: Goto is not working.");
+            }
+            
             if (slewSettleTime > 0)
             {
                 Thread.Sleep(slewSettleTime * 1000);
             }
 
-            if (response == Starbook.Response.OK)
+            while (true)
             {
-                while (true)
+                response = starbook.GetStatus(out Starbook.Status status);
+
+                if (response != Starbook.Response.OK)
                 {
-                    Starbook.Status status = starbook.GetStatus();
-
-                    if (!status.Goto)
-                    {
-                        break;
-                    }
-
-                    Thread.Sleep(100);
+                    throw new ASCOM.InvalidOperationException("SlewToCoordinates: Status is not available.");
                 }
+
+                if (!status.Goto)
+                {
+                    break;
+                }
+
+                Thread.Sleep(100);
             }
 
             traceLogger.LogMessage("SlewToCoordinates", response.ToString());
@@ -953,8 +1059,24 @@ namespace ASCOM.Starbook
 
         public void SlewToCoordinatesAsync(double RightAscension, double Declination)
         {
-            Starbook.HMS rightAscension = new Starbook.HMS(targetRightAscension = RightAscension);
-            Starbook.DMS declination = new Starbook.DMS(targetDeclination = Declination);
+            if (Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension))
+            {
+                targetRightAscension = RightAscension;
+            }
+            else
+            {
+                throw new ASCOM.InvalidValueException("SlewToCoordinatesAsync: RightAscension is not valid.");
+            }
+
+            if (Starbook.DMS.FromValue(Declination, out Starbook.DMS declination))
+            {
+                targetDeclination = Declination;
+            }
+            else
+            {
+                throw new ASCOM.InvalidValueException("SlewToCoordinatesAsync: Declination is not valid.");
+            }
+
             Starbook.Response response = starbook.Goto(rightAscension, declination);
             traceLogger.LogMessage("SlewToCoordinatesAsync", response.ToString());
         }
@@ -966,28 +1088,43 @@ namespace ASCOM.Starbook
                 throw new ASCOM.InvalidOperationException("SlewToTarget: Target RightAscension/Declination is not set.");
             }
 
-            Starbook.HMS rightAscension = new Starbook.HMS(targetRightAscension);
-            Starbook.DMS declination = new Starbook.DMS(targetDeclination);
+            if (!Starbook.HMS.FromValue(targetRightAscension, out Starbook.HMS rightAscension))
+            {
+                throw new ASCOM.InvalidValueException("SlewToTarget: Target RightAscension is not valid.");
+            }
+
+            if (!Starbook.DMS.FromValue(targetDeclination, out Starbook.DMS declination))
+            {
+                throw new ASCOM.InvalidValueException("SlewToTarget: Target Declination is not valid.");
+            }
+
             Starbook.Response response = starbook.Goto(rightAscension, declination);
+
+            if (response != Starbook.Response.OK)
+            {
+                throw new ASCOM.InvalidOperationException("SlewToTarget: Goto is not working.");
+            }
 
             if (slewSettleTime > 0)
             {
                 Thread.Sleep(slewSettleTime * 1000);
             }
 
-            if (response == Starbook.Response.OK)
+            while (true)
             {
-                while (true)
+                response = starbook.GetStatus(out Starbook.Status status);
+
+                if (response != Starbook.Response.OK)
                 {
-                    Starbook.Status status = starbook.GetStatus();
-
-                    if (!status.Goto)
-                    {
-                        break;
-                    }
-
-                    Thread.Sleep(100);
+                    throw new ASCOM.InvalidOperationException("SlewToTarget: Status is not available.");
                 }
+
+                if (!status.Goto)
+                {
+                    break;
+                }
+
+                Thread.Sleep(100);
             }
 
             traceLogger.LogMessage("SlewToTarget", response.ToString());
@@ -1000,8 +1137,16 @@ namespace ASCOM.Starbook
                 throw new ASCOM.InvalidOperationException("SlewToTargetAsync: Target RightAscension/Declination is not set.");
             }
 
-            Starbook.HMS rightAscension = new Starbook.HMS(targetRightAscension);
-            Starbook.DMS declination = new Starbook.DMS(targetDeclination);
+            if (!Starbook.HMS.FromValue(targetRightAscension, out Starbook.HMS rightAscension))
+            {
+                throw new ASCOM.InvalidValueException("SlewToTargetAsync: Target RightAscension is not valid.");
+            }
+
+            if (!Starbook.DMS.FromValue(targetDeclination, out Starbook.DMS declination))
+            {
+                throw new ASCOM.InvalidValueException("SlewToTargetAsync: Target Declination is not valid.");
+            }
+
             Starbook.Response response = starbook.Goto(rightAscension, declination);
             traceLogger.LogMessage("SlewToTargetAsync", response.ToString());
         }
@@ -1010,7 +1155,11 @@ namespace ASCOM.Starbook
         {
             get
             {
-                bool qoto = starbook.GetStatus().Goto;
+                if (starbook.GetStatus(out Telescope.Starbook.Status status) != Starbook.Response.OK)
+                {
+                    throw new ASCOM.InvalidOperationException("Slewing Get: Status is not available.");
+                }
+                bool qoto = status.Goto;
                 traceLogger.LogMessage("Slewing Get", qoto.ToString());
                 return qoto;
             }
@@ -1024,8 +1173,24 @@ namespace ASCOM.Starbook
 
         public void SyncToCoordinates(double RightAscension, double Declination)
         {
-            Starbook.HMS rightAscension = new Starbook.HMS(targetRightAscension = RightAscension);
-            Starbook.DMS declination = new Starbook.DMS(targetDeclination = Declination);
+            if (Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension))
+            {
+                targetRightAscension = RightAscension;
+            }
+            else
+            {
+                throw new ASCOM.InvalidValueException("SyncToCoordinates: RightAscension is not valid.");
+            }
+
+            if (Starbook.DMS.FromValue(Declination, out Starbook.DMS declination))
+            {
+                targetDeclination = Declination;
+            }
+            else
+            {
+                throw new ASCOM.InvalidValueException("SyncToCoordinates: Declination is not valid.");
+            }
+
             Starbook.Response response = starbook.Align(rightAscension, declination);
             traceLogger.LogMessage("SyncToCoordinates", response.ToString());
         }
@@ -1037,8 +1202,16 @@ namespace ASCOM.Starbook
                 throw new ASCOM.InvalidOperationException("SyncToTarget: Target RightAscension/Declination is not set.");
             }
 
-            Starbook.HMS rightAscension = new Starbook.HMS(targetRightAscension);
-            Starbook.DMS declination = new Starbook.DMS(targetDeclination);
+            if (!Starbook.HMS.FromValue(targetRightAscension, out Starbook.HMS rightAscension))
+            {
+                throw new ASCOM.InvalidValueException("SyncToTarget: Target RightAscension is not valid.");
+            }
+
+            if (!Starbook.DMS.FromValue(targetDeclination, out Starbook.DMS declination))
+            {
+                throw new ASCOM.InvalidValueException("SyncToTarget: Target Declination is not valid.");
+            }
+
             Starbook.Response response = starbook.Align(rightAscension, declination);
             traceLogger.LogMessage("SyncToTarget", response.ToString());
         }
@@ -1075,14 +1248,18 @@ namespace ASCOM.Starbook
         {
             get
             {
-                Starbook.State state = starbook.GetStatus().State;
+                if (starbook.GetStatus(out Starbook.Status status) != Starbook.Response.OK)
+                {
+                    throw new ASCOM.InvalidOperationException("Tracking Get: Status is not available.");
+                }
+                Starbook.State state = status.State;
                 bool tracking = (state == Starbook.State.Guide || state == Starbook.State.Scope || state == Starbook.State.Chart || state == Starbook.State.User);
-                traceLogger.LogMessage("Tracking", "Get - " + tracking.ToString());
+                traceLogger.LogMessage("Tracking Get", tracking.ToString());
                 return tracking;
             }
             set
             {
-                Starbook.Response response = starbook.Start();
+                Starbook.Response response = value ? starbook.Start() : Starbook.Response.OK;
                 traceLogger.LogMessage("Tracking Set", response.ToString());
             }
         }
@@ -1110,10 +1287,9 @@ namespace ASCOM.Starbook
             get
             {
                 ITrackingRates trackingRates = new TrackingRates();
-                traceLogger.LogMessage("TrackingRates", "Get - ");
                 foreach (DriveRates driveRate in trackingRates)
                 {
-                    traceLogger.LogMessage("TrackingRates", "Get - " + driveRate.ToString());
+                    traceLogger.LogMessage("TrackingRates Get", driveRate.ToString());
                 }
                 return trackingRates;
             }
@@ -1123,13 +1299,33 @@ namespace ASCOM.Starbook
         {
             get
             {
-                DateTime utcDate = starbook.GetTime().ToUniversalTime();
-                traceLogger.LogMessage("TrackingRates", "Get - " + String.Format("MM/dd/yy HH:mm:ss", utcDate));
+                if (starbook.GetTime(out DateTime time) != Starbook.Response.OK)
+                {
+                    throw new ASCOM.InvalidOperationException("UTCDate Get: Time is not available.");
+                }
+                if (!placeCached)
+                {
+                    if (starbook.GetPlace(out placeCache) != Starbook.Response.OK)
+                    {
+                        throw new ASCOM.InvalidOperationException("UTCDate Get: Place is not available.");
+                    }
+                    placeCached = true;
+                }
+                DateTime utcDate = time.AddHours(-placeCache.Timezone);
+                traceLogger.LogMessage("UTCDate Get", String.Format("MM/dd/yy HH:mm:ss", utcDate));
                 return utcDate;
             }
             set
             {
-                Starbook.Response response = starbook.SetTime(value.ToLocalTime());
+                if (!placeCached)
+                {
+                    if (starbook.GetPlace(out placeCache) != Starbook.Response.OK)
+                    {
+                        throw new ASCOM.InvalidOperationException("UTCDate Set: Place is not available.");
+                    }
+                    placeCached = true;
+                }
+                Starbook.Response response = starbook.SetTime(value.AddHours(placeCache.Timezone));
                 traceLogger.LogMessage("UTCDate Set", response.ToString());
             }
         }

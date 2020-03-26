@@ -265,6 +265,7 @@
             // 
             // textBoxLatitudeDegree
             // 
+            this.textBoxLatitudeDegree.Enabled = false;
             this.textBoxLatitudeDegree.Location = new System.Drawing.Point(138, 37);
             this.textBoxLatitudeDegree.Name = "textBoxLatitudeDegree";
             this.textBoxLatitudeDegree.ReadOnly = true;
@@ -274,6 +275,7 @@
             // 
             // textBoxLatitudeMinute
             // 
+            this.textBoxLatitudeMinute.Enabled = false;
             this.textBoxLatitudeMinute.Location = new System.Drawing.Point(204, 37);
             this.textBoxLatitudeMinute.Name = "textBoxLatitudeMinute";
             this.textBoxLatitudeMinute.ReadOnly = true;
@@ -303,6 +305,7 @@
             // 
             // textBoxLongitudeDegree
             // 
+            this.textBoxLongitudeDegree.Enabled = false;
             this.textBoxLongitudeDegree.Location = new System.Drawing.Point(138, 72);
             this.textBoxLongitudeDegree.Name = "textBoxLongitudeDegree";
             this.textBoxLongitudeDegree.ReadOnly = true;
@@ -312,6 +315,7 @@
             // 
             // textBoxLongitudeMinute
             // 
+            this.textBoxLongitudeMinute.Enabled = false;
             this.textBoxLongitudeMinute.Location = new System.Drawing.Point(204, 72);
             this.textBoxLongitudeMinute.Name = "textBoxLongitudeMinute";
             this.textBoxLongitudeMinute.ReadOnly = true;
@@ -357,6 +361,7 @@
             // 
             // textBoxTimezone
             // 
+            this.textBoxTimezone.Enabled = false;
             this.textBoxTimezone.Location = new System.Drawing.Point(138, 106);
             this.textBoxTimezone.Name = "textBoxTimezone";
             this.textBoxTimezone.ReadOnly = true;
@@ -467,8 +472,6 @@
             // checkBoxSyncSystemTime
             // 
             this.checkBoxSyncSystemTime.AutoSize = true;
-            this.checkBoxSyncSystemTime.Checked = true;
-            this.checkBoxSyncSystemTime.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBoxSyncSystemTime.Enabled = false;
             this.checkBoxSyncSystemTime.Location = new System.Drawing.Point(464, 75);
             this.checkBoxSyncSystemTime.Name = "checkBoxSyncSystemTime";

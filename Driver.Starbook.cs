@@ -69,7 +69,7 @@ namespace ASCOM.Starbook
             /// <summary>
             /// Get status of the mount.
             /// </summary>
-            /// <returns>
+            /// <param name="status">
             /// Status which contains the following fields:
             /// [*] RA: Right Ascension which is formatted as [HH]+[MM.M]
             /// [*] DEC: Declination which is formatted as [S][DDD]+[MM]
@@ -80,49 +80,75 @@ namespace ASCOM.Starbook
             ///     [+] CHART (User Presses CHART)
             ///     [+] USER (User Presses MENU)
             /// [*] GOTO: Slewing (1) or Not Slewing (0)
-            /// </returns>
+            /// </param>
+            /// <returns>Response string: OK or ERROR:%</returns>
             /// 
-            public Status GetStatus()
+            public Response GetStatus(out Status status)
             {
-                Status status = new Status();
+                status = new Status(); bool statusRA = false, statusDEC = false, statusState = false, statusGoto = false;
 
-                Dictionary<string, string> dictionary = this.HandshakeDictionary("GETSTATUS");
-
-                foreach (KeyValuePair<string, string> item in dictionary)
+                foreach (KeyValuePair<string, string> item in this.HandshakeDictionary("GETSTATUS"))
                 {
                     switch (item.Key)
                     {
                         case "RA":
-                            status.RA = new HMS(item.Value); break;
+                        {
+                            if (HMS.TryParse(item.Value, out HMS ra))
+                            {
+                                status.RA = ra; statusRA = true;
+                            }
+                            break;
+                        }
                         case "DEC":
-                            status.Dec = new DMS(item.Value); break;
+                        {
+                            if (DMS.TryParse(item.Value, out DMS dec))
+                            {
+                                status.Dec = dec; statusDEC = true;
+                            }
+                            break;
+                        }
                         case "STATE":
-                            status.State = this.ParseState(item.Value); break;
+                        {
+                            if (this.TryParseState(item.Value, out State state))
+                            {
+                                status.State = state; statusState = true;
+                            }
+                            break;
+                        }
                         case "GOTO":
-                            status.Goto = item.Value == "1"; break;
+                        {
+                            if (item.Value == "1")
+                            {
+                                status.Goto = true; statusGoto = true;
+                            }
+                            else if (item.Value == "0")
+                            {
+                                status.Goto = false; statusGoto = true;
+                            }
+                            break;
+                        }
                     }
                 }
 
-                return status;
+                return (statusRA && statusDEC && statusState && statusGoto) ? Response.OK : Response.ErrorUnknown;
             }
 
             /// <summary>
             /// Get time of the mount.
             /// </summary>
-            /// <returns>Time which is formatted as [YYYY]+[MM]+[DD]+[HH]+[MM]+[SS] (Local Time)</returns>
+            /// <param name="time">Time which is formatted as [YYYY]+[MM]+[DD]+[HH]+[MM]+[SS] (Local Time)</param>
+            /// <returns>Response string: OK or ERROR:%</returns>
             /// 
-            public DateTime GetTime()
+            public Response GetTime(out DateTime time)
             {
-                string timeString; DateTime time;
+                time = DateTime.MinValue; Dictionary<string, string> dictionary = this.HandshakeDictionary("GETTIME");
 
-                Dictionary<string, string> dictionary = this.HandshakeDictionary("GETTIME");
-
-                if (!dictionary.TryGetValue("TIME", out timeString) || !DateTime.TryParseExact(timeString, "yyyy+MM+dd+HH+mm+ss", null, DateTimeStyles.None, out time))
+                if (!dictionary.TryGetValue("TIME", out string s) || !DateTime.TryParseExact(s, "yyyy+MM+dd+HH+mm+ss", null, DateTimeStyles.None, out time))
                 {
-                    time = DateTime.MinValue;
+                    return Response.ErrorUnknown;
                 }
 
-                return time;
+                return Response.OK;
             }
 
             /// <summary>
@@ -139,31 +165,50 @@ namespace ASCOM.Starbook
             /// <summary>
             /// Get place of the mount.
             /// </summary>
-            /// <returns>
+            /// <param name="place">
             /// Place contains the following fields:
             /// [*] LATITUDE: Latitude which is formatted as [N|S][DDD]+[MM]
             /// [*] LONGITUDE: Longitude which is formatted as [E|W][DDD]+[MM]
             /// [*] TIMEZONE: Timezone which is ranged from [-12] to [14]
-            /// </returns>
+            /// </param>
+            /// <returns>Response string: OK or ERROR:%</returns>
             /// 
-            public Place GetPlace()
+            public Response GetPlace(out Place place)
             {
-                Place place = new Place();
+                place = new Place(); bool placeLatitude = false, placeLongitude = false, placeTimezone = false;
 
                 foreach (KeyValuePair<string, string> item in this.HandshakeDictionary("GETPLACE"))
                 {
                     switch (item.Key)
                     {
                         case "LATITUDE":
-                            place.Latitude = new DMS(item.Value); break;
+                        {
+                            if (DMS.TryParse(item.Value, out DMS latitude))
+                            {
+                                place.Latitude = latitude; placeLatitude = true;
+                            }
+                            break;
+                        }
                         case "LONGITUDE":
-                            place.Longitude = new DMS(item.Value); break;
+                        {
+                            if (DMS.TryParse(item.Value, out DMS longitude))
+                            {
+                                place.Longitude = longitude; placeLongitude = true;
+                            }
+                            break;
+                        }
                         case "TIMEZONE":
-                            place.Timezone = int.Parse(item.Value); break;
+                        {
+                            if (int.TryParse(item.Value, out int timezone))
+                            {
+                                place.Timezone = timezone; placeTimezone = true;
+                            }
+                            break;
+                        }
                     }
                 }
 
-                return place;
+                return (placeLatitude && placeLongitude && placeTimezone) ? Response.OK : Response.ErrorUnknown;
             }
 
             /// <summary>
@@ -450,7 +495,7 @@ namespace ASCOM.Starbook
 
                 handshakes["VERSION"] = "VERSION=2.7B50";
                 handshakes["GETSTATUS"] = "RA=0+0.0&DEC=0+0&GOTO=0&STATE=INIT";
-                handshakes["GETPLACE"] = "LATITUDE=N00+00&LONGITUDE=E000+00&TIMEZONE=0";
+                handshakes["GETPLACE"] = "LATITUDE=N23+30&LONGITUDE=E120+00&TIMEZONE=8";
                 handshakes["GETTIME"] = string.Format("TIME={0:yyyy+MM+dd+HH+mm+ss}", DateTime.Now);
                 handshakes["GETROUND"] = "4320000";
                 handshakes["GETXY"] = "X=0&Y=0";
@@ -590,22 +635,22 @@ namespace ASCOM.Starbook
                 }
             }
 
-            private State ParseState(string state)
+            private bool TryParseState(string s, out State state)
             {
-                switch (state)
+                switch (s)
                 {
                     case "INIT":
-                        return State.Init;
+                        state = State.Init; return true;
                     case "GUIDE":
-                        return State.Guide;
+                        state = State.Guide; return true;
                     case "SCOPE":
-                        return State.Scope;
+                        state = State.Scope; return true;
                     case "CHART":
-                        return State.Chart;
+                        state = State.Chart; return true;
                     case "USER":
-                        return State.User;
+                        state = State.User; return true;
                     default:
-                        return State.Unknown;
+                        state = State.Unknown; return false;
                 }
             }
 
@@ -634,47 +679,49 @@ namespace ASCOM.Starbook
             [ComVisible(false)]
             public struct HMS
             {
-                public HMS(int hour, int minute, int second)
-                    : this()
+                public HMS(int hour, int minute, double second) : this()
                 {
                     this.Hour = hour;
                     this.Minute = minute;
                     this.Second = second;
                 }
 
-                public HMS(double value)
-                    : this()
+                public static bool FromValue(double value, out HMS hms)
                 {
-                    this.Hour = (int)Math.Floor(value); value -= this.Hour; value *= 60;
-                    this.Minute = (int)Math.Floor(value); value -= this.Minute; value *= 60;
-                    this.Second = (int)Math.Floor(value + 0.5);
+                    hms = new HMS();
+
+                    if (value < 0 || 24 <= value)
+                    {
+                        return false;
+                    }
+
+                    hms.Hour = (int)Math.Floor(value); value -= hms.Hour; value *= 60;
+                    hms.Minute = (int)Math.Floor(value); value -= hms.Minute; value *= 60;
+                    hms.Second = value;
+
+                    return true;
                 }
 
-                public HMS(string s)
-                    : this()
+                public static bool TryParse(string s, out HMS hms)
                 {
-                    Match match = Regex.Match(s, @"(?<Hour>\d+)\+(?<Minute>\d+(\.\d+)?)");
+                    hms = new HMS(); Match match = Regex.Match(s, @"(?<Hour>\d+)\+(?<Minute>\d+(\.\d+)?)");
 
-                    if (match.Success)
+                    if (!match.Success || !int.TryParse(match.Groups["Hour"].Value, out int hour) || hour < 0 || 23 < hour ||
+                                          !double.TryParse(match.Groups["Minute"].Value, out double minute) || minute < 0 || 60 <= minute)
                     {
-                        this.Hour = int.Parse(match.Groups["Hour"].Value);
-
-                        double value = double.Parse(match.Groups["Minute"].Value);
-
-                        this.Minute = (int)Math.Floor(value); value -= this.Minute; value *= 60;
-                        this.Second = (int)Math.Floor(value + 0.5);
+                        return false;
                     }
-                    else
-                    {
-                        this.Hour = 0;
-                        this.Minute = 0;
-                        this.Second = 0;
-                    }
+
+                    hms.Hour = hour;
+                    hms.Minute = (int)Math.Floor(minute);
+                    hms.Second = (minute - hms.Minute) * 60;
+
+                    return true;
                 }
 
-                public int Hour { get; set; }
-                public int Minute { get; set; }
-                public int Second { get; set; }
+                public int Hour { get; private set; }
+                public int Minute { get; private set; }
+                public double Second { get; private set; }
 
                 public double Value
                 {
@@ -693,103 +740,117 @@ namespace ASCOM.Starbook
             [ComVisible(false)]
             public struct DMS
             {
-                public DMS(int degree, int minute, int second, Direction direction = Direction.Unknown)
-                    : this()
+                public DMS(Direction direction, int degree, int minute, double second) : this()
                 {
+                    this.Direction = direction;
+
                     this.Degree = degree;
                     this.Minute = minute;
                     this.Second = second;
-
-                    this.Direction = direction;
                 }
 
-                public DMS(double value, Direction direction = Direction.Unknown)
-                    : this()
+                public static bool FromValue(double value, out DMS dms)
                 {
-                    bool negative;
+                    return FromValue(value, out dms, Direction.Positive, Direction.Negative);
+                }
 
-                    if (value < 0)
+                public static bool FromValue(double value, out DMS dms, Direction positive, Direction negative)
+                {
+                    dms = new DMS();
+
+                    double minValue = -90;
+                    double maxValue =  90;
+
+                    if (positive == Direction.East && negative == Direction.West)
                     {
-                        negative = true; value = -value;
+                        minValue = -180;
+                        maxValue =  180;
+                    }
+
+                    if (value < minValue || maxValue < value)
+                    {
+                        return false;
+                    }
+
+                    if (value >= 0)
+                    {
+                        dms.Direction = positive;
                     }
                     else
                     {
-                        negative = false;
+                        dms.Direction = negative; value = -value;
                     }
 
-                    this.Degree = (int)Math.Floor(value); value -= this.Degree; value *= 60;
-                    this.Minute = (int)Math.Floor(value); value -= this.Minute; value *= 60;
-                    this.Second = (int)Math.Floor(value + 0.5);
+                    dms.Degree = (int)Math.Floor(value); value -= dms.Degree; value *= 60;
+                    dms.Minute = (int)Math.Floor(value); value -= dms.Minute; value *= 60;
+                    dms.Second = value;
 
-                    if (direction == Direction.Unknown)
-                    {
-                        direction = negative ? Direction.Negative : Direction.Positive;
-                    }
-
-                    this.Direction = direction;
+                    return true;
                 }
 
-                public DMS(string s)
-                    : this()
+                public static bool TryParse(string s, out DMS dms)
                 {
-                    Match match = Regex.Match(s, @"(?<Position>[NSEW])?(?<Negative>-)?(?<Degree>\d+)\+(?<Minute>\d+(\.\d+)?)");
+                    dms = new DMS(); Match match = Regex.Match(s, @"(?<Direction>[NSEW\-])?(?<Degree>\d+)\+(?<Minute>\d+(\.\d+)?)");
 
-                    if (match.Success)
+                    if (!match.Success)
                     {
-                        this.Degree = int.Parse(match.Groups["Degree"].Value);
+                        return false;
+                    }
 
-                        double value = double.Parse(match.Groups["Minute"].Value);
+                    Direction direction;
+                    double minValue = -90;
+                    double maxValue =  90;
 
-                        this.Minute = (int)Math.Floor(value); value -= this.Minute; value *= 60;
-                        this.Second = (int)Math.Floor(value + 0.5);
+                    Group group = match.Groups["Direction"];
 
-                        Group position = match.Groups["Position"];
-
-                        if (position.Success)
+                    if (group.Success)
+                    {
+                        switch (group.Value)
                         {
-                            switch (position.Value)
-                            {
-                                case "N":
-                                    this.Direction = Direction.North; break;
-                                case "S":
-                                    this.Direction = Direction.South; break;
-                                case "E":
-                                    this.Direction = Direction.East; break;
-                                case "W":
-                                    this.Direction = Direction.West; break;
-                                default:
-                                    this.Direction = Direction.Unknown; break;
-                            }
-                        }
-                        else
-                        {
-                            Group negative = match.Groups["Negative"];
-
-                            if (negative.Success)
-                            {
-                                this.Direction = Direction.Negative;
-                            }
-                            else
-                            {
-                                this.Direction = Direction.Positive;
-                            }
+                            case "N":
+                                direction = Direction.North; break;
+                            case "S":
+                                direction = Direction.South; break;
+                            case "E":
+                                direction = Direction.East; minValue = -180; maxValue = 180; break;
+                            case "W":
+                                direction = Direction.West; minValue = -180; maxValue = 180; break;
+                            case "-":
+                            default:
+                                direction = Direction.Negative; break;
                         }
                     }
                     else
                     {
-                        this.Degree = 0;
-                        this.Minute = 0;
-                        this.Second = 0;
-
-                        this.Direction = Direction.Unknown;
+                        direction = Direction.Positive;
                     }
+
+                    if (!int.TryParse(match.Groups["Degree"].Value, out int degree) || !double.TryParse(match.Groups["Minute"].Value, out double minute))
+                    {
+                        return false;
+                    }
+
+                    double value = degree + minute / 60;
+
+                    if (value < minValue || maxValue < value)
+                    {
+                        return false;
+                    }
+
+                    dms.Direction = direction;
+
+                    dms.Degree = degree;
+                    dms.Minute = (int)Math.Floor(minute);
+                    dms.Second = (value - dms.Minute) * 60;
+
+                    return true;
                 }
 
-                public int Degree { get; set; }
-                public int Minute { get; set; }
-                public int Second { get; set; }
+                public Direction Direction { get; private set; }
 
-                public Direction Direction { get; set; }
+                public int Degree { get; private set; }
+                public int Minute { get; private set; }
+                public double Second { get; private set; }
 
                 public double Value
                 {

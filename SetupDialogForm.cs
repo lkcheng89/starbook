@@ -101,17 +101,17 @@ namespace ASCOM.Starbook
 
         private bool CheckComponentLocation(out Telescope.Starbook.Place location)
         {
-            location = new Telescope.Starbook.Place(); int degree, minute, timezone; Telescope.Starbook.Direction direction;
+            location = new Telescope.Starbook.Place(); Telescope.Starbook.Direction direction;
 
-            if (!int.TryParse(textBoxLatitudeDegree.Text, out degree) || degree < -90 || 90 < degree)
+            if (!int.TryParse(textBoxLatitudeDegree.Text, out int degree) || degree < 0 || 90 < degree)
             {
-                MessageBox.Show(this, "Degree of latitude should be ranged from -90 to 90.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(this, "Degree of latitude should be ranged from 0 to 90.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxLatitudeDegree.SelectAll();
                 textBoxLatitudeDegree.Focus();
                 return false;
             }
 
-            if (!int.TryParse(textBoxLatitudeMinute.Text, out minute) || minute < 0 || 59 < minute)
+            if (!int.TryParse(textBoxLatitudeMinute.Text, out int minute) || minute < 0 || 59 < minute)
             {
                 MessageBox.Show(this, "Minute of latitude should be ranged from 0 to 59.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxLatitudeMinute.SelectAll();
@@ -126,14 +126,16 @@ namespace ASCOM.Starbook
                 case "S":
                     direction = Telescope.Starbook.Direction.South; break;
                 default:
-                    direction = Telescope.Starbook.Direction.Unknown; break;
+                    MessageBox.Show(this, "Direction of latitude should be N or S.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    comboBoxLatitudeDirection.Focus();
+                    return false;
             }
 
-            location.Latitude = new Telescope.Starbook.DMS(degree, minute, 0, direction);
+            location.Latitude = new Telescope.Starbook.DMS(direction, degree, minute, 0);
 
-            if (!int.TryParse(textBoxLongitudeDegree.Text, out degree) || degree < -180 || 180 < degree)
+            if (!int.TryParse(textBoxLongitudeDegree.Text, out degree) || degree < 0 || 180 < degree)
             {
-                MessageBox.Show(this, "Degree of longitude should be ranged from -180 to 180.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(this, "Degree of longitude should be ranged from 0 to 180.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxLongitudeDegree.SelectAll();
                 textBoxLongitudeDegree.Focus();
                 return false;
@@ -154,12 +156,14 @@ namespace ASCOM.Starbook
                 case "W":
                     direction = Telescope.Starbook.Direction.West; break;
                 default:
-                    direction = Telescope.Starbook.Direction.Unknown; break;
+                    MessageBox.Show(this, "Direction of longitude should be E or W.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    comboBoxLongitudeDirection.Focus();
+                    return false;
             }
 
-            location.Longitude = new Telescope.Starbook.DMS(degree, minute, 0, direction);
+            location.Longitude = new Telescope.Starbook.DMS(direction, degree, minute, 0);
 
-            if (!int.TryParse(textBoxTimezone.Text, out timezone) || timezone < -12 || 14 < timezone)
+            if (!int.TryParse(textBoxTimezone.Text, out int timezone) || timezone < -12 || 14 < timezone)
             {
                 MessageBox.Show(this, "Time zone should be ranged from -12 to 14.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxTimezone.SelectAll();
@@ -174,9 +178,9 @@ namespace ASCOM.Starbook
 
         private bool CheckComponentDateTime(out DateTime dateTime)
         {
-            dateTime = DateTime.MinValue; int year, month, day, hour, minute, second;
+            dateTime = DateTime.MinValue;
 
-            if (!int.TryParse(textBoxYear.Text, out year) || year < 1 || 9999 < year)
+            if (!int.TryParse(textBoxYear.Text, out int year) || year < 1 || 9999 < year)
             {
                 MessageBox.Show(this, "Year of date should be ranged from 1 to 9999.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxYear.SelectAll();
@@ -184,7 +188,7 @@ namespace ASCOM.Starbook
                 return false;
             }
 
-            if (!int.TryParse(textBoxMonth.Text, out month) || month < 1 || 12 < month)
+            if (!int.TryParse(textBoxMonth.Text, out int month) || month < 1 || 12 < month)
             {
                 MessageBox.Show(this, "Month of date should be ranged from 1 to 12.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxMonth.SelectAll();
@@ -192,7 +196,7 @@ namespace ASCOM.Starbook
                 return false;
             }
 
-            if (!int.TryParse(textBoxDay.Text, out day) || day < 1 || 31 < day)
+            if (!int.TryParse(textBoxDay.Text, out int day) || day < 1 || 31 < day)
             {
                 MessageBox.Show(this, "Day of date should be ranged from 1 to 31.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxDay.SelectAll();
@@ -200,7 +204,7 @@ namespace ASCOM.Starbook
                 return false;
             }
 
-            if (!int.TryParse(textBoxHour.Text, out hour) || hour < 0 || 23 < hour)
+            if (!int.TryParse(textBoxHour.Text, out int hour) || hour < 0 || 23 < hour)
             {
                 MessageBox.Show(this, "Hour of time should be ranged from 0 to 23.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxHour.SelectAll();
@@ -208,7 +212,7 @@ namespace ASCOM.Starbook
                 return false;
             }
 
-            if (!int.TryParse(textBoxMinute.Text, out minute) || minute < 0 || 59 < minute)
+            if (!int.TryParse(textBoxMinute.Text, out int minute) || minute < 0 || 59 < minute)
             {
                 MessageBox.Show(this, "Minute of time should be ranged from 0 to 59.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxMinute.SelectAll();
@@ -216,7 +220,7 @@ namespace ASCOM.Starbook
                 return false;
             }
 
-            if (!int.TryParse(textBoxSecond.Text, out second) || second < 0 || 59 < second)
+            if (!int.TryParse(textBoxSecond.Text, out int second) || second < 0 || 59 < second)
             {
                 MessageBox.Show(this, "Second of time should be ranged from 0 to 59.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxSecond.SelectAll();
@@ -258,7 +262,10 @@ namespace ASCOM.Starbook
 
             IPAddress ipAddress = Telescope.starbook.IPAddress; Telescope.starbook.IPAddress = ipAddressCheck;
 
-            Telescope.Starbook.Status status = Telescope.starbook.GetStatus();
+            if (Telescope.starbook.GetStatus(out Telescope.Starbook.Status status) != Telescope.Starbook.Response.OK)
+            {
+                status = new Telescope.Starbook.Status();
+            }
 
             bool connected = false, initializing = false;
 
@@ -294,8 +301,15 @@ namespace ASCOM.Starbook
                     initializing = true;
                 }
 
-                Telescope.Starbook.Place place = Telescope.starbook.GetPlace();
-                DateTime dateTime = Telescope.starbook.GetTime();
+                if (Telescope.starbook.GetPlace(out Telescope.Starbook.Place place) != Telescope.Starbook.Response.OK)
+                {
+                    place = new Telescope.Starbook.Place();
+                }
+
+                if (Telescope.starbook.GetTime(out DateTime dateTime) != Telescope.Starbook.Response.OK)
+                {
+                    dateTime = DateTime.MinValue;
+                }
 
                 textBoxLatitudeDegree.Text = place.Latitude.Degree.ToString();
                 textBoxLatitudeMinute.Text = place.Latitude.Minute.ToString();
@@ -335,29 +349,45 @@ namespace ASCOM.Starbook
 
             // Location & Timezone
 
-            textBoxLatitudeDegree.ReadOnly = true;
-            textBoxLatitudeMinute.ReadOnly = true;
-            comboBoxLatitudeDirection.Enabled = false;
+            textBoxLatitudeDegree.ReadOnly = !checkBoxSetLocation.Checked;
+            textBoxLatitudeMinute.ReadOnly = !checkBoxSetLocation.Checked;
 
-            textBoxLongitudeDegree.ReadOnly = true;
-            textBoxLongitudeMinute.ReadOnly = true;
-            comboBoxLongitudeDirection.Enabled = false;
+            textBoxLatitudeDegree.Enabled = connected && initializing;
+            textBoxLatitudeMinute.Enabled = connected && initializing;
+            comboBoxLatitudeDirection.Enabled = connected && initializing && checkBoxSetLocation.Checked;
 
-            textBoxTimezone.ReadOnly = true;
+            textBoxLongitudeDegree.ReadOnly = !checkBoxSetLocation.Checked;
+            textBoxLongitudeMinute.ReadOnly = !checkBoxSetLocation.Checked;
+
+            textBoxLongitudeDegree.Enabled = connected && initializing;
+            textBoxLongitudeMinute.Enabled = connected && initializing;
+            comboBoxLongitudeDirection.Enabled = connected && initializing && checkBoxSetLocation.Checked;
+
+            textBoxTimezone.ReadOnly = !checkBoxSetLocation.Checked;
+            textBoxTimezone.Enabled = connected && initializing;
 
             checkBoxSetLocation.Enabled = connected && initializing;
 
             // Date & Time
 
-            textBoxYear.ReadOnly = true;
-            textBoxMonth.ReadOnly = true;
-            textBoxDay.ReadOnly = true;
+            textBoxYear.ReadOnly = !checkBoxSetDateTime.Checked;
+            textBoxMonth.ReadOnly = !checkBoxSetDateTime.Checked;
+            textBoxDay.ReadOnly = !checkBoxSetDateTime.Checked;
 
-            textBoxHour.ReadOnly = true;
-            textBoxMinute.ReadOnly = true;
-            textBoxSecond.ReadOnly = true;
+            textBoxHour.ReadOnly = !checkBoxSetDateTime.Checked;
+            textBoxMinute.ReadOnly = !checkBoxSetDateTime.Checked;
+            textBoxSecond.ReadOnly = !checkBoxSetDateTime.Checked;
+
+            textBoxYear.Enabled = connected && initializing;
+            textBoxMonth.Enabled = connected && initializing;
+            textBoxDay.Enabled = connected && initializing;
+
+            textBoxHour.Enabled = connected && initializing;
+            textBoxMinute.Enabled = connected && initializing;
+            textBoxSecond.Enabled = connected && initializing;
 
             checkBoxSetDateTime.Enabled = connected && initializing;
+            checkBoxSyncSystemTime.Enabled = connected && initializing && checkBoxSetDateTime.Checked;
 
             // Pulse Guide
 
