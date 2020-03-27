@@ -391,6 +391,28 @@ namespace ASCOM.Starbook
 
             // Pulse Guide
 
+            comboBoxGuideRate.Enabled = connected && checkBoxSetGuideRate.Checked;
+
+            textBoxGuideRate0.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate1.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate2.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate3.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate4.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate5.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate6.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate7.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate8.ReadOnly = !checkBoxSetGuideRate.Checked;
+
+            textBoxGuideRate0.Enabled = connected;
+            textBoxGuideRate1.Enabled = connected;
+            textBoxGuideRate2.Enabled = connected;
+            textBoxGuideRate3.Enabled = connected;
+            textBoxGuideRate4.Enabled = connected;
+            textBoxGuideRate5.Enabled = connected;
+            textBoxGuideRate6.Enabled = connected;
+            textBoxGuideRate7.Enabled = connected;
+            textBoxGuideRate8.Enabled = connected;
+
             checkBoxSetGuideRate.Enabled = connected;
 
             Telescope.starbook.IPAddress = ipAddress;
@@ -464,17 +486,20 @@ namespace ASCOM.Starbook
                 }
             }
 
-            Telescope.guideRate = comboBoxGuideRate.SelectedIndex;
+            if (checkBoxSetGuideRate.Enabled && checkBoxSetGuideRate.Checked)
+            {
+                Telescope.guideRate = comboBoxGuideRate.SelectedIndex;
 
-            if (!CheckComponentGuideRate(textBoxGuideRate0, 0, out Telescope.guideRates[0])) { this.DialogResult = DialogResult.None; return; }
-            if (!CheckComponentGuideRate(textBoxGuideRate1, 1, out Telescope.guideRates[1])) { this.DialogResult = DialogResult.None; return; }
-            if (!CheckComponentGuideRate(textBoxGuideRate2, 2, out Telescope.guideRates[2])) { this.DialogResult = DialogResult.None; return; }
-            if (!CheckComponentGuideRate(textBoxGuideRate3, 3, out Telescope.guideRates[3])) { this.DialogResult = DialogResult.None; return; }
-            if (!CheckComponentGuideRate(textBoxGuideRate4, 4, out Telescope.guideRates[4])) { this.DialogResult = DialogResult.None; return; }
-            if (!CheckComponentGuideRate(textBoxGuideRate5, 5, out Telescope.guideRates[5])) { this.DialogResult = DialogResult.None; return; }
-            if (!CheckComponentGuideRate(textBoxGuideRate6, 6, out Telescope.guideRates[6])) { this.DialogResult = DialogResult.None; return; }
-            if (!CheckComponentGuideRate(textBoxGuideRate7, 7, out Telescope.guideRates[7])) { this.DialogResult = DialogResult.None; return; }
-            if (!CheckComponentGuideRate(textBoxGuideRate8, 8, out Telescope.guideRates[8])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate0, 0, out Telescope.guideRates[0])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate1, 1, out Telescope.guideRates[1])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate2, 2, out Telescope.guideRates[2])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate3, 3, out Telescope.guideRates[3])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate4, 4, out Telescope.guideRates[4])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate5, 5, out Telescope.guideRates[5])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate6, 6, out Telescope.guideRates[6])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate7, 7, out Telescope.guideRates[7])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate8, 8, out Telescope.guideRates[8])) { this.DialogResult = DialogResult.None; return; }
+            }
 
             Telescope.traceLogger.Enabled = chkTraceLogger.Checked;
         }
@@ -513,6 +538,21 @@ namespace ASCOM.Starbook
         private void checkBoxSyncSystemTime_CheckedChanged(object sender, EventArgs e)
         {
             
+        }
+
+        private void checkBoxSetGuideRate_CheckedChanged(object sender, EventArgs e)
+        {
+            comboBoxGuideRate.Enabled = checkBoxSetGuideRate.Checked;
+
+            textBoxGuideRate0.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate1.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate2.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate3.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate4.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate5.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate6.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate7.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate8.ReadOnly = !checkBoxSetGuideRate.Checked;
         }
 
         private void timer_Tick(object sender, EventArgs e)

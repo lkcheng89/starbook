@@ -515,6 +515,7 @@
             // 
             // textBoxMinute
             // 
+            this.textBoxMinute.Enabled = false;
             this.textBoxMinute.Location = new System.Drawing.Point(204, 72);
             this.textBoxMinute.Name = "textBoxMinute";
             this.textBoxMinute.ReadOnly = true;
@@ -524,6 +525,7 @@
             // 
             // textBoxMonth
             // 
+            this.textBoxMonth.Enabled = false;
             this.textBoxMonth.Location = new System.Drawing.Point(204, 37);
             this.textBoxMonth.Name = "textBoxMonth";
             this.textBoxMonth.ReadOnly = true;
@@ -533,6 +535,7 @@
             // 
             // textBoxSecond
             // 
+            this.textBoxSecond.Enabled = false;
             this.textBoxSecond.Location = new System.Drawing.Point(271, 72);
             this.textBoxSecond.Name = "textBoxSecond";
             this.textBoxSecond.ReadOnly = true;
@@ -542,6 +545,7 @@
             // 
             // textBoxHour
             // 
+            this.textBoxHour.Enabled = false;
             this.textBoxHour.Location = new System.Drawing.Point(138, 72);
             this.textBoxHour.Name = "textBoxHour";
             this.textBoxHour.ReadOnly = true;
@@ -551,6 +555,7 @@
             // 
             // textBoxDay
             // 
+            this.textBoxDay.Enabled = false;
             this.textBoxDay.Location = new System.Drawing.Point(271, 37);
             this.textBoxDay.Name = "textBoxDay";
             this.textBoxDay.ReadOnly = true;
@@ -570,6 +575,7 @@
             // 
             // textBoxYear
             // 
+            this.textBoxYear.Enabled = false;
             this.textBoxYear.Location = new System.Drawing.Point(138, 37);
             this.textBoxYear.Name = "textBoxYear";
             this.textBoxYear.ReadOnly = true;
@@ -723,8 +729,6 @@
             // checkBoxSetGuideRate
             // 
             this.checkBoxSetGuideRate.AutoSize = true;
-            this.checkBoxSetGuideRate.Checked = true;
-            this.checkBoxSetGuideRate.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBoxSetGuideRate.Enabled = false;
             this.checkBoxSetGuideRate.Location = new System.Drawing.Point(464, 112);
             this.checkBoxSetGuideRate.Name = "checkBoxSetGuideRate";
@@ -732,8 +736,7 @@
             this.checkBoxSetGuideRate.TabIndex = 58;
             this.checkBoxSetGuideRate.Text = "Set Guide Rate";
             this.checkBoxSetGuideRate.UseVisualStyleBackColor = true;
-            this.checkBoxSetGuideRate.Visible = false;
-            this.checkBoxSetGuideRate.CheckedChanged += new System.EventHandler(this.checkBoxSetDateTime_CheckedChanged);
+            this.checkBoxSetGuideRate.CheckedChanged += new System.EventHandler(this.checkBoxSetGuideRate_CheckedChanged);
             // 
             // labelGuideRateX
             // 
@@ -767,64 +770,80 @@
             // 
             // textBoxGuideRate1
             // 
+            this.textBoxGuideRate1.Enabled = false;
             this.textBoxGuideRate1.Location = new System.Drawing.Point(192, 72);
             this.textBoxGuideRate1.Name = "textBoxGuideRate1";
+            this.textBoxGuideRate1.ReadOnly = true;
             this.textBoxGuideRate1.Size = new System.Drawing.Size(48, 29);
             this.textBoxGuideRate1.TabIndex = 48;
             this.textBoxGuideRate1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate8
             // 
+            this.textBoxGuideRate8.Enabled = false;
             this.textBoxGuideRate8.Location = new System.Drawing.Point(570, 72);
             this.textBoxGuideRate8.Name = "textBoxGuideRate8";
+            this.textBoxGuideRate8.ReadOnly = true;
             this.textBoxGuideRate8.Size = new System.Drawing.Size(48, 29);
             this.textBoxGuideRate8.TabIndex = 55;
             this.textBoxGuideRate8.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate7
             // 
+            this.textBoxGuideRate7.Enabled = false;
             this.textBoxGuideRate7.Location = new System.Drawing.Point(516, 72);
             this.textBoxGuideRate7.Name = "textBoxGuideRate7";
+            this.textBoxGuideRate7.ReadOnly = true;
             this.textBoxGuideRate7.Size = new System.Drawing.Size(48, 29);
             this.textBoxGuideRate7.TabIndex = 54;
             this.textBoxGuideRate7.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate6
             // 
+            this.textBoxGuideRate6.Enabled = false;
             this.textBoxGuideRate6.Location = new System.Drawing.Point(462, 72);
             this.textBoxGuideRate6.Name = "textBoxGuideRate6";
+            this.textBoxGuideRate6.ReadOnly = true;
             this.textBoxGuideRate6.Size = new System.Drawing.Size(48, 29);
             this.textBoxGuideRate6.TabIndex = 53;
             this.textBoxGuideRate6.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate5
             // 
+            this.textBoxGuideRate5.Enabled = false;
             this.textBoxGuideRate5.Location = new System.Drawing.Point(408, 72);
             this.textBoxGuideRate5.Name = "textBoxGuideRate5";
+            this.textBoxGuideRate5.ReadOnly = true;
             this.textBoxGuideRate5.Size = new System.Drawing.Size(48, 29);
             this.textBoxGuideRate5.TabIndex = 52;
             this.textBoxGuideRate5.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate4
             // 
+            this.textBoxGuideRate4.Enabled = false;
             this.textBoxGuideRate4.Location = new System.Drawing.Point(354, 72);
             this.textBoxGuideRate4.Name = "textBoxGuideRate4";
+            this.textBoxGuideRate4.ReadOnly = true;
             this.textBoxGuideRate4.Size = new System.Drawing.Size(48, 29);
             this.textBoxGuideRate4.TabIndex = 51;
             this.textBoxGuideRate4.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate3
             // 
+            this.textBoxGuideRate3.Enabled = false;
             this.textBoxGuideRate3.Location = new System.Drawing.Point(300, 72);
             this.textBoxGuideRate3.Name = "textBoxGuideRate3";
+            this.textBoxGuideRate3.ReadOnly = true;
             this.textBoxGuideRate3.Size = new System.Drawing.Size(48, 29);
             this.textBoxGuideRate3.TabIndex = 50;
             this.textBoxGuideRate3.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate2
             // 
+            this.textBoxGuideRate2.Enabled = false;
             this.textBoxGuideRate2.Location = new System.Drawing.Point(246, 72);
             this.textBoxGuideRate2.Name = "textBoxGuideRate2";
+            this.textBoxGuideRate2.ReadOnly = true;
             this.textBoxGuideRate2.Size = new System.Drawing.Size(48, 29);
             this.textBoxGuideRate2.TabIndex = 49;
             this.textBoxGuideRate2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -832,6 +851,7 @@
             // comboBoxGuideRate
             // 
             this.comboBoxGuideRate.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxGuideRate.Enabled = false;
             this.comboBoxGuideRate.FormattingEnabled = true;
             this.comboBoxGuideRate.Items.AddRange(new object[] {
             "0",
@@ -850,8 +870,10 @@
             // 
             // textBoxGuideRate0
             // 
+            this.textBoxGuideRate0.Enabled = false;
             this.textBoxGuideRate0.Location = new System.Drawing.Point(138, 72);
             this.textBoxGuideRate0.Name = "textBoxGuideRate0";
+            this.textBoxGuideRate0.ReadOnly = true;
             this.textBoxGuideRate0.Size = new System.Drawing.Size(48, 29);
             this.textBoxGuideRate0.TabIndex = 47;
             this.textBoxGuideRate0.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
