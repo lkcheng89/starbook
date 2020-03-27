@@ -53,11 +53,9 @@ namespace ASCOM.Starbook
             {
                 get
                 {
-                    string version;
-
                     Dictionary<string, string> dictionary = this.HandshakeDictionary("VERSION");
 
-                    if (!dictionary.TryGetValue("VERSION", out version))
+                    if (!dictionary.TryGetValue("VERSION", out string version))
                     {
                         version = string.Empty;
                     }
@@ -690,7 +688,7 @@ namespace ASCOM.Starbook
                 {
                     hms = new HMS();
 
-                    if (value < 0 || 24 <= value)
+                    if (double.IsNaN(value) || value < 0 || 24 <= value)
                     {
                         return false;
                     }
@@ -767,7 +765,7 @@ namespace ASCOM.Starbook
                         maxValue =  180;
                     }
 
-                    if (value < minValue || maxValue < value)
+                    if (double.IsNaN(value) || value < minValue || maxValue < value)
                     {
                         return false;
                     }
@@ -841,7 +839,7 @@ namespace ASCOM.Starbook
 
                     dms.Degree = degree;
                     dms.Minute = (int)Math.Floor(minute);
-                    dms.Second = (value - dms.Minute) * 60;
+                    dms.Second = (minute - dms.Minute) * 60;
 
                     return true;
                 }
