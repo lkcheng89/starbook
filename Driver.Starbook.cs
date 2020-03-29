@@ -107,7 +107,8 @@ namespace ASCOM.Starbook
                         }
                         case "STATE":
                         {
-                            if (this.TryParseState(item.Value, out State state))
+                            State state = this.ParseState(item.Value);
+                            if (state != State.Unknown)
                             {
                                 status.State = state; statusState = true;
                             }
@@ -330,41 +331,53 @@ namespace ASCOM.Starbook
             /// <summary>
             /// Get granularity of encoded value of the mount.
             /// </summary>
-            /// <returns>Granularity of encoded value</returns>
+            /// <param name="round">Granularity of encoded value</param>
+            /// <returns>Response string: OK or ERROR:%</returns>
             /// 
-            public int GetRound()
+            public Response GetRound(out int round)
             {
-                int round;
-
                 if (!int.TryParse(this.HandshakeString("GETROUND"), out round))
                 {
-                    round = 0;
+                    return Response.ErrorUnknown;
                 }
 
-                return round;
+                return Response.OK;
             }
 
             /// <summary>
             /// Get encoded value of X/Y coordinate of the mount.
             /// </summary>
-            /// <returns>Encoded value of X/Y coordinate</returns>
+            /// <param name="xy">Encoded value of X/Y coordinate</param>
+            /// <returns>Response string: OK or ERROR:%</returns>
             /// 
-            public XY GetXY()
+            public Response GetXY(out XY xy)
             {
-                XY xy = new XY();
+                xy = new XY(); bool xyX = false, xyY = false;
 
                 foreach (KeyValuePair<string, string> item in this.HandshakeDictionary("GETXY"))
                 {
                     switch (item.Key)
                     {
                         case "X":
-                            xy.X = int.Parse(item.Value); break;
+                        {
+                            if (int.TryParse(item.Value, out int x))
+                            {
+                                xy.X = x; xyX = true;
+                            }
+                            break;
+                        }
                         case "Y":
-                            xy.Y = int.Parse(item.Value); break;
+                        {
+                            if (int.TryParse(item.Value, out int y))
+                            {
+                                xy.Y = y; xyY = true;
+                            }
+                            break;
+                        }
                     }
                 }
 
-                return xy;
+                return (xyX && xyY) ? Response.OK : Response.ErrorUnknown;
             }
 
             /// <summary>
@@ -633,22 +646,22 @@ namespace ASCOM.Starbook
                 }
             }
 
-            private bool TryParseState(string s, out State state)
+            private State ParseState(string state)
             {
-                switch (s)
+                switch (state)
                 {
                     case "INIT":
-                        state = State.Init; return true;
+                        return State.Init;
                     case "GUIDE":
-                        state = State.Guide; return true;
+                        return State.Guide;
                     case "SCOPE":
-                        state = State.Scope; return true;
+                        return State.Scope;
                     case "CHART":
-                        state = State.Chart; return true;
+                        return State.Chart;
                     case "USER":
-                        state = State.User; return true;
+                        return State.User;
                     default:
-                        state = State.Unknown; return false;
+                        return State.Unknown;
                 }
             }
 

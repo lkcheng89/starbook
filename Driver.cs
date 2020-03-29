@@ -389,8 +389,21 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("AtHome_get", false.ToString());
-                return false;
+                Starbook.Response response = starbook.GetXY(out Starbook.XY xy);
+
+                if (response == Starbook.Response.OK)
+                {
+                    LogMessage("AtHome_get", "Starbook.GetXY() = {0}, {1} {2}", response, xy.X, xy.Y);
+                }
+                else
+                {
+                    LogMessage("AtHome_get", "Starbook.GetXY() = {0}", response);
+                    throw new ASCOM.InvalidOperationException("AtHome_get: XY is not available.");
+                }
+
+                bool atHome = xy.X == 0 && xy.Y == 0;
+                LogMessage("AtHome_get", atHome.ToString());
+                return atHome;
             }
         }
 
