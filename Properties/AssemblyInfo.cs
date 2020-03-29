@@ -8,11 +8,11 @@ using System.Runtime.InteropServices;
 //
 // TODO - Add your authorship information here
 [assembly: AssemblyTitle("ASCOM.Starbook.Telescope")]
-[assembly: AssemblyDescription("ASCOM Telescope driver for Starbook")]
+[assembly: AssemblyDescription("ASCOM Telescope Driver for Starbook")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("The ASCOM Initiative")]
-[assembly: AssemblyProduct("ASCOM Telescope driver for Starbook")]
-[assembly: AssemblyCopyright("Copyright © 2019 The ASCOM Initiative")]
+[assembly: AssemblyCompany("Lung-Kai Cheng")]
+[assembly: AssemblyProduct("ASCOM Telescope Driver for Starbook")]
+[assembly: AssemblyCopyright("Copyright © 2020 Lung-Kai Cheng")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -35,5 +35,5 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 //
 // TODO - Set your driver's version here
-[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyVersion("0.3.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]

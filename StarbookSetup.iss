@@ -5,8 +5,8 @@
 [Setup]
 AppID={{6ca208b7-9809-44c8-a717-486a889f1186}
 AppName=Starbook Driver
-AppVerName=Starbook Driver v0.2
-AppVersion=0.2
+AppVerName=Starbook Driver v0.3
+AppVersion=0.3
 AppPublisher=Lung-Kai Cheng <lkcheng89@gmail.com>
 AppPublisherURL=mailto:lkcheng89@gmail.com
 AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/
