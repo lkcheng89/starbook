@@ -117,10 +117,12 @@ namespace ASCOM.Starbook
 
         private double parkAzimuth;
         private double parkElevation;
+        private bool parking;
 
         private Starbook.Place placeCache;
         private bool placeCached;
 
+        private bool movingAxis;
         private bool pulseGuiding;
 
         private double targetDeclination;
@@ -147,11 +149,13 @@ namespace ASCOM.Starbook
 
             //TODO: Implement your additional construction here
 
-            parkAzimuth = double.NaN;
-            parkElevation = double.NaN;
+            parkAzimuth = 270;
+            parkElevation = 0;
+            parking = false;
 
             placeCached = false;
 
+            movingAxis = false;
             pulseGuiding = false;
 
             targetRightAscension = double.NaN;
@@ -344,6 +348,12 @@ namespace ASCOM.Starbook
         #region ITelescope Implementation
         public void AbortSlew()
         {
+            if (this.parking)
+            {
+                LogMessage("AbortSlew", "");
+                throw new ASCOM.InvalidOperationException("AbortSlew: AtPark is detected, Unpark must be called first.");
+            }
+
             Starbook.Response response = starbook.Stop();
             LogMessage("AbortSlew", "Starbook.Stop() = {0}", response);
         }
@@ -411,8 +421,8 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("AtPark_get", false.ToString());
-                return false;
+                LogMessage("AtPark_get", parking.ToString());
+                return parking;
             }
         }
 
@@ -637,8 +647,8 @@ namespace ASCOM.Starbook
 
         public PierSide DestinationSideOfPier(double RightAscension, double Declination)
         {
-            LogMessage("DestinationSideOfPier_get", "Not implemented");
-            throw new ASCOM.PropertyNotImplementedException("DestinationSideOfPier", false);
+            LogMessage("DestinationSideOfPier", "Not implemented");
+            throw new ASCOM.MethodNotImplementedException("DestinationSideOfPier");
         }
 
         public bool DoesRefraction
@@ -667,6 +677,12 @@ namespace ASCOM.Starbook
 
         public void FindHome()
         {
+            if (this.parking)
+            {
+                LogMessage("FindHome", "");
+                throw new ASCOM.InvalidOperationException("FindHome: AtPark is detected, Unpark must be called first.");
+            }
+
             Starbook.Response response = starbook.Home();
             LogMessage("FindHome", "Starbook.Home() = {0}", response);
         }
@@ -687,14 +703,12 @@ namespace ASCOM.Starbook
 
         public static int GuideRate(double guideRate)
         {
-            guideRate /= (15.041 / 3600);
-
             double guideRateDifference = double.MaxValue;
             int guideRateIndex = 0;
 
             for (int index = 0; index <= 8; index++)
             {
-                double difference = Math.Abs(guideRate - guideRates[index]);
+                double difference = Math.Abs(guideRate - GuideRate(index));
 
                 if (guideRateDifference > difference)
                 {
@@ -752,31 +766,65 @@ namespace ASCOM.Starbook
             switch (Axis)
             {
                 case TelescopeAxes.axisPrimary:
-                {
-                    if (Rate == 0)
-                    {
-                        starbook.NoMove();
-                        starbook.SetSpeed(guideRate);
-                    }
-                    else
-                    {
-                        starbook.SetSpeed(GuideRate(Math.Abs(Rate)));
-                        starbook.Move(Rate > 0 ? Starbook.Direction.East : Starbook.Direction.West);
-                    }
-                    break;
-                }
                 case TelescopeAxes.axisSecondary:
                 {
+                    if (this.parking)
+                    {
+                        throw new ASCOM.InvalidOperationException("MoveAxis: AtPark is detected, Unpark must be called first.");
+                    }
+
                     if (Rate == 0)
                     {
-                        starbook.NoMove();
-                        starbook.SetSpeed(guideRate);
+                        Starbook.Response response = starbook.NoMove();
+
+                        if (response != Starbook.Response.OK)
+                        {
+                            throw new ASCOM.InvalidOperationException("MoveAxis: Starbook.NoMove is not working.");
+                        }
+
+                        movingAxis = false;
+
+                        response = starbook.SetSpeed(guideRate);
+
+                        if (response != Starbook.Response.OK)
+                        {
+                            throw new ASCOM.InvalidOperationException("MoveAxis: Starbook.SetSpeed is not working.");
+                        }
                     }
                     else
                     {
-                        starbook.SetSpeed(GuideRate(Math.Abs(Rate)));
-                        starbook.Move(Rate > 0 ? Starbook.Direction.North : Starbook.Direction.South);
+                        double minRate = GuideRate(0);
+                        double maxRate = GuideRate(8);
+
+                        if (Math.Abs(Rate) < minRate || maxRate < Math.Abs(Rate))
+                        {
+                            throw new ASCOM.InvalidValueException("MoveAxis", "Rate", string.Format("{0} to {1} or {2} to {3}", minRate, maxRate, -maxRate, -minRate));
+                        }
+
+                        Starbook.Response response = starbook.SetSpeed(GuideRate(Math.Abs(Rate)));
+
+                        if (response != Starbook.Response.OK)
+                        {
+                            throw new ASCOM.InvalidOperationException("MoveAxis: Starbook.SetSpeed is not working.");
+                        }
+
+                        if (Axis == TelescopeAxes.axisPrimary)
+                        {
+                            response = starbook.Move(Rate > 0 ? Starbook.Direction.East : Starbook.Direction.West);
+                        }
+                        else/* if (Axis == TelescopeAxes.axisSecondary)*/
+                        {
+                            response = starbook.Move(Rate > 0 ? Starbook.Direction.North : Starbook.Direction.South);
+                        }
+
+                        if (response != Starbook.Response.OK)
+                        {
+                            throw new ASCOM.InvalidOperationException("MoveAxis: Starbook.Move is not working.");
+                        }
+
+                        movingAxis = true;
                     }
+
                     break;
                 }
                 case TelescopeAxes.axisTertiary:
@@ -789,11 +837,6 @@ namespace ASCOM.Starbook
         public void Park()
         {
             LogMessage("Park", "{0} {1}", parkAzimuth, parkElevation);
-
-            if (double.IsNaN(parkAzimuth) || double.IsNaN(parkElevation))
-            {
-                throw new ASCOM.InvalidOperationException("Park: SetPark must be called first.");
-            }
 
             Starbook.Response response;
 
@@ -844,15 +887,22 @@ namespace ASCOM.Starbook
             response = starbook.Goto(rightAscension, declination);
             LogMessage("Park", "Starbook.Goto({0}, {1}) = {2}", rightAscension, declination, response);
 
-            if (response == Starbook.Response.OK)
+            if (response != Starbook.Response.OK)
             {
                 throw new ASCOM.InvalidOperationException("Park: Goto is not working.");
             }
+
+            parking = true;
         }
 
         public void PulseGuide(GuideDirections Direction, int Duration)
         {
             LogMessage("PulseGuide", "{0} {1}", Direction, Duration);
+
+            if (this.parking)
+            {
+                throw new ASCOM.InvalidOperationException("PulseGuide: AtPark is detected, Unpark must be called first.");
+            }
 
             Starbook.Direction direction;
 
@@ -1186,6 +1236,12 @@ namespace ASCOM.Starbook
             set
             {
                 LogMessage("SlewSettleTime_set", value.ToString());
+
+                if (value < 0)
+                {
+                    throw new ASCOM.InvalidValueException("SlewSettleTime_set", "SlewSettleTime", "0 to 32767");
+                }
+
                 slewSettleTime = value;
             }
         }
@@ -1205,6 +1261,11 @@ namespace ASCOM.Starbook
         public void SlewToCoordinates(double RightAscension, double Declination)
         {
             LogMessage("SlewToCoordinates", "{0} {1}", RightAscension, Declination);
+
+            if (this.parking)
+            {
+                throw new ASCOM.InvalidOperationException("SlewToCoordinates: AtPark is detected, Unpark must be called first.");
+            }
 
             if (Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension))
             {
@@ -1264,6 +1325,11 @@ namespace ASCOM.Starbook
         {
             LogMessage("SlewToCoordinatesAsync", "{0} {1}", RightAscension, Declination);
 
+            if (this.parking)
+            {
+                throw new ASCOM.InvalidOperationException("SlewToCoordinatesAsync: AtPark is detected, Unpark must be called first.");
+            }
+
             if (Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension))
             {
                 targetRightAscension = RightAscension;
@@ -1290,14 +1356,19 @@ namespace ASCOM.Starbook
         {
             LogMessage("SlewToTarget", "{0} {1}", targetRightAscension, targetRightAscension);
 
+            if (this.parking)
+            {
+                throw new ASCOM.InvalidOperationException("SlewToTarget: AtPark is detected, Unpark must be called first.");
+            }
+
             if (!Starbook.HMS.FromValue(targetRightAscension, out Starbook.HMS rightAscension))
             {
-                throw new ASCOM.InvalidValueException("SlewToTarget: Target RightAscension is not set correctly.");
+                throw new ASCOM.InvalidValueException("SlewToTarget", "TargetRightAscension",  "0 to 24");
             }
 
             if (!Starbook.DMS.FromValue(targetDeclination, out Starbook.DMS declination))
             {
-                throw new ASCOM.InvalidValueException("SlewToTarget: Target Declination is not set correctly.");
+                throw new ASCOM.InvalidValueException("SlewToTarget", "TargetDeclination", "-90 to 90");
             }
 
             Starbook.Response response = starbook.Goto(rightAscension, declination);
@@ -1340,14 +1411,19 @@ namespace ASCOM.Starbook
         {
             LogMessage("SlewToTargetAsync", "{0} {1}", targetRightAscension, targetRightAscension);
 
+            if (this.parking)
+            {
+                throw new ASCOM.InvalidOperationException("SlewToTargetAsync: AtPark is detected, Unpark must be called first.");
+            }
+
             if (!Starbook.HMS.FromValue(targetRightAscension, out Starbook.HMS rightAscension))
             {
-                throw new ASCOM.InvalidOperationException("SlewToTargetAsync: Target RightAscension is not set correctly.");
+                throw new ASCOM.InvalidValueException("SlewToTargetAsync", "TargetRightAscension", "0 to 24");
             }
 
             if (!Starbook.DMS.FromValue(targetDeclination, out Starbook.DMS declination))
             {
-                throw new ASCOM.InvalidOperationException("SlewToTargetAsync: Target Declination is not set correctly.");
+                throw new ASCOM.InvalidValueException("SlewToTargetAsync", "TargetDeclination", "-90 to 90");
             }
 
             Starbook.Response response = starbook.Goto(rightAscension, declination);
@@ -1358,21 +1434,27 @@ namespace ASCOM.Starbook
         {
             get
             {
-                Starbook.Response response = starbook.GetStatus(out Telescope.Starbook.Status status);
+                bool slewing = this.movingAxis;
 
-                if (response == Starbook.Response.OK)
+                if (!slewing)
                 {
-                    LogMessage("Slewing_get", "Starbook.GetStatus() = {0}, {1} {2} {3} {4}", response, status.RA, status.Dec, status.State, status.Goto);
-                }
-                else
-                {
-                    LogMessage("Slewing_get", "Starbook.GetStatus() = {0}", response);
-                    throw new ASCOM.InvalidOperationException("Slewing_get: Status is not available.");
+                    Starbook.Response response = starbook.GetStatus(out Telescope.Starbook.Status status);
+
+                    if (response == Starbook.Response.OK)
+                    {
+                        LogMessage("Slewing_get", "Starbook.GetStatus() = {0}, {1} {2} {3} {4}", response, status.RA, status.Dec, status.State, status.Goto);
+                    }
+                    else
+                    {
+                        LogMessage("Slewing_get", "Starbook.GetStatus() = {0}", response);
+                        throw new ASCOM.InvalidOperationException("Slewing_get: Status is not available.");
+                    }
+
+                    slewing = status.Goto;
                 }
 
-                bool qoto = status.Goto;
-                LogMessage("Slewing_get", qoto.ToString());
-                return qoto;
+                LogMessage("Slewing_get", slewing.ToString());
+                return slewing;
             }
         }
 
@@ -1385,6 +1467,11 @@ namespace ASCOM.Starbook
         public void SyncToCoordinates(double RightAscension, double Declination)
         {
             LogMessage("SyncToCoordinates", "{0} {1}", RightAscension, Declination);
+
+            if (this.parking)
+            {
+                throw new ASCOM.InvalidOperationException("SyncToCoordinates: AtPark is detected, Unpark must be called first.");
+            }
 
             if (Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension))
             {
@@ -1412,14 +1499,19 @@ namespace ASCOM.Starbook
         {
             LogMessage("SyncToTarget", "{0} {1}", targetRightAscension, targetRightAscension);
 
+            if (this.parking)
+            {
+                throw new ASCOM.InvalidOperationException("SyncToTarget: AtPark is detected, Unpark must be called first.");
+            }
+
             if (!Starbook.HMS.FromValue(targetRightAscension, out Starbook.HMS rightAscension))
             {
-                throw new ASCOM.InvalidOperationException("SyncToTarget: Target RightAscension is not set correctly.");
+                throw new ASCOM.InvalidValueException("SyncToTarget", "TargetRightAscension", "0 to 24");
             }
 
             if (!Starbook.DMS.FromValue(targetDeclination, out Starbook.DMS declination))
             {
-                throw new ASCOM.InvalidOperationException("SyncToTarget: Target Declination is not set correctly.");
+                throw new ASCOM.InvalidValueException("SyncToTarget", "TargetDeclination", "-90 to 90");
             }
 
             Starbook.Response response = starbook.Align(rightAscension, declination);
@@ -1430,12 +1522,23 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("TargetDeclination_get", double.IsNaN(targetDeclination) ? "NaN" : targetDeclination.ToString());
+                if (double.IsNaN(targetDeclination))
+                {
+                    throw new ASCOM.InvalidOperationException("TargetDeclination_get: TargetDeclination is not set yet.");
+                }
+
+                LogMessage("TargetDeclination_get", targetDeclination.ToString());
                 return targetDeclination;
             }
             set
             {
                 LogMessage("TargetDeclination_set", value.ToString());
+
+                if (value < -90 || 90 < value)
+                {
+                    throw new ASCOM.InvalidValueException("TargetDeclination_set", "TargetDeclination", "-90 to 90");
+                }
+
                 targetDeclination = value;
             }
         }
@@ -1444,12 +1547,23 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("TargetRightAscension_get", double.IsNaN(targetRightAscension) ? "NaN" : targetRightAscension.ToString());
+                if (double.IsNaN(targetRightAscension))
+                {
+                    throw new ASCOM.InvalidOperationException("TargetRightAscension_get: TargetRightAscension is not set yet.");
+                }
+
+                LogMessage("TargetRightAscension_get", targetRightAscension.ToString());
                 return targetRightAscension;
             }
             set
             {
                 LogMessage("TargetRightAscension_set", value.ToString());
+
+                if (value < 0 || 24 < value)
+                {
+                    throw new ASCOM.InvalidValueException("TargetRightAscension_set", "TargetRightAscension", "0 to 24");
+                }
+
                 targetRightAscension = value;
             }
         }
@@ -1593,6 +1707,7 @@ namespace ASCOM.Starbook
         public void Unpark()
         {
             LogMessage("Unpark", "");
+            parking = false;
         }
 
         #endregion

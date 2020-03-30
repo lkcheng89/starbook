@@ -701,7 +701,7 @@ namespace ASCOM.Starbook
                 {
                     hms = new HMS();
 
-                    if (double.IsNaN(value) || value < 0 || 24 <= value)
+                    if (double.IsNaN(value) || value < 0 || 24 < value)
                     {
                         return false;
                     }
