@@ -1637,17 +1637,18 @@ namespace ASCOM.Starbook
                 {
                     Starbook.Response response = starbook.Start();
 
-                    if (response != Starbook.Response.OK)
+                    if (response == Starbook.Response.OK)
                     {
-                        LogMessage("Tracking_set", "InvalidOperationException: Starbook.Start()={0}", response);
-                        throw new ASCOM.InvalidOperationException("Tracking_set: Starbook.Start() is not working.");
+                        LogMessage("Tracking_set", "OK: {0}", value);
                     }
-
-                    LogMessage("Tracking_set", "OK: {0}", value);
+                    else
+                    {
+                        LogMessage("Tracking_set", "FAIL: {0}, Starbook.Start()={0}", value, response);
+                    }
                 }
                 else
                 {
-                    LogMessage("Tracking_set", "FAIL: {0}, Cannot stop tracking.", value);
+                    LogMessage("Tracking_set", "FAIL: {0}", value);
                 }
             }
         }
