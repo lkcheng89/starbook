@@ -124,9 +124,15 @@ namespace ASCOM.Starbook
 
         private bool movingAxis;
         private bool pulseGuiding;
+        private bool tracking;
 
         private double targetDeclination;
         private double targetRightAscension;
+
+        private int poll;
+        private object status;
+        private bool threadRunning;
+        private Thread thread;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Starbook"/> class.
@@ -157,9 +163,15 @@ namespace ASCOM.Starbook
 
             movingAxis = false;
             pulseGuiding = false;
+            tracking = true;
 
             targetRightAscension = double.NaN;
             targetDeclination = double.NaN;
+
+            poll = 100;
+            status = null;
+            thread = null;
+            threadRunning = false;
 
             traceLogger.LogMessage("Telescope", "Completed initialisation");
         }
@@ -180,8 +192,18 @@ namespace ASCOM.Starbook
         {
             // consider only showing the setup dialog if not connected
             // or call a different dialog if connected
-            if (IsConnected)
+
+            bool connected;
+
+            lock (this)
+            {
+                connected = this.connectedState;
+            }
+
+            if (connected)
+            {
                 System.Windows.Forms.MessageBox.Show("Already connected, just press OK");
+            }
 
             using (SetupDialogForm F = new SetupDialogForm())
             {
@@ -250,41 +272,42 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("Connected_get", IsConnected.ToString());
-                return IsConnected;
+                bool connected = IsConnected;
+                LogMessage("Connected_get", connected.ToString());
+                return connected;
             }
             set
             {
                 LogMessage("Connected_set", value.ToString());
 
-                if (value == IsConnected)
+                lock (this)
                 {
-                    return;
+                    connectedState = value; status = null;
+                }
+
+                if (thread != null)
+                {
+                    threadRunning = false;
+
+                    try
+                    {
+                        thread.Join();
+                    }
+                    catch
+                    {
+
+                    }
                 }
 
                 if (value)
                 {
-                    connectedState = true;
-                    LogMessage("Connected_set", "Connecting to {0}", starbook.IPAddress);
-                    // TODO connect to the device
-                    string version = starbook.Version;
-                    if (string.IsNullOrEmpty(version))
-                    {
-                        connectedState = false;
-                    }
-                    else
-                    {
-                        starbook.Start();
-                        starbook.Stop();
-
-                        starbook.SetSpeed(guideRate);
-                    }
+                    threadRunning = true;
+                    thread = new Thread(ThreadEntry);
+                    thread.Start();
                 }
                 else
                 {
-                    connectedState = false;
-                    LogMessage("Connected_set", "Disconnecting from {0}", starbook.IPAddress);
-                    // TODO disconnect from the device
+                    thread = null;
                 }
             }
         }
@@ -348,6 +371,8 @@ namespace ASCOM.Starbook
 
         public void AbortSlew()
         {
+            CheckConnected("AbortSlew");
+
             if (this.parking)
             {
                 LogMessage("AbortSlew", "InvalidOperationException: AtPark");
@@ -406,6 +431,8 @@ namespace ASCOM.Starbook
         {
             get
             {
+                CheckConnected("AtHome");
+
                 Starbook.Response response = starbook.GetXY(out Starbook.XY xy);
 
                 if (response != Starbook.Response.OK)
@@ -426,6 +453,8 @@ namespace ASCOM.Starbook
         {
             get
             {
+                CheckConnected("AtPark_get");
+
                 bool atPark = parking;
                 LogMessage("AtPark_get", atPark.ToString());
                 return atPark;
@@ -630,7 +659,9 @@ namespace ASCOM.Starbook
         {
             get
             {
-                Starbook.Response response = starbook.GetStatus(out Telescope.Starbook.Status status);
+                CheckConnected("Declination_get");
+
+                Starbook.Response response = GetStatus(out Telescope.Starbook.Status status);
 
                 if (response != Starbook.Response.OK)
                 {
@@ -683,6 +714,8 @@ namespace ASCOM.Starbook
         {
             get
             {
+                CheckConnected("EquatorialSystem_get");
+
                 EquatorialCoordinateType equatorialSystem = EquatorialCoordinateType.equJ2000;
                 LogMessage("EquatorialSystem_get", equatorialSystem.ToString());
                 return equatorialSystem;
@@ -691,6 +724,8 @@ namespace ASCOM.Starbook
 
         public void FindHome()
         {
+            CheckConnected("FindHome");
+
             if (this.parking)
             {
                 LogMessage("FindHome", "InvalidOperationException: AtPark");
@@ -719,7 +754,7 @@ namespace ASCOM.Starbook
 
         public static double GuideRate(int guideRate)
         {
-            return guideRates[guideRate] * (15.041 / 3600);
+            return guideRates[guideRate] * (15.04106858 / 3600);
         }
 
         public static int GuideRate(double guideRate)
@@ -751,6 +786,8 @@ namespace ASCOM.Starbook
             }
             set
             {
+                CheckConnected("GuideRateDeclination_set");
+
                 Starbook.Response response = starbook.SetSpeed(Telescope.guideRate = GuideRate(value));
 
                 if (response != Starbook.Response.OK)
@@ -773,6 +810,8 @@ namespace ASCOM.Starbook
             }
             set
             {
+                CheckConnected("GuideRateRightAscension_set");
+
                 Starbook.Response response = starbook.SetSpeed(guideRate = GuideRate(value));
 
                 if (response != Starbook.Response.OK)
@@ -789,6 +828,8 @@ namespace ASCOM.Starbook
         {
             get
             {
+                CheckConnected("IsPulseGuiding_get");
+
                 bool isPulseGuiding = pulseGuiding;
                 LogMessage("IsPulseGuiding_get", isPulseGuiding.ToString());
                 return isPulseGuiding;
@@ -797,6 +838,8 @@ namespace ASCOM.Starbook
 
         public void MoveAxis(TelescopeAxes Axis, double Rate)
         {
+            CheckConnected("MoveAxis");
+
             switch (Axis)
             {
                 case TelescopeAxes.axisPrimary:
@@ -871,6 +914,8 @@ namespace ASCOM.Starbook
                         movingAxis = true;
                     }
 
+                    LogMessage("MoveAxis", "OK: Axis={0},Rate={1}", Axis, Rate);
+
                     break;
                 }
                 case TelescopeAxes.axisTertiary:
@@ -883,6 +928,8 @@ namespace ASCOM.Starbook
 
         public void Park()
         {
+            CheckConnected("Park");
+            
             if (parking)
             {
                 LogMessage("Park", "OK: Skipped");
@@ -945,6 +992,8 @@ namespace ASCOM.Starbook
 
         public void PulseGuide(GuideDirections Direction, int Duration)
         {
+            CheckConnected("PulseGuide");
+
             if (this.parking)
             {
                 LogMessage("PulseGuide", "InvalidOperationException: AtPark");
@@ -1010,7 +1059,9 @@ namespace ASCOM.Starbook
         {
             get
             {
-                Starbook.Response response = starbook.GetStatus(out Starbook.Status status);
+                CheckConnected("RightAscension_get");
+
+                Starbook.Response response = GetStatus(out Starbook.Status status);
 
                 if (response != Starbook.Response.OK)
                 {
@@ -1041,7 +1092,9 @@ namespace ASCOM.Starbook
 
         public void SetPark()
         {
-            Starbook.Response response = starbook.GetStatus(out Starbook.Status status);
+            CheckConnected("SetPark");
+
+            Starbook.Response response = GetStatus(out Starbook.Status status);
 
             if (response != Starbook.Response.OK)
             {
@@ -1140,6 +1193,8 @@ namespace ASCOM.Starbook
         {
             get
             {
+                CheckConnected("SiteLatitude_get");
+
                 if (!placeCached)
                 {
                     Starbook.Response response = starbook.GetPlace(out placeCache);
@@ -1159,6 +1214,8 @@ namespace ASCOM.Starbook
             }
             set
             {
+                CheckConnected("SiteLatitude_set");
+
                 if (!Starbook.DMS.FromValue(value, out Starbook.DMS latitude, Starbook.Direction.North, Starbook.Direction.South))
                 {
                     LogMessage("SiteLatitude_set", "InvalidValueException: {0}", value);
@@ -1202,6 +1259,8 @@ namespace ASCOM.Starbook
         {
             get
             {
+                CheckConnected("SiteLongitude_get");
+
                 if (!placeCached)
                 {
                     Starbook.Response response = starbook.GetPlace(out placeCache);
@@ -1221,6 +1280,8 @@ namespace ASCOM.Starbook
             }
             set
             {
+                CheckConnected("SiteLongitude_set");
+
                 if (!Starbook.DMS.FromValue(value, out Starbook.DMS longitude, Starbook.Direction.East, Starbook.Direction.West))
                 {
                     LogMessage("SiteLongitude_set", "InvalidValueException: {0}", value);
@@ -1294,6 +1355,8 @@ namespace ASCOM.Starbook
 
         public void SlewToCoordinates(double RightAscension, double Declination)
         {
+            CheckConnected("SlewToCoordinates");
+
             if (this.parking)
             {
                 LogMessage("SlewToCoordinates", "InvalidOperationException: AtPark");
@@ -1330,7 +1393,7 @@ namespace ASCOM.Starbook
 
             while (true)
             {
-                response = starbook.GetStatus(out Starbook.Status status);
+                response = GetStatus(out Starbook.Status status);
 
                 if (response != Starbook.Response.OK)
                 {
@@ -1351,6 +1414,8 @@ namespace ASCOM.Starbook
 
         public void SlewToCoordinatesAsync(double RightAscension, double Declination)
         {
+            CheckConnected("SlewToCoordinatesAsync");
+
             if (this.parking)
             {
                 LogMessage("SlewToCoordinatesAsync", "InvalidOperationException: AtPark");
@@ -1385,6 +1450,8 @@ namespace ASCOM.Starbook
 
         public void SlewToTarget()
         {
+            CheckConnected("SlewToTarget");
+
             if (this.parking)
             {
                 LogMessage("SlewToTarget", "InvalidOperationException: AtPark");
@@ -1418,7 +1485,7 @@ namespace ASCOM.Starbook
 
             while (true)
             {
-                response = starbook.GetStatus(out Starbook.Status status);
+                response = GetStatus(out Starbook.Status status);
 
                 if (response != Starbook.Response.OK)
                 {
@@ -1439,6 +1506,8 @@ namespace ASCOM.Starbook
 
         public void SlewToTargetAsync()
         {
+            CheckConnected("SlewToTargetAsync");
+
             if (this.parking)
             {
                 LogMessage("SlewToTargetAsync", "InvalidOperationException: AtPark");
@@ -1472,11 +1541,13 @@ namespace ASCOM.Starbook
         {
             get
             {
+                CheckConnected("Slewing_get");
+                
                 bool slewing = this.movingAxis;
 
                 if (!slewing)
                 {
-                    Starbook.Response response = starbook.GetStatus(out Telescope.Starbook.Status status);
+                    Starbook.Response response = GetStatus(out Telescope.Starbook.Status status);
 
                     if (response != Starbook.Response.OK)
                     {
@@ -1500,6 +1571,8 @@ namespace ASCOM.Starbook
 
         public void SyncToCoordinates(double RightAscension, double Declination)
         {
+            CheckConnected("SyncToCoordinates");
+
             if (this.parking)
             {
                 LogMessage("SyncToCoordinates", "InvalidOperationException: AtPark");
@@ -1534,6 +1607,8 @@ namespace ASCOM.Starbook
 
         public void SyncToTarget()
         {
+            CheckConnected("SyncToTarget");
+
             if (this.parking)
             {
                 LogMessage("SyncToTarget", "InvalidOperationException: AtPark");
@@ -1619,20 +1694,41 @@ namespace ASCOM.Starbook
         {
             get
             {
-                Starbook.Response response = starbook.GetStatus(out Starbook.Status status);
+                CheckConnected("Tracking_get");
 
-                if (response != Starbook.Response.OK)
+                bool tracking = this.tracking;
+
+                if (tracking)
                 {
-                    LogMessage("Tracking_get", "InvalidOperationException: Starbook.GetStatus()={0}", response);
-                    throw new ASCOM.InvalidOperationException("Tracking_get: Starbook.GetStatus() is not working.");
+                    Starbook.Response response = GetStatus(out Starbook.Status status);
+
+                    if (response != Starbook.Response.OK)
+                    {
+                        LogMessage("Tracking_get", "InvalidOperationException: Starbook.GetStatus()={0}", response);
+                        throw new ASCOM.InvalidOperationException("Tracking_get: Starbook.GetStatus() is not working.");
+                    }
+
+                    tracking = (status.State == Starbook.State.Guide || status.State == Starbook.State.Scope || status.State == Starbook.State.Chart || status.State == Starbook.State.User);
+                    LogMessage("Tracking_get", "{0}: Status.State={1}", tracking, status.State);
+                }
+                else
+                {
+                    LogMessage("Tracking_get", tracking.ToString());
                 }
 
-                bool tracking = (status.State == Starbook.State.Guide || status.State == Starbook.State.Scope || status.State == Starbook.State.Chart || status.State == Starbook.State.User);
-                LogMessage("Tracking_get", "{0}: Status.State={1}", tracking, status.State);
                 return tracking;
             }
             set
             {
+                CheckConnected("Tracking_set");
+
+                if (value == tracking)
+                {
+                    LogMessage("Tracking_set", "OK: {0}, Ignored", value); return;
+                }
+
+                tracking = value;
+
                 if (value)
                 {
                     Starbook.Response response = starbook.Start();
@@ -1643,12 +1739,21 @@ namespace ASCOM.Starbook
                     }
                     else
                     {
-                        LogMessage("Tracking_set", "FAIL: {0}, Starbook.Start()={0}", value, response);
+                        LogMessage("Tracking_set", "FAIL: {0}, Starbook.Start()={1}", value, response);
                     }
                 }
                 else
                 {
-                    LogMessage("Tracking_set", "FAIL: {0}", value);
+                    Starbook.Response response = starbook.Stop();
+
+                    if (response == Starbook.Response.OK)
+                    {
+                        LogMessage("Tracking_set", "OK: {0}", value);
+                    }
+                    else
+                    {
+                        LogMessage("Tracking_set", "FAIL: {0}, Starbook.Stop()={1}", value, response);
+                    }
                 }
             }
         }
@@ -1692,6 +1797,8 @@ namespace ASCOM.Starbook
         {
             get
             {
+                CheckConnected("UTCDate_get");
+
                 Starbook.Response response = starbook.GetTime(out DateTime time);
 
                 if (response != Starbook.Response.OK)
@@ -1719,6 +1826,8 @@ namespace ASCOM.Starbook
             }
             set
             {
+                CheckConnected("UTCDate_set");
+
                 Starbook.Response response;
 
                 if (!placeCached)
@@ -1750,6 +1859,8 @@ namespace ASCOM.Starbook
 
         public void Unpark()
         {
+            CheckConnected("Unpark");
+
             if (parking)
             {
                 LogMessage("Unpark", "OK"); parking = false;
@@ -1848,6 +1959,14 @@ namespace ASCOM.Starbook
             get
             {
                 // TODO check that the driver hardware connection exists and is connected to the hardware
+
+                bool connectedState;
+
+                lock (this)
+                {
+                    connectedState = this.connectedState;
+                }
+
                 return connectedState;
             }
         }
@@ -1860,6 +1979,7 @@ namespace ASCOM.Starbook
         {
             if (!IsConnected)
             {
+                LogMessage(message, "NotConnectedException");
                 throw new ASCOM.NotConnectedException(message);
             }
         }
@@ -1943,6 +2063,104 @@ namespace ASCOM.Starbook
             var msg = string.Format(message, args);
             traceLogger.LogMessage(identifier, msg);
         }
+        #endregion
+
+        #region Multi-threading features
+
+        private void ThreadEntry()
+        {
+            Starbook.Response response;
+
+            for (bool firstPoll = true; threadRunning; )
+            {
+                if (firstPoll)
+                {
+                    firstPoll = false;
+
+                    do
+                    {
+                        starbook.Start();
+
+                        if ((response = starbook.Stop()) != Starbook.Response.OK)
+                        {
+                            break;
+                        }
+
+                        if ((response = starbook.NoMove()) != Starbook.Response.OK)
+                        {
+                            break;
+                        }
+
+                        if ((response = starbook.SetSpeed(guideRate)) != Starbook.Response.OK)
+                        {
+                            break;
+                        }
+                    }
+                    while (false);
+
+                    if (response != Starbook.Response.OK)
+                    {
+                        lock (this)
+                        {
+                            connectedState = false;
+                        }
+
+                        break;
+                    }
+                }
+                else
+                {
+                    response = starbook.GetStatus(out Starbook.Status status);
+
+                    if (response != Starbook.Response.OK)
+                    {
+                        lock (this)
+                        {
+                            connectedState = false; this.status = null;
+                        }
+
+                        break;
+                    }
+
+                    lock (this)
+                    {
+                        this.status = status;
+                    }
+
+                    Thread.Sleep(poll);
+                }
+            }
+        }
+
+        private Starbook.Response GetStatus(out Starbook.Status status)
+        {
+            DateTime dateTime = DateTime.Now;
+
+            while (true)
+            {
+                object s;
+
+                lock (this)
+                {
+                    s = this.status;
+                }
+
+                if (s != null)
+                {
+                    status = (Starbook.Status)this.status; return Starbook.Response.OK;
+                }
+
+                TimeSpan timeSpan = DateTime.Now - dateTime;
+
+                if (timeSpan.TotalSeconds >= 60)
+                {
+                    status = new Starbook.Status(); return Starbook.Response.ErrorUnknown;
+                }
+
+                Thread.Sleep(1000);
+            }
+        }
+
         #endregion
     }
 }

@@ -32,10 +32,10 @@ namespace ASCOM.Starbook
 
             public Starbook()
             {
+                this.IPAddress = IPAddress.Parse("169.254.1.1");
+
                 this.web = new WebClientTimeout();
                 this.web.Timeout = 5000;
-
-                this.IPAddress = IPAddress.Parse("169.254.1.1");
             }
 
             /// <summary>
@@ -491,52 +491,18 @@ namespace ASCOM.Starbook
             private string HandshakeString(string command)
             {
                 string strinq;
-#if true
 
                 try
                 {
-                    strinq = this.web.DownloadString(string.Format("http://{0}/{1}", this.IPAddress, command));
+                    lock (this.web)
+                    {
+                        strinq = this.web.DownloadString(string.Format("http://{0}/{1}", this.IPAddress, command));
+                    }
                 }
                 catch
                 {
                     strinq = string.Empty;
                 }
-#else
-                Dictionary<string, string> handshakes = new Dictionary<string, string>();
-
-                handshakes["VERSION"] = "VERSION=2.7B50";
-                handshakes["GETSTATUS"] = "RA=0+0.0&DEC=0+0&GOTO=0&STATE=INIT";
-                handshakes["GETPLACE"] = "LATITUDE=N23+30&LONGITUDE=E120+00&TIMEZONE=8";
-                handshakes["GETTIME"] = string.Format("TIME={0:yyyy+MM+dd+HH+mm+ss}", DateTime.Now);
-                handshakes["GETROUND"] = "4320000";
-                handshakes["GETXY"] = "X=0&Y=0";
-                handshakes["SETPLACE"] = "OK";
-                handshakes["SETTIME"] = "OK";
-                handshakes["SETSPEED"] = "OK";
-                handshakes["SAVESETTING"] = "OK";
-                handshakes["START"] = "OK";
-                handshakes["RESET"] = "OK";
-                handshakes["GOHOME"] = "OK";
-                handshakes["MOVE"] = "OK";
-                handshakes["GOTORADEC"] = "OK";
-                handshakes["ALIGN"] = "OK";
-
-                int index = command.IndexOf('?');
-
-                if (index >= 0)
-                {
-                    command = command.Substring(0, index);
-                }
-
-                if (handshakes.TryGetValue(command, out strinq))
-                {
-                    strinq = string.Format("<!--{0}-->", strinq);
-                }
-                else
-                {
-                    strinq = string.Empty;
-                }
-#endif
 
                 Match match = Regex.Match(strinq, @"<!--(?<String>.*)-->");
 
@@ -584,7 +550,10 @@ namespace ASCOM.Starbook
                 {
                     if (web)
                     {
-                        bytes = this.web.DownloadData(string.Format("http://{0}/{1}", this.IPAddress, command));
+                        lock (this.web)
+                        {
+                            bytes = this.web.DownloadData(string.Format("http://{0}/{1}", this.IPAddress, command));
+                        }
                     }
                     else
                     {
@@ -744,7 +713,7 @@ namespace ASCOM.Starbook
 
                 public override string ToString()
                 {
-                    return string.Format("{0:00}+{1:00.0}", this.Hour, this.Minute + this.Second / 60.0 + 0.05);
+                    return string.Format("{0:00}+{1:00.0}", this.Hour, this.Minute + this.Second / 60.0);
                 }
             }
 
@@ -880,7 +849,7 @@ namespace ASCOM.Starbook
 
                 public override string ToString()
                 {
-                    string direction;
+                    string direction; bool degree = false;
 
                     switch (this.Direction)
                     {
@@ -889,9 +858,9 @@ namespace ASCOM.Starbook
                         case Direction.South:
                             direction = "S"; break;
                         case Direction.East:
-                            direction = "E"; break;
+                            direction = "E"; degree = true; break;
                         case Direction.West:
-                            direction = "W"; break;
+                            direction = "W"; degree = true; break;
                         case Direction.Positive:
                         default:
                             direction = string.Empty; break;
@@ -899,7 +868,7 @@ namespace ASCOM.Starbook
                             direction = "-"; break;
                     }
 
-                    return string.Format("{0}{1:000}+{2:00}", direction, this.Degree, this.Minute);
+                    return string.Format(degree ? "{0}{1:000}+{2:00}" : "{0}{1:00}+{2:00}", direction, this.Degree, this.Minute);
                 }
             }
 
