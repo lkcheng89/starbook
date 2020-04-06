@@ -404,8 +404,45 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("Altitude_get", "PropertyNotImplementedException");
-                throw new ASCOM.PropertyNotImplementedException("Altitude", false);
+                CheckConnected("Altitude_get");
+
+                Starbook.Response response = GetStatus(out Starbook.Status status);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("Altitude_get", "InvalidOperationException: Starbook.GetStatus()={0}", response);
+                    throw new ASCOM.InvalidOperationException("Altitude_get: Starbook.GetStatus() is not working.");
+                }
+
+                if (!placeCached)
+                {
+                    response = starbook.GetPlace(out placeCache);
+
+                    if (response != Starbook.Response.OK)
+                    {
+                        LogMessage("Altitude_get", "InvalidOperationException: Starbook.GetPlace()={0}", response);
+                        throw new ASCOM.InvalidOperationException("Altitude_get: Starbook.GetPlace() is not working.");
+                    }
+
+                    placeCached = true;
+                }
+
+                response = starbook.GetTime(out DateTime time);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("Altitude_get", "InvalidOperationException: Starbook.GetTime()={0}", response);
+                    throw new ASCOM.InvalidOperationException("Altitude_get: Starbook.GetTime() is not working.");
+                }
+
+                transform.SiteLatitude = placeCache.Latitude.Value;
+                transform.SiteLongitude = placeCache.Longitude.Value;
+                transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-placeCache.Timezone));
+                transform.SetJ2000(status.RA.Value, status.Dec.Value);
+
+                double altitude = transform.ElevationTopocentric;
+                LogMessage("Altitude_get", altitude.ToString());
+                return altitude;
             }
         }
 
@@ -477,8 +514,45 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("Azimuth_get", "PropertyNotImplementedException");
-                throw new ASCOM.PropertyNotImplementedException("Azimuth", false);
+                CheckConnected("Azimuth_get");
+
+                Starbook.Response response = GetStatus(out Starbook.Status status);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("Azimuth_get", "InvalidOperationException: Starbook.GetStatus()={0}", response);
+                    throw new ASCOM.InvalidOperationException("Azimuth_get: Starbook.GetStatus() is not working.");
+                }
+
+                if (!placeCached)
+                {
+                    response = starbook.GetPlace(out placeCache);
+
+                    if (response != Starbook.Response.OK)
+                    {
+                        LogMessage("Azimuth_get", "InvalidOperationException: Starbook.GetPlace()={0}", response);
+                        throw new ASCOM.InvalidOperationException("Azimuth_get: Starbook.GetPlace() is not working.");
+                    }
+
+                    placeCached = true;
+                }
+
+                response = starbook.GetTime(out DateTime time);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("Azimuth_get", "InvalidOperationException: Starbook.GetTime()={0}", response);
+                    throw new ASCOM.InvalidOperationException("Azimuth_get: Starbook.GetTime() is not working.");
+                }
+
+                transform.SiteLatitude = placeCache.Latitude.Value;
+                transform.SiteLongitude = placeCache.Longitude.Value;
+                transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-placeCache.Timezone));
+                transform.SetJ2000(status.RA.Value, status.Dec.Value);
+
+                double azimuth = transform.AzimuthTopocentric;
+                LogMessage("Azimuth_get", azimuth.ToString());
+                return azimuth;
             }
         }
 
@@ -605,8 +679,8 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanSlewAltAz_get", false.ToString());
-                return false;
+                LogMessage("CanSlewAltAz_get", true.ToString());
+                return true;
             }
         }
 
@@ -614,8 +688,8 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanSlewAltAzAsync_get", false.ToString());
-                return false;
+                LogMessage("CanSlewAltAzAsync_get", true.ToString());
+                return true;
             }
         }
 
@@ -641,8 +715,8 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanSyncAltAz_get", false.ToString());
-                return false;
+                LogMessage("CanSyncAltAz_get", true.ToString());
+                return true;
             }
         }
 
@@ -1343,14 +1417,183 @@ namespace ASCOM.Starbook
 
         public void SlewToAltAz(double Azimuth, double Altitude)
         {
-            LogMessage("SlewToAltAz", "MethodNotImplementedException");
-            throw new ASCOM.MethodNotImplementedException("SlewToAltAz");
+            CheckConnected("SlewToAltAz");
+
+            if (this.parking)
+            {
+                LogMessage("SlewToAltAz", "InvalidOperationException: AtPark");
+                throw new ASCOM.InvalidOperationException("SlewToAltAz: AtPark, Starbook.Unpark() must be called first.");
+            }
+
+            if (Azimuth < 0 || 360 < Azimuth)
+            {
+                LogMessage("SlewToAltAz", "InvalidValueException: Azimuth={0}", Azimuth);
+                throw new ASCOM.InvalidValueException("SlewToAltAz", "Azimuth", "0 to 360");
+            }
+
+            if (Altitude < 0 || 90 < Altitude)
+            {
+                LogMessage("SlewToAltAz", "InvalidValueException: Altitude={0}", Altitude);
+                throw new ASCOM.InvalidValueException("SlewToAltAz", "Altitude", "0 to 90");
+            }
+
+            Starbook.Response response;
+
+            if (!placeCached)
+            {
+                response = starbook.GetPlace(out placeCache);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("SlewToAltAz", "InvalidOperationException: Starbook.GetPlace()={0}", response);
+                    throw new ASCOM.InvalidOperationException("SlewToAltAz: Starbook.GetPlace() is not working.");
+                }
+
+                placeCached = true;
+            }
+
+            response = starbook.GetTime(out DateTime time);
+
+            if (response != Starbook.Response.OK)
+            {
+                LogMessage("SlewToAltAz", "InvalidOperationException: Starbook.GetTime()={0}", response);
+                throw new ASCOM.InvalidOperationException("SlewToAltAz: Starbook.GetTime() is not working.");
+            }
+
+            transform.SiteLatitude = placeCache.Latitude.Value;
+            transform.SiteLongitude = placeCache.Longitude.Value;
+            transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-placeCache.Timezone));
+            transform.SetAzimuthElevation(Azimuth, Altitude);
+
+            double RightAscension = transform.RAJ2000;
+            double Declination = transform.DecJ2000;
+
+            if (!Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension))
+            {
+                LogMessage("SlewToAltAz", "InvalidValueException: RightAscension={0}", RightAscension);
+                throw new ASCOM.InvalidValueException("SlewToAltAz", "RightAscension", "0 to 24");
+            }
+
+            if (!Starbook.DMS.FromValue(Declination, out Starbook.DMS declination))
+            {
+                LogMessage("SlewToAltAz", "InvalidValueException: Declination={0}", Declination);
+                throw new ASCOM.InvalidValueException("SlewToAltAz", "Declination", "-90 to 90");
+            }
+
+            targetRightAscension = RightAscension;
+            targetDeclination = Declination;
+
+            response = starbook.Goto(rightAscension, declination);
+
+            if (response != Starbook.Response.OK)
+            {
+                LogMessage("SlewToAltAz", "InvalidOperationException: Starbook.Goto({0},{1})={2}", rightAscension, declination, response);
+                throw new ASCOM.InvalidOperationException("SlewToAltAz: Starbook.Goto() is not working.");
+            }
+
+            if (slewSettleTime > 0)
+            {
+                Thread.Sleep(slewSettleTime * 1000);
+            }
+
+            while (true)
+            {
+                response = GetStatus(out Starbook.Status status);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("SlewToAltAz", "InvalidOperationException: Starbook.GetStatus()={0}", response);
+                    throw new ASCOM.InvalidOperationException("SlewToAltAz: Starbook.GetStatus() is not working.");
+                }
+
+                if (!status.Goto)
+                {
+                    break;
+                }
+
+                Thread.Sleep(100);
+            }
+
+            LogMessage("SlewToAltAz", "OK: Azimuth={0},Altitude={1}", Azimuth, Altitude);
         }
 
         public void SlewToAltAzAsync(double Azimuth, double Altitude)
         {
-            LogMessage("SlewToAltAzAsync", "MethodNotImplementedException");
-            throw new ASCOM.MethodNotImplementedException("SlewToAltAzAsync");
+            CheckConnected("SlewToAltAzAsync");
+
+            if (this.parking)
+            {
+                LogMessage("SlewToAltAzAsync", "InvalidOperationException: AtPark");
+                throw new ASCOM.InvalidOperationException("SlewToAltAzAsync: AtPark, Starbook.Unpark() must be called first.");
+            }
+
+            if (Azimuth < 0 || 360 < Azimuth)
+            {
+                LogMessage("SlewToAltAzAsync", "InvalidValueException: Azimuth={0}", Azimuth);
+                throw new ASCOM.InvalidValueException("SlewToAltAzAsync", "Azimuth", "0 to 360");
+            }
+
+            if (Altitude < 0 || 90 < Altitude)
+            {
+                LogMessage("SlewToAltAzAsync", "InvalidValueException: Altitude={0}", Altitude);
+                throw new ASCOM.InvalidValueException("SlewToAltAzAsync", "Altitude", "0 to 90");
+            }
+
+            Starbook.Response response;
+
+            if (!placeCached)
+            {
+                response = starbook.GetPlace(out placeCache);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("SlewToAltAzAsync", "InvalidOperationException: Starbook.GetPlace()={0}", response);
+                    throw new ASCOM.InvalidOperationException("SlewToAltAzAsync: Starbook.GetPlace() is not working.");
+                }
+
+                placeCached = true;
+            }
+
+            response = starbook.GetTime(out DateTime time);
+
+            if (response != Starbook.Response.OK)
+            {
+                LogMessage("SlewToAltAzAsync", "InvalidOperationException: Starbook.GetTime()={0}", response);
+                throw new ASCOM.InvalidOperationException("SlewToAltAzAsync: Starbook.GetTime() is not working.");
+            }
+
+            transform.SiteLatitude = placeCache.Latitude.Value;
+            transform.SiteLongitude = placeCache.Longitude.Value;
+            transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-placeCache.Timezone));
+            transform.SetAzimuthElevation(Azimuth, Altitude);
+
+            double RightAscension = transform.RAJ2000;
+            double Declination = transform.DecJ2000;
+
+            if (!Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension))
+            {
+                LogMessage("SlewToAltAzAsync", "InvalidValueException: RightAscension={0}", RightAscension);
+                throw new ASCOM.InvalidValueException("SlewToAltAzAsync", "RightAscension", "0 to 24");
+            }
+
+            if (!Starbook.DMS.FromValue(Declination, out Starbook.DMS declination))
+            {
+                LogMessage("SlewToAltAzAsync", "InvalidValueException: Declination={0}", Declination);
+                throw new ASCOM.InvalidValueException("SlewToAltAzAsync", "Declination", "-90 to 90");
+            }
+
+            targetRightAscension = RightAscension;
+            targetDeclination = Declination;
+
+            response = starbook.Goto(rightAscension, declination);
+
+            if (response != Starbook.Response.OK)
+            {
+                LogMessage("SlewToAltAzAsync", "InvalidOperationException: Starbook.Goto({0},{1})={2}", rightAscension, declination, response);
+                throw new ASCOM.InvalidOperationException("SlewToAltAzAsync: Starbook.Goto() is not working.");
+            }
+
+            LogMessage("SlewToAltAzAsync", "OK: Azimuth={0},Altitude={1}", Azimuth, Altitude);
         }
 
         public void SlewToCoordinates(double RightAscension, double Declination)
@@ -1565,8 +1808,81 @@ namespace ASCOM.Starbook
 
         public void SyncToAltAz(double Azimuth, double Altitude)
         {
-            LogMessage("SyncToAltAz", "MethodNotImplementedException");
-            throw new ASCOM.MethodNotImplementedException("SyncToAltAz");
+            CheckConnected("SyncToAltAz");
+
+            if (this.parking)
+            {
+                LogMessage("SyncToAltAz", "InvalidOperationException: AtPark");
+                throw new ASCOM.InvalidOperationException("SyncToAltAz: AtPark, Starbook.Unpark() must be called first.");
+            }
+
+            if (Azimuth < 0 || 360 < Azimuth)
+            {
+                LogMessage("SyncToAltAz", "InvalidValueException: Azimuth={0}", Azimuth);
+                throw new ASCOM.InvalidValueException("SyncToAltAz", "Azimuth", "0 to 360");
+            }
+
+            if (Altitude < 0 || 90 < Altitude)
+            {
+                LogMessage("SyncToAltAz", "InvalidValueException: Altitude={0}", Altitude);
+                throw new ASCOM.InvalidValueException("SyncToAltAz", "Altitude", "0 to 90");
+            }
+
+            Starbook.Response response;
+
+            if (!placeCached)
+            {
+                response = starbook.GetPlace(out placeCache);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("SyncToAltAz", "InvalidOperationException: Starbook.GetPlace()={0}", response);
+                    throw new ASCOM.InvalidOperationException("SyncToAltAz: Starbook.GetPlace() is not working.");
+                }
+
+                placeCached = true;
+            }
+
+            response = starbook.GetTime(out DateTime time);
+
+            if (response != Starbook.Response.OK)
+            {
+                LogMessage("SyncToAltAz", "InvalidOperationException: Starbook.GetTime()={0}", response);
+                throw new ASCOM.InvalidOperationException("SyncToAltAz: Starbook.GetTime() is not working.");
+            }
+
+            transform.SiteLatitude = placeCache.Latitude.Value;
+            transform.SiteLongitude = placeCache.Longitude.Value;
+            transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-placeCache.Timezone));
+            transform.SetAzimuthElevation(Azimuth, Altitude);
+
+            double RightAscension = transform.RAJ2000;
+            double Declination = transform.DecJ2000;
+
+            if (!Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension))
+            {
+                LogMessage("SyncToAltAz", "InvalidValueException: RightAscension={0}", RightAscension);
+                throw new ASCOM.InvalidValueException("SyncToAltAz", "RightAscension", "0 to 24");
+            }
+
+            if (!Starbook.DMS.FromValue(Declination, out Starbook.DMS declination))
+            {
+                LogMessage("SyncToAltAz", "InvalidValueException: Declination={0}", Declination);
+                throw new ASCOM.InvalidValueException("SyncToAltAz", "Declination", "-90 to 90");
+            }
+
+            targetRightAscension = RightAscension;
+            targetDeclination = Declination;
+
+            response = starbook.Align(rightAscension, declination);
+
+            if (response != Starbook.Response.OK)
+            {
+                LogMessage("SyncToAltAz", "InvalidOperationException: Starbook.Align({0},{1})={2}", rightAscension, declination, response);
+                throw new ASCOM.InvalidOperationException("SyncToAltAz: Starbook.Align() is not working.");
+            }
+
+            LogMessage("SyncToAltAz", "OK: Azimuth={0},Altitude={1}", Azimuth, Altitude);
         }
 
         public void SyncToCoordinates(double RightAscension, double Declination)
