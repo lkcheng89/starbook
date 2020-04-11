@@ -47,21 +47,19 @@ namespace ASCOM.Starbook
             /// <summary>
             /// Get firmware version of the starbook controller.
             /// </summary>
-            /// <returns>Firmware version which is formatted as [MAJORVERSION].[MINORVERSION]B[BUILDNUMBER]</returns>
+            /// <param name="status">Firmware version which is formatted as [MAJORVERSION].[MINORVERSION]B[BUILDNUMBER]</param>
+            /// <returns>Response string: OK or ERROR:%</returns>
             /// 
-            public string Version
+            public Response GetVersion(out string version)
             {
-                get
+                version = string.Empty; Response response = this.Handshake("VERSION", out Dictionary<string, string> dictionary);
+
+                if (response == Response.ErrorUnknown && dictionary.TryGetValue("VERSION", out version))
                 {
-                    Dictionary<string, string> dictionary = this.HandshakeDictionary("VERSION");
-
-                    if (!dictionary.TryGetValue("VERSION", out string version))
-                    {
-                        version = string.Empty;
-                    }
-
-                    return version;
+                    response.Assign(Response.OK);
                 }
+
+                return response;
             }
 
             /// <summary>
@@ -83,53 +81,63 @@ namespace ASCOM.Starbook
             /// 
             public Response GetStatus(out Status status)
             {
-                status = new Status(); bool statusRA = false, statusDEC = false, statusState = false, statusGoto = false;
-
-                foreach (KeyValuePair<string, string> item in this.HandshakeDictionary("GETSTATUS"))
+                status = new Status(); Response response = this.Handshake("GETSTATUS", out Dictionary<string, string> dictionary);
+                
+                if (response == Response.ErrorUnknown)
                 {
-                    switch (item.Key)
+                    bool statusRA = false, statusDEC = false, statusState = false, statusGoto = false;
+
+                    foreach (KeyValuePair<string, string> item in dictionary)
                     {
-                        case "RA":
+                        switch (item.Key)
                         {
-                            if (HMS.TryParse(item.Value, out HMS ra))
+                            case "RA":
                             {
-                                status.RA = ra; statusRA = true;
+                                if (HMS.TryParse(item.Value, out HMS ra))
+                                {
+                                    status.RA = ra; statusRA = true;
+                                }
+                                break;
                             }
-                            break;
+                            case "DEC":
+                            {
+                                if (DMS.TryParse(item.Value, out DMS dec))
+                                {
+                                    status.Dec = dec; statusDEC = true;
+                                }
+                                break;
+                            }
+                            case "STATE":
+                            {
+                                State state = this.ParseState(item.Value);
+                                if (state != State.Unknown)
+                                {
+                                    status.State = state; statusState = true;
+                                }
+                                break;
+                            }
+                            case "GOTO":
+                            {
+                                if (item.Value == "1")
+                                {
+                                    status.Goto = true; statusGoto = true;
+                                }
+                                else if (item.Value == "0")
+                                {
+                                    status.Goto = false; statusGoto = true;
+                                }
+                                break;
+                            }
                         }
-                        case "DEC":
-                        {
-                            if (DMS.TryParse(item.Value, out DMS dec))
-                            {
-                                status.Dec = dec; statusDEC = true;
-                            }
-                            break;
-                        }
-                        case "STATE":
-                        {
-                            State state = this.ParseState(item.Value);
-                            if (state != State.Unknown)
-                            {
-                                status.State = state; statusState = true;
-                            }
-                            break;
-                        }
-                        case "GOTO":
-                        {
-                            if (item.Value == "1")
-                            {
-                                status.Goto = true; statusGoto = true;
-                            }
-                            else if (item.Value == "0")
-                            {
-                                status.Goto = false; statusGoto = true;
-                            }
-                            break;
-                        }
+                    }
+
+                    if (statusRA && statusDEC && statusState && statusGoto)
+                    {
+                        response.Assign(Response.OK);
                     }
                 }
 
-                return (statusRA && statusDEC && statusState && statusGoto) ? Response.OK : Response.ErrorUnknown;
+                return response;
             }
 
             /// <summary>
@@ -140,14 +148,14 @@ namespace ASCOM.Starbook
             /// 
             public Response GetTime(out DateTime time)
             {
-                time = DateTime.MinValue; Dictionary<string, string> dictionary = this.HandshakeDictionary("GETTIME");
+                time = DateTime.MinValue; Response response = this.Handshake("GETTIME", out Dictionary<string, string> dictionary);
 
-                if (!dictionary.TryGetValue("TIME", out string s) || !DateTime.TryParseExact(s, "yyyy+MM+dd+HH+mm+ss", null, DateTimeStyles.None, out time))
+                if (response == Response.ErrorUnknown && dictionary.TryGetValue("TIME", out string s) && DateTime.TryParseExact(s, "yyyy+MM+dd+HH+mm+ss", null, DateTimeStyles.None, out time))
                 {
-                    return Response.ErrorUnknown;
+                    response.Assign(Response.OK);
                 }
 
-                return Response.OK;
+                return response;
             }
 
             /// <summary>
@@ -174,40 +182,50 @@ namespace ASCOM.Starbook
             /// 
             public Response GetPlace(out Place place)
             {
-                place = new Place(); bool placeLatitude = false, placeLongitude = false, placeTimezone = false;
-
-                foreach (KeyValuePair<string, string> item in this.HandshakeDictionary("GETPLACE"))
+                place = new Place(); Response response = this.Handshake("GETPLACE", out Dictionary<string, string> dictionary);
+                
+                if (response == Response.ErrorUnknown)
                 {
-                    switch (item.Key)
+                    bool placeLatitude = false, placeLongitude = false, placeTimezone = false;
+
+                    foreach (KeyValuePair<string, string> item in dictionary)
                     {
-                        case "LATITUDE":
+                        switch (item.Key)
                         {
-                            if (DMS.TryParse(item.Value, out DMS latitude))
+                            case "LATITUDE":
                             {
-                                place.Latitude = latitude; placeLatitude = true;
+                                if (DMS.TryParse(item.Value, out DMS latitude))
+                                {
+                                    place.Latitude = latitude; placeLatitude = true;
+                                }
+                                break;
                             }
-                            break;
-                        }
-                        case "LONGITUDE":
-                        {
-                            if (DMS.TryParse(item.Value, out DMS longitude))
+                            case "LONGITUDE":
                             {
-                                place.Longitude = longitude; placeLongitude = true;
+                                if (DMS.TryParse(item.Value, out DMS longitude))
+                                {
+                                    place.Longitude = longitude; placeLongitude = true;
+                                }
+                                break;
                             }
-                            break;
-                        }
-                        case "TIMEZONE":
-                        {
-                            if (int.TryParse(item.Value, out int timezone))
+                            case "TIMEZONE":
                             {
-                                place.Timezone = timezone; placeTimezone = true;
+                                if (int.TryParse(item.Value, out int timezone))
+                                {
+                                    place.Timezone = timezone; placeTimezone = true;
+                                }
+                                break;
                             }
-                            break;
                         }
+                    }
+
+                    if (placeLatitude && placeLongitude && placeTimezone)
+                    {
+                        response.Assign(Response.OK);
                     }
                 }
 
-                return (placeLatitude && placeLongitude && placeTimezone) ? Response.OK : Response.ErrorUnknown;
+                return response;
             }
 
             /// <summary>
@@ -336,12 +354,14 @@ namespace ASCOM.Starbook
             /// 
             public Response GetRound(out int round)
             {
-                if (!int.TryParse(this.HandshakeString("GETROUND"), out round))
+                round = 0; Response response = this.Handshake("GETROUND");
+
+                if (response == Response.ErrorUnknown && int.TryParse(response.Reply, out round))
                 {
-                    return Response.ErrorUnknown;
+                    response.Assign(Response.OK);
                 }
 
-                return Response.OK;
+                return response;
             }
 
             /// <summary>
@@ -352,32 +372,42 @@ namespace ASCOM.Starbook
             /// 
             public Response GetXY(out XY xy)
             {
-                xy = new XY(); bool xyX = false, xyY = false;
+                xy = new XY(); Response response = this.Handshake("GETXY", out Dictionary<string, string> dictionary);
 
-                foreach (KeyValuePair<string, string> item in this.HandshakeDictionary("GETXY"))
+                if (response == Response.ErrorUnknown)
                 {
-                    switch (item.Key)
+                    bool xyX = false, xyY = false;
+
+                    foreach (KeyValuePair<string, string> item in dictionary)
                     {
-                        case "X":
+                        switch (item.Key)
                         {
-                            if (int.TryParse(item.Value, out int x))
+                            case "X":
                             {
-                                xy.X = x; xyX = true;
+                                if (int.TryParse(item.Value, out int x))
+                                {
+                                    xy.X = x; xyX = true;
+                                }
+                                break;
                             }
-                            break;
-                        }
-                        case "Y":
-                        {
-                            if (int.TryParse(item.Value, out int y))
+                            case "Y":
                             {
-                                xy.Y = y; xyY = true;
+                                if (int.TryParse(item.Value, out int y))
+                                {
+                                    xy.Y = y; xyY = true;
+                                }
+                                break;
                             }
-                            break;
                         }
+                    }
+
+                    if (xyX && xyY)
+                    {
+                        response.Assign(Response.OK);
                     }
                 }
 
-                return (xyX && xyY) ? Response.OK : Response.ErrorUnknown;
+                return response;
             }
 
             /// <summary>
@@ -485,7 +515,33 @@ namespace ASCOM.Starbook
 
             private Response Handshake(string command)
             {
-                return ParseResponse(this.HandshakeString(command));
+                string reply = this.HandshakeString(command);
+
+                Response response = ParseResponse(reply);
+                response.Command = command;
+                response.Reply = reply;
+
+                return response;
+            }
+
+            private Response Handshake(string command, out Dictionary<string, string> dictionary)
+            {
+                dictionary = new Dictionary<string, string>(); Response response = this.Handshake(command);
+
+                if (response == Response.ErrorUnknown)
+                {
+                    MatchCollection matches = Regex.Matches(response.Reply, @"(?<Name>[^&=]+)=(?<Value>[^&]+)");
+
+                    foreach (Match natch in matches)
+                    {
+                        string name = natch.Groups["Name"].Value.ToUpper();
+                        string value = natch.Groups["Value"].Value;
+
+                        dictionary[name] = value;
+                    }
+                }
+
+                return response;
             }
 
             private string HandshakeString(string command)
@@ -501,7 +557,7 @@ namespace ASCOM.Starbook
                 }
                 catch
                 {
-                    strinq = string.Empty;
+                    return "ERROR:NETWORK";
                 }
 
                 Match match = Regex.Match(strinq, @"<!--(?<String>.*)-->");
@@ -510,36 +566,8 @@ namespace ASCOM.Starbook
                 {
                     strinq = match.Groups["String"].Value;
                 }
-                else
-                {
-                    strinq = string.Empty;
-                }
 
                 return strinq;
-            }
-
-            private Dictionary<string, string> HandshakeDictionary(string command, Dictionary<string, string> dictionary = null)
-            {
-                if (dictionary == null)
-                {
-                    dictionary = new Dictionary<string, string>();
-                }
-                else
-                {
-                    dictionary.Clear();
-                }
-
-                MatchCollection matches = Regex.Matches(this.HandshakeString(command), @"(?<Name>[^&=]+)=(?<Value>[^&]+)");
-
-                foreach (Match natch in matches)
-                {
-                    string name = natch.Groups["Name"].Value.ToUpper();
-                    string value = natch.Groups["Value"].Value;
-
-                    dictionary[name] = value;
-                }
-
-                return dictionary;
             }
 
             private byte[] HandshakeBytes(string command, bool web = true)
@@ -610,6 +638,8 @@ namespace ASCOM.Starbook
                         return Response.ErrorFormat;
                     case "ERROR:BELOW HORIZONE":
                         return Response.ErrorBelowHorizon;
+                    case "ERROR:NETWORK":
+                        return Response.ErrorNetwork;
                     default:
                         return Response.ErrorUnknown;
                 }
@@ -645,9 +675,70 @@ namespace ASCOM.Starbook
             }
 
             [ComVisible(false)]
-            public enum Response
+            public struct Response
             {
-                OK, ErrorIllegalState, ErrorFormat, ErrorBelowHorizon, ErrorUnknown
+                public static readonly Response OK                = new Response("OK");
+                public static readonly Response ErrorIllegalState = new Response("ErrorIllegalState");
+                public static readonly Response ErrorFormat       = new Response("ErrorFormat");
+                public static readonly Response ErrorBelowHorizon = new Response("ErrorBelowHorizon");
+                public static readonly Response ErrorNetwork      = new Response("ErrorTimeout");
+                public static readonly Response ErrorUnknown      = new Response("ErrorUnknown");
+
+                string response;
+
+                public Response(Response response, string command = null, string reply = null)
+                {
+                    this.response = response.response;
+
+                    this.Command = command;
+                    this.Reply = reply;
+                }
+
+                private Response(string response)
+                {
+                    this.response = response;
+
+                    this.Command = null;
+                    this.Reply = null;
+                }
+
+                public void Assign(Response response)
+                {
+                    this.response = response.response;
+                }
+
+                public string Command { get; set; }
+                public string Reply { get; set; }
+
+                public override bool Equals(object obj)
+                {
+                    if (obj == null || !(obj is Response))
+                    {
+                        return false;
+                    }
+
+                    return this.response == ((Response)obj).response;
+                }
+
+                public override int GetHashCode()
+                {
+                    return this.response.GetHashCode();
+                }
+
+                public override string ToString()
+                {
+                    return string.Format("{0} [{1}] [{2}]", this.response, this.Command, this.Reply);
+                }
+
+                public static bool operator==(Response a, Response b)
+                {
+                    return a.Equals(b);
+                }
+
+                public static bool operator!=(Response a, Response b)
+                {
+                    return !a.Equals(b);
+                }
             }
 
             [ComVisible(false)]
@@ -686,7 +777,7 @@ namespace ASCOM.Starbook
                 {
                     hms = new HMS(); Match match = Regex.Match(s, @"(?<Hour>\d+)\+(?<Minute>\d+(\.\d+)?)");
 
-                    if (!match.Success || !int.TryParse(match.Groups["Hour"].Value, out int hour) || hour < 0 || 23 < hour ||
+                    if (!match.Success || !int.TryParse(match.Groups["Hour"].Value, out int hour) || hour < 0 || /*23 < hour ||*/
                                           !double.TryParse(match.Groups["Minute"].Value, out double minute) || minute < 0 || 60 <= minute)
                     {
                         return false;

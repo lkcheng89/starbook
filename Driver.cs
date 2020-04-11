@@ -122,17 +122,20 @@ namespace ASCOM.Starbook
         private Starbook.Place placeCache;
         private bool placeCached;
 
-        private bool movingAxis;
-        private bool pulseGuiding;
-        private bool tracking;
-
         private double targetDeclination;
         private double targetRightAscension;
 
-        private int poll;
-        private object status;
         private bool threadRunning;
         private Thread thread;
+        private int poll;
+
+        private object status;
+        private object response;
+        private Queue<Request> requests;
+        private bool atHome;
+        private bool movingAxis;
+        private bool pulseGuiding;
+        private bool tracking;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Starbook"/> class.
@@ -161,17 +164,20 @@ namespace ASCOM.Starbook
 
             placeCached = false;
 
-            movingAxis = false;
-            pulseGuiding = false;
-            tracking = true;
-
             targetRightAscension = double.NaN;
             targetDeclination = double.NaN;
 
-            poll = 100;
-            status = null;
-            thread = null;
             threadRunning = false;
+            thread = null;
+            poll = 100;
+
+            status = null;
+            response = null;
+            requests = new Queue<Request>();
+            atHome = true;
+            movingAxis = false;
+            pulseGuiding = false;
+            tracking = true;
 
             traceLogger.LogMessage("Telescope", "Completed initialisation");
         }
@@ -282,7 +288,7 @@ namespace ASCOM.Starbook
 
                 lock (this)
                 {
-                    connectedState = value; status = null;
+                    connectedState = value; status = null; response = null;
                 }
 
                 if (thread != null)
@@ -470,18 +476,14 @@ namespace ASCOM.Starbook
             {
                 CheckConnected("AtHome");
 
-                Starbook.Response response = starbook.GetXY(out Starbook.XY xy);
+                bool atHome;
 
-                if (response != Starbook.Response.OK)
+                lock (this)
                 {
-                    LogMessage("AtHome_get", "InvalidOperationException: Starbook.GetXY()={0}", response);
-                    throw new ASCOM.InvalidOperationException("AtHome_get: Starbook.GetXY() is not working.");
+                    atHome = this.atHome;
                 }
 
-                // TODO: This doesn't work!!
-
-                bool atHome = xy.X == 0 && xy.Y == 0;
-                LogMessage("AtHome_get", "{0}: X={1},Y={2}", atHome, xy.X, xy.Y);
+                LogMessage("AtHome_get", atHome.ToString());
                 return atHome;
             }
         }
@@ -806,12 +808,30 @@ namespace ASCOM.Starbook
                 throw new ASCOM.InvalidOperationException("FindHome: AtPark, Starbook.Unpark() must be called first.");
             }
 
-            Starbook.Response response = starbook.Home();
+            Starbook.Response response = Home();
 
             if (response != Starbook.Response.OK)
             {
                 LogMessage("FindHome", "InvalidOperationException: Starbook.Home()={0}", response);
                 throw new ASCOM.InvalidOperationException("FindHome: Starbook.Home() is not working.");
+            }
+
+            while (true)
+            {
+                response = GetStatus(out Starbook.Status status);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("FindHome", "InvalidOperationException: Starbook.GetStatus()={0}", response);
+                    throw new ASCOM.InvalidOperationException("FindHome: Starbook.GetStatus() is not working.");
+                }
+
+                if (!status.Goto)
+                {
+                    break;
+                }
+
+                Thread.Sleep(100);
             }
 
             LogMessage("FindHome", "OK");
@@ -904,7 +924,13 @@ namespace ASCOM.Starbook
             {
                 CheckConnected("IsPulseGuiding_get");
 
-                bool isPulseGuiding = pulseGuiding;
+                bool isPulseGuiding;
+
+                lock (this)
+                {
+                    isPulseGuiding = pulseGuiding;
+                }
+
                 LogMessage("IsPulseGuiding_get", isPulseGuiding.ToString());
                 return isPulseGuiding;
             }
@@ -935,7 +961,10 @@ namespace ASCOM.Starbook
                             throw new ASCOM.InvalidOperationException("MoveAxis: Starbook.NoMove() is not working.");
                         }
 
-                        movingAxis = false;
+                        lock (this)
+                        {
+                            movingAxis = false;
+                        }
 
                         response = starbook.SetSpeed(Telescope.guideRate);
 
@@ -985,7 +1014,10 @@ namespace ASCOM.Starbook
                             throw new ASCOM.InvalidOperationException("MoveAxis: Starbook.Move() is not working.");
                         }
 
-                        movingAxis = true;
+                        lock (this)
+                        {
+                            movingAxis = true; atHome = false;
+                        }
                     }
 
                     LogMessage("MoveAxis", "OK: Axis={0},Rate={1}", Axis, Rate);
@@ -1050,7 +1082,7 @@ namespace ASCOM.Starbook
                     throw new ASCOM.InvalidOperationException("Park: Cannot determine declination.");
                 }
 
-                response = starbook.Goto(rightAscension, declination);
+                response = Goto(rightAscension, declination);
 
                 if (response != Starbook.Response.OK)
                 {
@@ -1109,7 +1141,10 @@ namespace ASCOM.Starbook
                 throw new ASCOM.InvalidOperationException("PulseGuide: Starbook.Move() is not working.");
             }
 
-            pulseGuiding = true;
+            lock (this)
+            {
+                pulseGuiding = true; atHome = false;
+            }
 
             if (Duration > 0)
             {
@@ -1118,7 +1153,10 @@ namespace ASCOM.Starbook
 
             response = starbook.NoMove();
 
-            pulseGuiding = false;
+            lock (this)
+            {
+                pulseGuiding = false;
+            }
 
             if (response != Starbook.Response.OK)
             {
@@ -1483,17 +1521,12 @@ namespace ASCOM.Starbook
             targetRightAscension = RightAscension;
             targetDeclination = Declination;
 
-            response = starbook.Goto(rightAscension, declination);
+            response = Goto(rightAscension, declination);
 
             if (response != Starbook.Response.OK)
             {
                 LogMessage("SlewToAltAz", "InvalidOperationException: Starbook.Goto({0},{1})={2}", rightAscension, declination, response);
                 throw new ASCOM.InvalidOperationException("SlewToAltAz: Starbook.Goto() is not working.");
-            }
-
-            if (slewSettleTime > 0)
-            {
-                Thread.Sleep(slewSettleTime * 1000);
             }
 
             while (true)
@@ -1585,7 +1618,7 @@ namespace ASCOM.Starbook
             targetRightAscension = RightAscension;
             targetDeclination = Declination;
 
-            response = starbook.Goto(rightAscension, declination);
+            response = Goto(rightAscension, declination);
 
             if (response != Starbook.Response.OK)
             {
@@ -1621,17 +1654,12 @@ namespace ASCOM.Starbook
             targetRightAscension = RightAscension;
             targetDeclination = Declination;
 
-            Starbook.Response response = starbook.Goto(rightAscension, declination);
+            Starbook.Response response = Goto(rightAscension, declination);
 
             if (response != Starbook.Response.OK)
             {
                 LogMessage("SlewToCoordinates", "InvalidOperationException: Starbook.Goto({0},{1})={2}", rightAscension, declination, response);
                 throw new ASCOM.InvalidOperationException("SlewToCoordinates: Starbook.Goto() is not working.");
-            }
-            
-            if (slewSettleTime > 0)
-            {
-                Thread.Sleep(slewSettleTime * 1000);
             }
 
             while (true)
@@ -1680,7 +1708,7 @@ namespace ASCOM.Starbook
             targetRightAscension = RightAscension;
             targetDeclination = Declination;
 
-            Starbook.Response response = starbook.Goto(rightAscension, declination);
+            Starbook.Response response = Goto(rightAscension, declination);
 
             if (response != Starbook.Response.OK)
             {
@@ -1713,17 +1741,12 @@ namespace ASCOM.Starbook
                 throw new ASCOM.InvalidValueException("SlewToTarget", "TargetDeclination", "-90 to 90");
             }
 
-            Starbook.Response response = starbook.Goto(rightAscension, declination);
+            Starbook.Response response = Goto(rightAscension, declination);
 
             if (response != Starbook.Response.OK)
             {
                 LogMessage("SlewToTarget", "InvalidOperationException: Starbook.Goto({0},{1})={2}", rightAscension, declination, response);
                 throw new ASCOM.InvalidOperationException("SlewToTarget: Starbook.Goto() is not working.");
-            }
-
-            if (slewSettleTime > 0)
-            {
-                Thread.Sleep(slewSettleTime * 1000);
             }
 
             while (true)
@@ -1769,7 +1792,7 @@ namespace ASCOM.Starbook
                 throw new ASCOM.InvalidValueException("SlewToTargetAsync", "TargetDeclination", "-90 to 90");
             }
 
-            Starbook.Response response = starbook.Goto(rightAscension, declination);
+            Starbook.Response response = Goto(rightAscension, declination);
 
             if (response != Starbook.Response.OK)
             {
@@ -1785,8 +1808,13 @@ namespace ASCOM.Starbook
             get
             {
                 CheckConnected("Slewing_get");
-                
-                bool slewing = this.movingAxis;
+
+                bool slewing;
+
+                lock (this)
+                {
+                    slewing = this.movingAxis || this.pulseGuiding;
+                }
 
                 if (!slewing)
                 {
@@ -1874,7 +1902,7 @@ namespace ASCOM.Starbook
             targetRightAscension = RightAscension;
             targetDeclination = Declination;
 
-            response = starbook.Align(rightAscension, declination);
+            response = Align(rightAscension, declination);
 
             if (response != Starbook.Response.OK)
             {
@@ -1910,7 +1938,7 @@ namespace ASCOM.Starbook
             targetRightAscension = RightAscension;
             targetDeclination = Declination;
 
-            Starbook.Response response = starbook.Align(rightAscension, declination);
+            Starbook.Response response = Align(rightAscension, declination);
 
             if (response != Starbook.Response.OK)
             {
@@ -1943,7 +1971,7 @@ namespace ASCOM.Starbook
                 throw new ASCOM.InvalidValueException("SyncToTarget", "TargetDeclination", "-90 to 90");
             }
 
-            Starbook.Response response = starbook.Align(rightAscension, declination);
+            Starbook.Response response = Align(rightAscension, declination);
 
             if (response != Starbook.Response.OK)
             {
@@ -2377,39 +2405,63 @@ namespace ASCOM.Starbook
         internal static void LogMessage(string identifier, string message, params object[] args)
         {
             var msg = string.Format(message, args);
-            traceLogger.LogMessage(identifier, msg);
+
+            lock (traceLogger)
+            {
+                traceLogger.LogMessage(identifier, msg);
+            }
         }
         #endregion
 
         #region Multi-threading features
 
+        private class Request
+        {
+            public Request(string name)
+            {
+                this.Name = name;
+                this.Parameters = new Dictionary<string, object>();
+                this.Response = null;
+            }
+
+            public string Name { get; set; }
+            public Dictionary<string, object> Parameters { get; private set; }
+            public object Response { get; set; }
+        }
+
         private void ThreadEntry()
         {
+            int slewingState = 0; // 0: NotSlewing, 1: Slewing, 2: SlewingSettle
+            DateTime slewingSettle = DateTime.MinValue;
+            bool findingHome = false;
             Starbook.Response response;
 
-            for (bool firstPoll = true; threadRunning; )
+            for (bool initializing = true; threadRunning; )
             {
-                if (firstPoll)
+                if (initializing)
                 {
-                    firstPoll = false;
+                    initializing = false;
 
                     do
                     {
-                        starbook.Start();
-
-                        if ((response = starbook.Stop()) != Starbook.Response.OK)
+                        if ((response = starbook.Start()) != Starbook.Response.OK)
                         {
-                            break;
+                            LogMessage("Thread", "Starbook.Start()={0}", response);
                         }
+
+                        /*if ((response = starbook.Stop()) != Starbook.Response.OK)
+                        {
+                            LogMessage("Thread", "Starbook.Stop()={0}", response); break;
+                        }*/
 
                         if ((response = starbook.NoMove()) != Starbook.Response.OK)
                         {
-                            break;
+                            LogMessage("Thread", "Starbook.NoMove()={0}", response); break;
                         }
 
                         if ((response = starbook.SetSpeed(guideRate)) != Starbook.Response.OK)
                         {
-                            break;
+                            LogMessage("Thread", "Starbook.SetSpeed({0})={1}", guideRate, response); break;
                         }
                     }
                     while (false);
@@ -2426,25 +2478,170 @@ namespace ASCOM.Starbook
                 }
                 else
                 {
+                    bool slewing = false; Request request = null;
+
+                    lock (this.requests)
+                    {
+                        if (this.requests.Count > 0)
+                        {
+                            request = this.requests.Dequeue();
+                        }
+                    }
+
+                    if (request != null)
+                    {
+                        switch (request.Name)
+                        {
+                            case "Align":
+                            {
+                                Starbook.HMS ra = (Starbook.HMS)request.Parameters["RA"];
+                                Starbook.DMS dec = (Starbook.DMS)request.Parameters["Dec"];
+
+                                response = starbook.Align(ra, dec);
+
+                                if (response == Starbook.Response.OK)
+                                {
+                                    lock (this)
+                                    {
+                                        this.status = null; this.response = null;
+                                    }
+                                }
+
+                                break;
+                            }
+                            case "Goto":
+                            {
+                                Starbook.HMS ra = (Starbook.HMS)request.Parameters["RA"];
+                                Starbook.DMS dec = (Starbook.DMS)request.Parameters["Dec"];
+
+                                response = starbook.Goto(ra, dec);
+
+                                if (response == Starbook.Response.OK)
+                                {
+                                    slewing = true;
+
+                                    lock (this)
+                                    {
+                                        this.status = null; this.response = null; this.atHome = false;
+                                    }
+                                }
+
+                                break;
+                            }
+                            case "Home":
+                            {
+                                response = starbook.Home();
+
+                                if (response == Starbook.Response.OK)
+                                {
+                                    slewing = true; findingHome = true;
+
+                                    lock (this)
+                                    {
+                                        this.status = null; this.response = null; this.atHome = false;
+                                    }
+                                }
+
+                                break;
+                            }
+                            default:
+                            {
+                                response = Starbook.Response.ErrorUnknown; break;
+                            }
+                        }
+
+                        lock (request)
+                        {
+                            request.Response = response;
+                        }
+                    }
+
                     response = starbook.GetStatus(out Starbook.Status status);
 
                     if (response != Starbook.Response.OK)
                     {
                         lock (this)
                         {
-                            connectedState = false; this.status = null;
+                            connectedState = false; this.status = null; this.response = null;
                         }
 
-                        break;
+                        LogMessage("Thread", "Starbook.GetStatus()={0}", response); break;
+                    }
+
+                    switch (slewingState)
+                    {
+                        case 0: // NotSlewing
+                        {
+                            if (slewing)
+                            {
+                                slewingState = 1; status.Goto = true;
+                            }
+
+                            break;
+                        }
+                        case 1: // Slewing
+                        {
+                            if (!status.Goto)
+                            {
+                                slewingState = 2; slewingSettle = DateTime.Now; status.Goto = true;
+                            }
+
+                            break;
+                        }
+                        case 2: // SlewingSettle
+                        {
+                            if (status.Goto)
+                            {
+                                slewingState = 1;
+                            }
+                            else
+                            {
+                                TimeSpan timeSpan = DateTime.Now - slewingSettle;
+
+                                if (timeSpan.TotalSeconds >= slewSettleTime)
+                                {
+                                    slewingState = 0;
+
+                                    if (findingHome)
+                                    {
+                                        lock (this)
+                                        {
+                                            this.atHome = true;
+                                        }
+
+                                        findingHome = false;
+                                    }
+                                }
+                                else
+                                {
+                                    status.Goto = true;
+                                }
+                            }
+
+                            break;
+                        }
                     }
 
                     lock (this)
                     {
-                        this.status = status;
+                        this.status = status; this.response = response;
                     }
 
                     Thread.Sleep(poll);
                 }
+            }
+
+            lock (this.requests)
+            {
+                foreach (Request request in this.requests)
+                {
+                    lock (request)
+                    {
+                        request.Response = Starbook.Response.ErrorUnknown;
+                    }
+                }
+
+                this.requests.Clear();
             }
         }
 
@@ -2454,27 +2651,106 @@ namespace ASCOM.Starbook
 
             while (true)
             {
-                object s;
+                bool connected; object statusPolled, responsePolled;
 
                 lock (this)
                 {
-                    s = this.status;
+                    connected = this.connectedState; statusPolled = this.status; responsePolled = this.response;
                 }
 
-                if (s != null)
+                TimeSpan timeSpan = DateTime.Now - dateTime;
+
+                if (timeSpan.TotalSeconds >= 60 || !connected)
                 {
-                    status = (Starbook.Status)this.status; return Starbook.Response.OK;
+                    status = new Starbook.Status(); return Starbook.Response.ErrorUnknown;
+                }
+
+                if (statusPolled != null && responsePolled != null)
+                {
+                    status = (Starbook.Status)statusPolled; return (Starbook.Response)responsePolled;
+                }
+
+                Thread.Sleep(100);
+            }
+        }
+
+        private Starbook.Response Align(Starbook.HMS ra, Starbook.DMS dec)
+        {
+            Request request = new Request("Align");
+            request.Parameters.Add("RA", ra);
+            request.Parameters.Add("Dec", dec);
+
+            return Handshake(request);
+        }
+
+        private Starbook.Response Goto(Starbook.HMS ra, Starbook.DMS dec)
+        {
+            Request request = new Request("Goto");
+            request.Parameters.Add("RA", ra);
+            request.Parameters.Add("Dec", dec);
+
+            return Handshake(request);
+        }
+
+        private Starbook.Response Home()
+        {
+            Request request = new Request("Home");
+
+            return Handshake(request);
+        }
+
+        private Starbook.Response Handshake(Request request)
+        {
+            lock (this.requests)
+            {
+                this.requests.Enqueue(request);
+            }
+
+            DateTime dateTime = DateTime.Now;
+
+            while (true)
+            {
+                lock (request)
+                {
+                    if (request.Response != null)
+                    {
+                        break;
+                    }
+                }
+
+                bool connected;
+
+                lock (this)
+                {
+                    connected = this.connectedState;
+                }
+
+                if (!connected)
+                {
+                    lock (request)
+                    {
+                        request.Response = Starbook.Response.ErrorUnknown;
+                    }
+
+                    break;
                 }
 
                 TimeSpan timeSpan = DateTime.Now - dateTime;
 
                 if (timeSpan.TotalSeconds >= 60)
                 {
-                    status = new Starbook.Status(); return Starbook.Response.ErrorUnknown;
+                    lock (request)
+                    {
+                        request.Response = Starbook.Response.ErrorUnknown;
+                    }
+
+                    break;
                 }
 
-                Thread.Sleep(1000);
+                Thread.Sleep(100);
             }
+
+            return (Starbook.Response)request.Response;
         }
 
         #endregion

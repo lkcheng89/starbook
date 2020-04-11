@@ -262,9 +262,15 @@ namespace ASCOM.Starbook
 
             IPAddress ipAddress = Telescope.starbook.IPAddress; Telescope.starbook.IPAddress = ipAddressCheck;
 
-            if (Telescope.starbook.GetStatus(out Telescope.Starbook.Status status) != Telescope.Starbook.Response.OK)
+            Telescope.Starbook.Response response = Telescope.starbook.GetStatus(out Telescope.Starbook.Status status);
+
+            if (response == Telescope.Starbook.Response.OK)
             {
-                status = new Telescope.Starbook.Status();
+                Telescope.LogMessage("SetupDialogForm", "Check: Starbook.GetStatus()={0} / RA={1}, Dec={2}, State={3}, Goto={4}", response, status.RA, status.Dec, status.State, status.Goto);
+            }
+            else
+            {
+                Telescope.LogMessage("SetupDialogForm", "Check: Starbook.GetStatus()={0}", response); status = new Telescope.Starbook.Status();
             }
 
             bool connected = false, initializing = false;
@@ -301,14 +307,26 @@ namespace ASCOM.Starbook
                     initializing = true;
                 }
 
-                if (Telescope.starbook.GetPlace(out Telescope.Starbook.Place place) != Telescope.Starbook.Response.OK)
+                response = Telescope.starbook.GetPlace(out Telescope.Starbook.Place place);
+
+                if (response == Telescope.Starbook.Response.OK)
                 {
-                    place = new Telescope.Starbook.Place();
+                    Telescope.LogMessage("SetupDialogForm", "Check: Starbook.GetPlace()={0} / Latitude={1}, Longitude={2}, Timezone={3}", response, place.Latitude, place.Longitude, place.Timezone);
+                }
+                else
+                {
+                    Telescope.LogMessage("SetupDialogForm", "Check: Starbook.GetPlace()={0}", response); place = new Telescope.Starbook.Place();
                 }
 
-                if (Telescope.starbook.GetTime(out DateTime dateTime) != Telescope.Starbook.Response.OK)
+                response = Telescope.starbook.GetTime(out DateTime dateTime);
+
+                if (response == Telescope.Starbook.Response.OK)
                 {
-                    dateTime = DateTime.MinValue;
+                    Telescope.LogMessage("SetupDialogForm", "Check: Starbook.GetTime()={0} / Time={1:yyyy/MM/dd HH:mm:ss}", response, dateTime);
+                }
+                else
+                {
+                    Telescope.LogMessage("SetupDialogForm", "Check: Starbook.GetTime()={0}", response); dateTime = DateTime.MinValue;
                 }
 
                 textBoxLatitudeDegree.Text = place.Latitude.Degree.ToString();
@@ -344,7 +362,18 @@ namespace ASCOM.Starbook
                 textBoxMinute.Text = dateTime.Minute.ToString();
                 textBoxSecond.Text = dateTime.Second.ToString();
 
-                labelFirmwareVersion.Text = string.Format("Firmware Version: {0}", Telescope.starbook.Version);
+                response = Telescope.starbook.GetVersion(out string version);
+
+                if (response == Telescope.Starbook.Response.OK)
+                {
+                    Telescope.LogMessage("SetupDialogForm", "Check: Starbook.GetVersion()={0} / Version={1}", response, version);
+                }
+                else
+                {
+                    Telescope.LogMessage("SetupDialogForm", "Check: Starbook.GetVersion()={0}", response); version = string.Empty;
+                }
+
+                labelFirmwareVersion.Text = string.Format("Firmware Version: {0}", version);
             }
 
             // Location & Timezone
