@@ -32,37 +32,37 @@ namespace ASCOM.Starbook
 
             if (ipAddress.Length == 4)
             {
-                this.textBoxIPAddress1.Text = ipAddress[0].ToString();
-                this.textBoxIPAddress2.Text = ipAddress[1].ToString();
-                this.textBoxIPAddress3.Text = ipAddress[2].ToString();
-                this.textBoxIPAddress4.Text = ipAddress[3].ToString();
+                this.textBoxIPAddress1.Text = ipAddress[0].ToString(CultureInfo.InvariantCulture);
+                this.textBoxIPAddress2.Text = ipAddress[1].ToString(CultureInfo.InvariantCulture);
+                this.textBoxIPAddress3.Text = ipAddress[2].ToString(CultureInfo.InvariantCulture);
+                this.textBoxIPAddress4.Text = ipAddress[3].ToString(CultureInfo.InvariantCulture);
             }
 
             comboBoxGuideRate.SelectedIndex = Telescope.guideRate;
 
-            textBoxGuideRate0.Text = Telescope.guideRates[0].ToString();
-            textBoxGuideRate1.Text = Telescope.guideRates[1].ToString();
-            textBoxGuideRate2.Text = Telescope.guideRates[2].ToString();
-            textBoxGuideRate3.Text = Telescope.guideRates[3].ToString();
-            textBoxGuideRate4.Text = Telescope.guideRates[4].ToString();
-            textBoxGuideRate5.Text = Telescope.guideRates[5].ToString();
-            textBoxGuideRate6.Text = Telescope.guideRates[6].ToString();
-            textBoxGuideRate7.Text = Telescope.guideRates[7].ToString();
-            textBoxGuideRate8.Text = Telescope.guideRates[8].ToString();
+            textBoxGuideRate0.Text = Telescope.guideRates[0].ToString(CultureInfo.InvariantCulture);
+            textBoxGuideRate1.Text = Telescope.guideRates[1].ToString(CultureInfo.InvariantCulture);
+            textBoxGuideRate2.Text = Telescope.guideRates[2].ToString(CultureInfo.InvariantCulture);
+            textBoxGuideRate3.Text = Telescope.guideRates[3].ToString(CultureInfo.InvariantCulture);
+            textBoxGuideRate4.Text = Telescope.guideRates[4].ToString(CultureInfo.InvariantCulture);
+            textBoxGuideRate5.Text = Telescope.guideRates[5].ToString(CultureInfo.InvariantCulture);
+            textBoxGuideRate6.Text = Telescope.guideRates[6].ToString(CultureInfo.InvariantCulture);
+            textBoxGuideRate7.Text = Telescope.guideRates[7].ToString(CultureInfo.InvariantCulture);
+            textBoxGuideRate8.Text = Telescope.guideRates[8].ToString(CultureInfo.InvariantCulture);
 
             Util util = new Util();
-            labelPlatformVersion.Text = string.Format("Platform Version: {0}.{1}", util.MajorVersion, util.MinorVersion);
-            //labelPlatformVersion.Text = string.Format("Platform Version: {0}.{1} {4}, Build {0}.{1}.{2}.{3}", util.MajorVersion, util.MinorVersion, util.ServicePack, util.BuildNumber, util.ServicePack > 0 ? string.Format("SP{0}", util.ServicePack) : string.Empty);
+            labelPlatformVersion.Text = string.Format(CultureInfo.InvariantCulture, "Platform Version: {0}.{1}", util.MajorVersion, util.MinorVersion);
+            //labelPlatformVersion.Text = string.Format(CultureInfo.InvariantCulture, "Platform Version: {0}.{1} {4}, Build {0}.{1}.{2}.{3}", util.MajorVersion, util.MinorVersion, util.ServicePack, util.BuildNumber, util.ServicePack > 0 ? string.Format("SP{0}", util.ServicePack) : string.Empty);
 
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            labelDriverVersion.Text = String.Format("Driver Version: {0}.{1}", version.Major, version.Minor);
+            labelDriverVersion.Text = String.Format(CultureInfo.InvariantCulture, "Driver Version: {0}.{1}", version.Major, version.Minor);
         }
 
         private bool CheckComponentIPAddress(out IPAddress ipAddress)
         {
-            ipAddress = IPAddress.None; int n;
+            ipAddress = IPAddress.None;
 
-            if (!int.TryParse(textBoxIPAddress1.Text, out n) || n < 0 || 255 < n)
+            if (!int.TryParse(textBoxIPAddress1.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int b1) || b1 < 0 || 255 < b1)
             {
                 MessageBox.Show(this, "The 1st byte of IP address should be ranged from 0 to 255.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxIPAddress1.SelectAll();
@@ -70,7 +70,7 @@ namespace ASCOM.Starbook
                 return false;
             }
 
-            if (!int.TryParse(textBoxIPAddress2.Text, out n) || n < 0 || 255 < n)
+            if (!int.TryParse(textBoxIPAddress2.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int b2) || b2 < 0 || 255 < b2)
             {
                 MessageBox.Show(this, "The 2nd byte of IP address should be ranged from 0 to 255.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxIPAddress2.SelectAll();
@@ -78,7 +78,7 @@ namespace ASCOM.Starbook
                 return false;
             }
 
-            if (!int.TryParse(textBoxIPAddress3.Text, out n) || n < 0 || 255 < n)
+            if (!int.TryParse(textBoxIPAddress3.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int b3) || b3 < 0 || 255 < b3)
             {
                 MessageBox.Show(this, "The 3rd byte of IP address should be ranged from 0 to 255.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxIPAddress3.SelectAll();
@@ -86,7 +86,7 @@ namespace ASCOM.Starbook
                 return false;
             }
 
-            if (!int.TryParse(textBoxIPAddress4.Text, out n) || n < 0 || 255 < n)
+            if (!int.TryParse(textBoxIPAddress4.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int b4) || b4 < 0 || 255 < b4)
             {
                 MessageBox.Show(this, "The 4th byte of IP address should be ranged from 0 to 255.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxIPAddress4.SelectAll();
@@ -94,7 +94,7 @@ namespace ASCOM.Starbook
                 return false;
             }
 
-            ipAddress = IPAddress.Parse(string.Format("{0}.{1}.{2}.{3}", textBoxIPAddress1.Text, textBoxIPAddress2.Text, textBoxIPAddress3.Text, textBoxIPAddress4.Text));
+            ipAddress = new IPAddress(new byte[] { (byte)b1, (byte)b2, (byte)b3, (byte)b4 });
 
             return true;
         }
@@ -103,7 +103,7 @@ namespace ASCOM.Starbook
         {
             location = new Telescope.Starbook.Place(); Telescope.Starbook.Direction direction;
 
-            if (!int.TryParse(textBoxLatitudeDegree.Text, out int degree) || degree < 0 || 90 < degree)
+            if (!int.TryParse(textBoxLatitudeDegree.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int degree) || degree < 0 || 90 < degree)
             {
                 MessageBox.Show(this, "Degree of latitude should be ranged from 0 to 90.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxLatitudeDegree.SelectAll();
@@ -111,7 +111,7 @@ namespace ASCOM.Starbook
                 return false;
             }
 
-            if (!int.TryParse(textBoxLatitudeMinute.Text, out int minute) || minute < 0 || 59 < minute)
+            if (!int.TryParse(textBoxLatitudeMinute.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int minute) || minute < 0 || 59 < minute)
             {
                 MessageBox.Show(this, "Minute of latitude should be ranged from 0 to 59.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxLatitudeMinute.SelectAll();
@@ -133,7 +133,7 @@ namespace ASCOM.Starbook
 
             location.Latitude = new Telescope.Starbook.DMS(direction, degree, minute, 0);
 
-            if (!int.TryParse(textBoxLongitudeDegree.Text, out degree) || degree < 0 || 180 < degree)
+            if (!int.TryParse(textBoxLongitudeDegree.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out degree) || degree < 0 || 180 < degree)
             {
                 MessageBox.Show(this, "Degree of longitude should be ranged from 0 to 180.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxLongitudeDegree.SelectAll();
@@ -141,7 +141,7 @@ namespace ASCOM.Starbook
                 return false;
             }
 
-            if (!int.TryParse(textBoxLongitudeMinute.Text, out minute) || minute < 0 || 59 < minute)
+            if (!int.TryParse(textBoxLongitudeMinute.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out minute) || minute < 0 || 59 < minute)
             {
                 MessageBox.Show(this, "Minute of longitude should be ranged from 0 to 59.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxLongitudeMinute.SelectAll();
@@ -163,7 +163,7 @@ namespace ASCOM.Starbook
 
             location.Longitude = new Telescope.Starbook.DMS(direction, degree, minute, 0);
 
-            if (!int.TryParse(textBoxTimezone.Text, out int timezone) || timezone < -12 || 14 < timezone)
+            if (!int.TryParse(textBoxTimezone.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int timezone) || timezone < -12 || 14 < timezone)
             {
                 MessageBox.Show(this, "Time zone should be ranged from -12 to 14.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxTimezone.SelectAll();
@@ -180,7 +180,7 @@ namespace ASCOM.Starbook
         {
             dateTime = DateTime.MinValue;
 
-            if (!int.TryParse(textBoxYear.Text, out int year) || year < 1 || 9999 < year)
+            if (!int.TryParse(textBoxYear.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int year) || year < 1 || 9999 < year)
             {
                 MessageBox.Show(this, "Year of date should be ranged from 1 to 9999.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxYear.SelectAll();
@@ -188,7 +188,7 @@ namespace ASCOM.Starbook
                 return false;
             }
 
-            if (!int.TryParse(textBoxMonth.Text, out int month) || month < 1 || 12 < month)
+            if (!int.TryParse(textBoxMonth.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int month) || month < 1 || 12 < month)
             {
                 MessageBox.Show(this, "Month of date should be ranged from 1 to 12.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxMonth.SelectAll();
@@ -196,7 +196,7 @@ namespace ASCOM.Starbook
                 return false;
             }
 
-            if (!int.TryParse(textBoxDay.Text, out int day) || day < 1 || 31 < day)
+            if (!int.TryParse(textBoxDay.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int day) || day < 1 || 31 < day)
             {
                 MessageBox.Show(this, "Day of date should be ranged from 1 to 31.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxDay.SelectAll();
@@ -204,7 +204,7 @@ namespace ASCOM.Starbook
                 return false;
             }
 
-            if (!int.TryParse(textBoxHour.Text, out int hour) || hour < 0 || 23 < hour)
+            if (!int.TryParse(textBoxHour.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int hour) || hour < 0 || 23 < hour)
             {
                 MessageBox.Show(this, "Hour of time should be ranged from 0 to 23.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxHour.SelectAll();
@@ -212,7 +212,7 @@ namespace ASCOM.Starbook
                 return false;
             }
 
-            if (!int.TryParse(textBoxMinute.Text, out int minute) || minute < 0 || 59 < minute)
+            if (!int.TryParse(textBoxMinute.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int minute) || minute < 0 || 59 < minute)
             {
                 MessageBox.Show(this, "Minute of time should be ranged from 0 to 59.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxMinute.SelectAll();
@@ -220,7 +220,7 @@ namespace ASCOM.Starbook
                 return false;
             }
 
-            if (!int.TryParse(textBoxSecond.Text, out int second) || second < 0 || 59 < second)
+            if (!int.TryParse(textBoxSecond.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int second) || second < 0 || 59 < second)
             {
                 MessageBox.Show(this, "Second of time should be ranged from 0 to 59.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxSecond.SelectAll();
@@ -240,9 +240,9 @@ namespace ASCOM.Starbook
                 guideRate = double.NaN; return true;
             }
 
-            if (!double.TryParse(textBoxGuideRate.Text, out guideRate))
+            if (!double.TryParse(textBoxGuideRate.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out guideRate))
             {
-                MessageBox.Show(this, string.Format("Format of guide rate {0} is incorrect.", textBoxGuideRateIndex), "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Format of guide rate {0} is incorrect.", textBoxGuideRateIndex), "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxGuideRate.SelectAll();
                 textBoxGuideRate.Focus();
                 return false;
@@ -329,8 +329,8 @@ namespace ASCOM.Starbook
                     Telescope.LogMessage("SetupDialogForm", "Check: Starbook.GetTime()={0}", response); dateTime = DateTime.MinValue;
                 }
 
-                textBoxLatitudeDegree.Text = place.Latitude.Degree.ToString();
-                textBoxLatitudeMinute.Text = place.Latitude.Minute.ToString();
+                textBoxLatitudeDegree.Text = place.Latitude.Degree.ToString(CultureInfo.InvariantCulture);
+                textBoxLatitudeMinute.Text = place.Latitude.Minute.ToString(CultureInfo.InvariantCulture);
 
                 if (place.Latitude.Direction == Telescope.Starbook.Direction.North)
                 {
@@ -341,8 +341,8 @@ namespace ASCOM.Starbook
                     comboBoxLatitudeDirection.SelectedItem = "S";
                 }
 
-                textBoxLongitudeDegree.Text = place.Longitude.Degree.ToString();
-                textBoxLongitudeMinute.Text = place.Longitude.Minute.ToString();
+                textBoxLongitudeDegree.Text = place.Longitude.Degree.ToString(CultureInfo.InvariantCulture);
+                textBoxLongitudeMinute.Text = place.Longitude.Minute.ToString(CultureInfo.InvariantCulture);
 
                 if (place.Longitude.Direction == Telescope.Starbook.Direction.East)
                 {
@@ -353,14 +353,14 @@ namespace ASCOM.Starbook
                     comboBoxLongitudeDirection.SelectedItem = "W";
                 }
 
-                textBoxTimezone.Text = place.Timezone.ToString();
+                textBoxTimezone.Text = place.Timezone.ToString(CultureInfo.InvariantCulture);
 
-                textBoxYear.Text = dateTime.Year.ToString();
-                textBoxMonth.Text = dateTime.Month.ToString();
-                textBoxDay.Text = dateTime.Day.ToString();
-                textBoxHour.Text = dateTime.Hour.ToString();
-                textBoxMinute.Text = dateTime.Minute.ToString();
-                textBoxSecond.Text = dateTime.Second.ToString();
+                textBoxYear.Text = dateTime.Year.ToString(CultureInfo.InvariantCulture);
+                textBoxMonth.Text = dateTime.Month.ToString(CultureInfo.InvariantCulture);
+                textBoxDay.Text = dateTime.Day.ToString(CultureInfo.InvariantCulture);
+                textBoxHour.Text = dateTime.Hour.ToString(CultureInfo.InvariantCulture);
+                textBoxMinute.Text = dateTime.Minute.ToString(CultureInfo.InvariantCulture);
+                textBoxSecond.Text = dateTime.Second.ToString(CultureInfo.InvariantCulture);
 
                 response = Telescope.starbook.GetVersion(out string version);
 
@@ -373,7 +373,7 @@ namespace ASCOM.Starbook
                     Telescope.LogMessage("SetupDialogForm", "Check: Starbook.GetVersion()={0}", response); version = string.Empty;
                 }
 
-                labelFirmwareVersion.Text = string.Format("Firmware Version: {0}", version);
+                labelFirmwareVersion.Text = string.Format(CultureInfo.InvariantCulture, "Firmware Version: {0}", version);
             }
 
             // Location & Timezone
@@ -474,7 +474,7 @@ namespace ASCOM.Starbook
 
                 if (response != Telescope.Starbook.Response.OK)
                 {
-                    MessageBox.Show(this, string.Format("Cannot set location: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot set location: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 
@@ -491,7 +491,7 @@ namespace ASCOM.Starbook
 
                 if (response != Telescope.Starbook.Response.OK)
                 {
-                    MessageBox.Show(this, string.Format("Cannot set date & time: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot set date & time: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 
@@ -501,7 +501,7 @@ namespace ASCOM.Starbook
 
                 if (response != Telescope.Starbook.Response.OK)
                 {
-                    MessageBox.Show(this, string.Format("Cannot set guide rate: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot set guide rate: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 
@@ -511,7 +511,7 @@ namespace ASCOM.Starbook
 
                 if (response != Telescope.Starbook.Response.OK)
                 {
-                    MessageBox.Show(this, string.Format("Cannot save setting: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot save setting: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 
@@ -590,13 +590,13 @@ namespace ASCOM.Starbook
             {
                 DateTime dateTime = DateTime.Now;
 
-                textBoxYear.Text = dateTime.Year.ToString();
-                textBoxMonth.Text = dateTime.Month.ToString();
-                textBoxDay.Text = dateTime.Day.ToString();
+                textBoxYear.Text = dateTime.Year.ToString(CultureInfo.InvariantCulture);
+                textBoxMonth.Text = dateTime.Month.ToString(CultureInfo.InvariantCulture);
+                textBoxDay.Text = dateTime.Day.ToString(CultureInfo.InvariantCulture);
 
-                textBoxHour.Text = dateTime.Hour.ToString();
-                textBoxMinute.Text = dateTime.Minute.ToString();
-                textBoxSecond.Text = dateTime.Second.ToString();
+                textBoxHour.Text = dateTime.Hour.ToString(CultureInfo.InvariantCulture);
+                textBoxMinute.Text = dateTime.Minute.ToString(CultureInfo.InvariantCulture);
+                textBoxSecond.Text = dateTime.Second.ToString(CultureInfo.InvariantCulture);
             }
         }
 
@@ -621,7 +621,7 @@ namespace ASCOM.Starbook
         {
             try
             {
-                System.Diagnostics.Process.Start(string.Format("mailto:{0}", labelEmail.Text));
+                System.Diagnostics.Process.Start(string.Format(CultureInfo.InvariantCulture, "mailto:{0}", labelEmail.Text));
             }
             catch (System.Exception other)
             {

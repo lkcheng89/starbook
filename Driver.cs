@@ -75,17 +75,17 @@ namespace ASCOM.Starbook
         private static string driverDescription = "Starbook";
 
         internal static string ipAddressProfileName = "IPAddress"; // Constants used for Profile persistence
-        internal static string ipAddressDefault = "169.254.1.1";
+        internal static IPAddress ipAddressDefault = new IPAddress(new byte[] { 169, 254, 1, 1 });
         internal static string slewSettleTimeProfileName = "SlewSettleTime";
-        internal static string slewSettleTimeDefault = "0";
+        internal static short slewSettleTimeDefault = 0;
         internal static string guideRateProfileName = "GuideRate";
-        internal static string guideRateDefault = "0";
+        internal static int guideRateDefault = 0;
         internal static string guideRatesProfileName = "GuideRates";
-        internal static string guideRatesDefault = "0.75,0.75,18,37,75,150,300,500,1000";
+        internal static double[] guideRatesDefault = new double[] { 0.75, 0.75, 18, 37, 75, 150, 300, 500, 1000 };
         internal static string traceLoggerProfileName = "TraceLogger";
-        internal static string traceLoggerDefault = "False";
+        internal static bool traceLoggerDefault = false;
 
-        internal static Starbook starbook = new Starbook(); // Variables to hold the currrent device configuration
+        internal static Starbook starbook = new Starbook(ipAddressDefault); // Variables to hold the currrent device configuration
         internal static short slewSettleTime;
         internal static int guideRate;
         internal static double[] guideRates;
@@ -279,12 +279,12 @@ namespace ASCOM.Starbook
             get
             {
                 bool connected = IsConnected;
-                LogMessage("Connected_get", connected.ToString());
+                LogMessage("Connected_get", "{0}", connected);
                 return connected;
             }
             set
             {
-                LogMessage("Connected_set", value.ToString());
+                LogMessage("Connected_set", "{0}", value);
 
                 lock (this)
                 {
@@ -401,7 +401,7 @@ namespace ASCOM.Starbook
             get
             {
                 AlignmentModes mode = AlignmentModes.algGermanPolar;
-                LogMessage("AlignmentMode_get", mode.ToString());
+                LogMessage("AlignmentMode_get", "{0}", mode);
                 return mode;
             }
         }
@@ -447,7 +447,7 @@ namespace ASCOM.Starbook
                 transform.SetJ2000(status.RA.Value, status.Dec.Value);
 
                 double altitude = transform.ElevationTopocentric;
-                LogMessage("Altitude_get", altitude.ToString());
+                LogMessage("Altitude_get", "{0}", altitude);
                 return altitude;
             }
         }
@@ -483,7 +483,7 @@ namespace ASCOM.Starbook
                     atHome = this.atHome;
                 }
 
-                LogMessage("AtHome_get", atHome.ToString());
+                LogMessage("AtHome_get", "{0}", atHome);
                 return atHome;
             }
         }
@@ -495,7 +495,7 @@ namespace ASCOM.Starbook
                 CheckConnected("AtPark_get");
 
                 bool atPark = parking;
-                LogMessage("AtPark_get", atPark.ToString());
+                LogMessage("AtPark_get", "{0}", atPark);
                 return atPark;
             }
         }
@@ -553,7 +553,7 @@ namespace ASCOM.Starbook
                 transform.SetJ2000(status.RA.Value, status.Dec.Value);
 
                 double azimuth = transform.AzimuthTopocentric;
-                LogMessage("Azimuth_get", azimuth.ToString());
+                LogMessage("Azimuth_get", "{0}", azimuth);
                 return azimuth;
             }
         }
@@ -562,7 +562,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanFindHome_get", true.ToString());
+                LogMessage("CanFindHome_get", "{0}", true);
                 return true;
             }
         }
@@ -600,7 +600,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanPark_get", true.ToString());
+                LogMessage("CanPark_get", "{0}", true);
                 return true;
             }
         }
@@ -609,7 +609,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanPulseGuide_get", true.ToString());
+                LogMessage("CanPulseGuide_get", "{0}", true);
                 return true;
             }
         }
@@ -618,7 +618,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanSetDeclinationRate_get", false.ToString());
+                LogMessage("CanSetDeclinationRate_get", "{0}", false);
                 return false;
             }
         }
@@ -627,7 +627,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanSetGuideRates_get", true.ToString());
+                LogMessage("CanSetGuideRates_get", "{0}", true);
                 return true;
             }
         }
@@ -636,7 +636,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanSetPark_get", true.ToString());
+                LogMessage("CanSetPark_get", "{0}", true);
                 return true;
             }
         }
@@ -645,7 +645,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanSetPierSide_get", false.ToString());
+                LogMessage("CanSetPierSide_get", "{0}", false);
                 return false;
             }
         }
@@ -654,7 +654,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanSetRightAscensionRate_get", false.ToString());
+                LogMessage("CanSetRightAscensionRate_get", "{0}", false);
                 return false;
             }
         }
@@ -663,7 +663,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanSetTracking_get", true.ToString());
+                LogMessage("CanSetTracking_get", "{0}", true);
                 return true;
             }
         }
@@ -672,7 +672,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanSlew_get", true.ToString());
+                LogMessage("CanSlew_get", "{0}", true);
                 return true;
             }
         }
@@ -681,7 +681,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanSlewAltAz_get", true.ToString());
+                LogMessage("CanSlewAltAz_get", "{0}", true);
                 return true;
             }
         }
@@ -690,7 +690,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanSlewAltAzAsync_get", true.ToString());
+                LogMessage("CanSlewAltAzAsync_get", "{0}", true);
                 return true;
             }
         }
@@ -699,7 +699,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanSlewAsync_get", true.ToString());
+                LogMessage("CanSlewAsync_get", "{0}", true);
                 return true;
             }
         }
@@ -708,7 +708,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanSync_get", true.ToString());
+                LogMessage("CanSync_get", "{0}", true);
                 return true;
             }
         }
@@ -717,7 +717,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanSyncAltAz_get", true.ToString());
+                LogMessage("CanSyncAltAz_get", "{0}", true);
                 return true;
             }
         }
@@ -726,7 +726,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("CanUnpark_get", true.ToString());
+                LogMessage("CanUnpark_get", "{0}", true);
                 return true;
             }
         }
@@ -756,7 +756,7 @@ namespace ASCOM.Starbook
             get
             {
                 double declination = 0.0;
-                LogMessage("DeclinationRate_get", declination.ToString());
+                LogMessage("DeclinationRate_get", "{0}", declination);
                 return declination;
             }
             set
@@ -793,7 +793,7 @@ namespace ASCOM.Starbook
                 CheckConnected("EquatorialSystem_get");
 
                 EquatorialCoordinateType equatorialSystem = EquatorialCoordinateType.equJ2000;
-                LogMessage("EquatorialSystem_get", equatorialSystem.ToString());
+                LogMessage("EquatorialSystem_get", "{0}", equatorialSystem);
                 return equatorialSystem;
             }
         }
@@ -931,7 +931,7 @@ namespace ASCOM.Starbook
                     isPulseGuiding = pulseGuiding;
                 }
 
-                LogMessage("IsPulseGuiding_get", isPulseGuiding.ToString());
+                LogMessage("IsPulseGuiding_get", "{0}", isPulseGuiding);
                 return isPulseGuiding;
             }
         }
@@ -982,7 +982,7 @@ namespace ASCOM.Starbook
                         if (Math.Abs(Rate) < minRate || maxRate < Math.Abs(Rate))
                         {
                             LogMessage("MoveAxis", "InvalidValueException: Rate={0}", Rate);
-                            throw new ASCOM.InvalidValueException("MoveAxis", "Rate", string.Format("{0} to {1} or {2} to {3}", minRate, maxRate, -maxRate, -minRate));
+                            throw new ASCOM.InvalidValueException("MoveAxis", "Rate", string.Format(CultureInfo.InvariantCulture, "{0} to {1} or {2} to {3}", minRate, maxRate, -maxRate, -minRate));
                         }
 
                         int guideRate = GuideRate(Math.Abs(Rate));
@@ -1192,7 +1192,7 @@ namespace ASCOM.Starbook
             get
             {
                 double rightAscensionRate = 0.0;
-                LogMessage("RightAscensionRate_get", rightAscensionRate.ToString());
+                LogMessage("RightAscensionRate_get", "{0}", rightAscensionRate);
                 return rightAscensionRate;
             }
             set
@@ -1281,7 +1281,7 @@ namespace ASCOM.Starbook
                 // Reduce to the range 0 to 24 hours
                 siderealTime = astroUtilities.ConditionRA(siderealTime);
 
-                LogMessage("SiderealTime_get", siderealTime.ToString());
+                LogMessage("SiderealTime_get", "{0}", siderealTime);
                 return siderealTime;
             }
         }
@@ -1291,7 +1291,7 @@ namespace ASCOM.Starbook
             get
             {
                 double siteElevation = 0;
-                LogMessage("SiteElevation_get", siteElevation.ToString());
+                LogMessage("SiteElevation_get", "{0}", siteElevation);
                 return siteElevation;
             }
             set
@@ -1437,7 +1437,7 @@ namespace ASCOM.Starbook
         {
             get
             {
-                LogMessage("SlewSettleTime_get", slewSettleTime.ToString());
+                LogMessage("SlewSettleTime_get", "{0}", slewSettleTime);
                 return slewSettleTime;
             }
             set
@@ -1829,7 +1829,7 @@ namespace ASCOM.Starbook
                     slewing = status.Goto;
                 }
 
-                LogMessage("Slewing_get", slewing.ToString());
+                LogMessage("Slewing_get", "{0}", slewing);
                 return slewing;
             }
         }
@@ -1992,7 +1992,7 @@ namespace ASCOM.Starbook
                     throw new ASCOM.InvalidOperationException("TargetDeclination_get: TargetDeclination is not set yet.");
                 }
 
-                LogMessage("TargetDeclination_get", targetDeclination.ToString());
+                LogMessage("TargetDeclination_get", "{0}", targetDeclination);
                 return targetDeclination;
             }
             set
@@ -2018,7 +2018,7 @@ namespace ASCOM.Starbook
                     throw new ASCOM.InvalidOperationException("TargetRightAscension_get: TargetRightAscension is not set yet.");
                 }
 
-                LogMessage("TargetRightAscension_get", targetRightAscension.ToString());
+                LogMessage("TargetRightAscension_get", "{0}", targetRightAscension);
                 return targetRightAscension;
             }
             set
@@ -2057,7 +2057,7 @@ namespace ASCOM.Starbook
                 }
                 else
                 {
-                    LogMessage("Tracking_get", tracking.ToString());
+                    LogMessage("Tracking_get", "{0}", tracking);
                 }
 
                 return tracking;
@@ -2107,7 +2107,7 @@ namespace ASCOM.Starbook
             get
             {
                 DriveRates trackingRate = DriveRates.driveSidereal;
-                LogMessage("TrackingRate_get", trackingRate.ToString());
+                LogMessage("TrackingRate_get", "{0}", trackingRate);
                 return trackingRate;
             }
             set
@@ -2130,7 +2130,7 @@ namespace ASCOM.Starbook
 
                 foreach (DriveRates driveRate in trackingRates)
                 {
-                    LogMessage("TrackingRates_get", driveRate.ToString());
+                    LogMessage("TrackingRates_get", "{0}", driveRate);
                 }
 
                 return trackingRates;
@@ -2333,16 +2333,32 @@ namespace ASCOM.Starbook
         /// </summary>
         internal void ReadProfile()
         {
+            bool recovering = false;
+
             using (Profile driverProfile = new Profile())
             {
                 driverProfile.DeviceType = "Telescope";
-                starbook.IPAddress = IPAddress.Parse(driverProfile.GetValue(driverID, ipAddressProfileName, string.Empty, ipAddressDefault));
-                slewSettleTime = short.Parse(driverProfile.GetValue(driverID, slewSettleTimeProfileName, string.Empty, slewSettleTimeDefault));
 
-                guideRate = int.Parse(driverProfile.GetValue(driverID, guideRateProfileName, string.Empty, guideRateDefault));
+                if (!IPAddress.TryParse(driverProfile.GetValue(driverID, ipAddressProfileName, string.Empty, string.Empty), out IPAddress ipAddress))
+                {
+                    ipAddress = ipAddressDefault; recovering = true;
+                }
+
+                starbook.IPAddress = ipAddress;
+
+                if (!short.TryParse(driverProfile.GetValue(driverID, slewSettleTimeProfileName, string.Empty, string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out slewSettleTime))
+                {
+                    slewSettleTime = slewSettleTimeDefault; recovering = true;
+                }
+
+                if (!int.TryParse(driverProfile.GetValue(driverID, guideRateProfileName, string.Empty, string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out guideRate))
+                {
+                    guideRate = guideRateDefault; recovering = true;
+                }
+
                 guideRates = new double[9];
 
-                string[] guideRateStrings = driverProfile.GetValue(driverID, guideRatesProfileName, string.Empty, guideRatesDefault).Split(',');
+                string[] guideRateStrings = driverProfile.GetValue(driverID, guideRatesProfileName, string.Empty, string.Empty).Split(',');
 
                 if (guideRateStrings.Length == 9)
                 {
@@ -2352,14 +2368,28 @@ namespace ASCOM.Starbook
                         {
                             guideRates[index] = double.NaN;
                         }
-                        else
+                        else if (!double.TryParse(guideRateStrings[index], NumberStyles.Number, CultureInfo.InvariantCulture, out guideRates[index]))
                         {
-                            guideRates[index] = double.Parse(guideRateStrings[index]);
+                            Array.Copy(guideRatesDefault, guideRates, 9); recovering = true; break;
                         }
                     }
                 }
+                else
+                {
+                    Array.Copy(guideRatesDefault, guideRates, 9); recovering = true;
+                }
 
-                traceLogger.Enabled = Convert.ToBoolean(driverProfile.GetValue(driverID, traceLoggerProfileName, string.Empty, traceLoggerDefault));
+                if (!bool.TryParse(driverProfile.GetValue(driverID, traceLoggerProfileName, string.Empty, string.Empty), out bool traceLoggerEnabled))
+                {
+                    traceLoggerEnabled = traceLoggerDefault; recovering = true;
+                }
+
+                traceLogger.Enabled = traceLoggerEnabled;
+            }
+
+            if (recovering)
+            {
+                WriteProfile();
             }
         }
 
@@ -2372,9 +2402,9 @@ namespace ASCOM.Starbook
             {
                 driverProfile.DeviceType = "Telescope";
                 driverProfile.WriteValue(driverID, ipAddressProfileName, starbook.IPAddress.ToString());
-                driverProfile.WriteValue(driverID, slewSettleTimeProfileName, slewSettleTime.ToString());
+                driverProfile.WriteValue(driverID, slewSettleTimeProfileName, slewSettleTime.ToString(CultureInfo.InvariantCulture));
 
-                driverProfile.WriteValue(driverID, guideRateProfileName, guideRate.ToString());
+                driverProfile.WriteValue(driverID, guideRateProfileName, guideRate.ToString(CultureInfo.InvariantCulture));
 
                 string[] guideRateStrings = new string[9];
 
@@ -2386,13 +2416,13 @@ namespace ASCOM.Starbook
                     }
                     else
                     {
-                        guideRateStrings[index] = guideRates[index].ToString();
+                        guideRateStrings[index] = guideRates[index].ToString(CultureInfo.InvariantCulture);
                     }
                 }
 
                 driverProfile.WriteValue(driverID, guideRatesProfileName, string.Join(",", guideRateStrings));
 
-                driverProfile.WriteValue(driverID, traceLoggerProfileName, traceLogger.Enabled.ToString());
+                driverProfile.WriteValue(driverID, traceLoggerProfileName, traceLogger.Enabled.ToString(CultureInfo.InvariantCulture));
             }
         }
 
@@ -2404,7 +2434,7 @@ namespace ASCOM.Starbook
         /// <param name="args"></param>
         internal static void LogMessage(string identifier, string message, params object[] args)
         {
-            var msg = string.Format(message, args);
+            var msg = string.Format(CultureInfo.InvariantCulture, message, args);
 
             lock (traceLogger)
             {

@@ -30,12 +30,14 @@ namespace ASCOM.Starbook
         {
             WebClientTimeout web;
 
-            public Starbook()
+            public Starbook(IPAddress ipAddress)
             {
-                this.IPAddress = IPAddress.Parse("169.254.1.1");
+                this.IPAddress = ipAddress;
 
-                this.web = new WebClientTimeout();
-                this.web.Timeout = 5000;
+                this.web = new WebClientTimeout()
+                {
+                    Timeout = 5000
+                };
             }
 
             /// <summary>
@@ -150,7 +152,7 @@ namespace ASCOM.Starbook
             {
                 time = DateTime.MinValue; Response response = this.Handshake("GETTIME", out Dictionary<string, string> dictionary);
 
-                if (response == Response.ErrorUnknown && dictionary.TryGetValue("TIME", out string s) && DateTime.TryParseExact(s, "yyyy+MM+dd+HH+mm+ss", null, DateTimeStyles.None, out time))
+                if (response == Response.ErrorUnknown && dictionary.TryGetValue("TIME", out string s) && DateTime.TryParseExact(s, "yyyy+MM+dd+HH+mm+ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out time))
                 {
                     response.Assign(Response.OK);
                 }
@@ -166,7 +168,7 @@ namespace ASCOM.Starbook
             /// 
             public Response SetTime(DateTime time)
             {
-                return this.Handshake(string.Format("SETTIME?TIME={0:yyyy+MM+dd+HH+mm+ss}", time));
+                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "SETTIME?TIME={0:yyyy+MM+dd+HH+mm+ss}", time));
             }
 
             /// <summary>
@@ -210,7 +212,7 @@ namespace ASCOM.Starbook
                             }
                             case "TIMEZONE":
                             {
-                                if (int.TryParse(item.Value, out int timezone))
+                                if (int.TryParse(item.Value, NumberStyles.Number, CultureInfo.InvariantCulture, out int timezone))
                                 {
                                     place.Timezone = timezone; placeTimezone = true;
                                 }
@@ -236,7 +238,7 @@ namespace ASCOM.Starbook
             /// 
             public Response SetPlace(Place place)
             {
-                return this.Handshake(string.Format("SETPLACE?LATITUDE={0}&LONGITUDE={1}&TIMEZONE={2:00}", place.Latitude, place.Longitude, place.Timezone));
+                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "SETPLACE?LATITUDE={0}&LONGITUDE={1}&TIMEZONE={2:00}", place.Latitude, place.Longitude, place.Timezone));
             }
 
             /// <summary>
@@ -291,7 +293,7 @@ namespace ASCOM.Starbook
             /// 
             public Response Goto(HMS ra, DMS dec)
             {
-                return this.Handshake(string.Format("GOTORADEC?RA={0}&DEC={1}", ra, dec));
+                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "GOTORADEC?RA={0}&DEC={1}", ra, dec));
             }
 
             /// <summary>
@@ -333,7 +335,7 @@ namespace ASCOM.Starbook
             /// <returns>Response string: OK or ERROR:%</returns>
             public Response Align(HMS ra, DMS dec)
             {
-                return this.Handshake(string.Format("ALIGN?RA={0}&DEC={1}", ra, dec));
+                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "ALIGN?RA={0}&DEC={1}", ra, dec));
             }
 
             /// <summary>
@@ -343,7 +345,7 @@ namespace ASCOM.Starbook
             /// <returns>Response string: OK or ERROR:%</returns>
             public Response SetSpeed(int speed)
             {
-                return this.Handshake(string.Format("SETSPEED?SPEED={0}", speed));
+                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "SETSPEED?SPEED={0}", speed));
             }
 
             /// <summary>
@@ -356,7 +358,7 @@ namespace ASCOM.Starbook
             {
                 round = 0; Response response = this.Handshake("GETROUND");
 
-                if (response == Response.ErrorUnknown && int.TryParse(response.Reply, out round))
+                if (response == Response.ErrorUnknown && int.TryParse(response.Reply, NumberStyles.Number, CultureInfo.InvariantCulture, out round))
                 {
                     response.Assign(Response.OK);
                 }
@@ -384,7 +386,7 @@ namespace ASCOM.Starbook
                         {
                             case "X":
                             {
-                                if (int.TryParse(item.Value, out int x))
+                                if (int.TryParse(item.Value, NumberStyles.Number, CultureInfo.InvariantCulture, out int x))
                                 {
                                     xy.X = x; xyX = true;
                                 }
@@ -392,7 +394,7 @@ namespace ASCOM.Starbook
                             }
                             case "Y":
                             {
-                                if (int.TryParse(item.Value, out int y))
+                                if (int.TryParse(item.Value, NumberStyles.Number, CultureInfo.InvariantCulture, out int y))
                                 {
                                     xy.Y = y; xyY = true;
                                 }
@@ -552,7 +554,7 @@ namespace ASCOM.Starbook
                 {
                     lock (this.web)
                     {
-                        strinq = this.web.DownloadString(string.Format("http://{0}/{1}", this.IPAddress, command));
+                        strinq = this.web.DownloadString(string.Format(CultureInfo.InvariantCulture, "http://{0}/{1}", this.IPAddress, command));
                     }
                 }
                 catch
@@ -580,7 +582,7 @@ namespace ASCOM.Starbook
                     {
                         lock (this.web)
                         {
-                            bytes = this.web.DownloadData(string.Format("http://{0}/{1}", this.IPAddress, command));
+                            bytes = this.web.DownloadData(string.Format(CultureInfo.InvariantCulture, "http://{0}/{1}", this.IPAddress, command));
                         }
                     }
                     else
@@ -591,7 +593,7 @@ namespace ASCOM.Starbook
 
                             using (NetworkStream networkStream = tcpClient.GetStream())
                             {
-                                byte[] request = Encoding.UTF8.GetBytes(string.Format("GET /{0} HTTP/1.1\r\n\r\n", command));
+                                byte[] request = Encoding.UTF8.GetBytes(string.Format(CultureInfo.InvariantCulture, "GET /{0} HTTP/1.1\r\n\r\n", command));
 
                                 networkStream.Write(request, 0, request.Length);
                                 networkStream.Flush();
@@ -727,7 +729,7 @@ namespace ASCOM.Starbook
 
                 public override string ToString()
                 {
-                    return string.Format("{0} [{1}] [{2}]", this.response, this.Command, this.Reply);
+                    return string.Format(CultureInfo.InvariantCulture, "{0} [{1}] [{2}]", this.response, this.Command, this.Reply);
                 }
 
                 public static bool operator==(Response a, Response b)
@@ -777,8 +779,8 @@ namespace ASCOM.Starbook
                 {
                     hms = new HMS(); Match match = Regex.Match(s, @"(?<Hour>\d+)\+(?<Minute>\d+(\.\d+)?)");
 
-                    if (!match.Success || !int.TryParse(match.Groups["Hour"].Value, out int hour) || hour < 0 || /*23 < hour ||*/
-                                          !double.TryParse(match.Groups["Minute"].Value, out double minute) || minute < 0 || 60 <= minute)
+                    if (!match.Success || !int.TryParse(match.Groups["Hour"].Value, NumberStyles.Number, CultureInfo.InvariantCulture, out int hour) || hour < 0 || /*23 < hour ||*/
+                                          !double.TryParse(match.Groups["Minute"].Value, NumberStyles.Number, CultureInfo.InvariantCulture, out double minute) || minute < 0 || 60 <= minute)
                     {
                         return false;
                     }
@@ -804,7 +806,7 @@ namespace ASCOM.Starbook
 
                 public override string ToString()
                 {
-                    return string.Format("{0:00}+{1:00.0}", this.Hour, this.Minute + this.Second / 60.0);
+                    return string.Format(CultureInfo.InvariantCulture, "{0:00}+{1:00.0}", this.Hour, this.Minute + this.Second / 60.0);
                 }
             }
 
@@ -896,7 +898,8 @@ namespace ASCOM.Starbook
                         direction = Direction.Positive;
                     }
 
-                    if (!int.TryParse(match.Groups["Degree"].Value, out int degree) || !double.TryParse(match.Groups["Minute"].Value, out double minute))
+                    if (!int.TryParse(match.Groups["Degree"].Value, NumberStyles.Number, CultureInfo.InvariantCulture, out int degree) ||
+                        !double.TryParse(match.Groups["Minute"].Value, NumberStyles.Number, CultureInfo.InvariantCulture, out double minute))
                     {
                         return false;
                     }
@@ -954,12 +957,12 @@ namespace ASCOM.Starbook
                             direction = "W"; degree = true; break;
                         case Direction.Positive:
                         default:
-                            direction = string.Empty; break;
+                            direction = "0"; break;
                         case Direction.Negative:
                             direction = "-"; break;
                     }
 
-                    return string.Format(degree ? "{0}{1:000}+{2:00}" : "{0}{1:00}+{2:00}", direction, this.Degree, this.Minute);
+                    return string.Format(CultureInfo.InvariantCulture, degree ? "{0}{1:000}+{2:00}" : "{0}{1:00}+{2:00}", direction, this.Degree, this.Minute);
                 }
             }
 
