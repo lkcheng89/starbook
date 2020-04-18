@@ -46,8 +46,8 @@ Register ASCOM driver
 ^^^^^^^^^^^^^^^^^^^^^
 $(FrameworkDir)\\regasm.exe /codebase bin\\Release\\ASCOM.Starbook.Telescope.dll
 ::
-    * $(FrameworkDir) is located at C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319 for 32-bits platform;
-    * $(FrameworkDir) is located at C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319 for 64-bits platform.
+    * $(FrameworkDir) is located at C:\Windows\Microsoft.NET\Framework\v4.0.30319 for 32-bits platform;
+    * $(FrameworkDir) is located at C:\Windows\Microsoft.NET\Framework64\v4.0.30319 for 64-bits platform.
 
 *This step is ommitted when build in Debug mode, this is required only when build in Release mode.*
 
