@@ -33,6 +33,7 @@ namespace ASCOM.Starbook
             public Starbook(IPAddress ipAddress)
             {
                 this.IPAddress = ipAddress;
+                this.J2000 = true;
 
                 this.web = new WebClientTimeout()
                 {
@@ -45,6 +46,12 @@ namespace ASCOM.Starbook
             /// </summary>
             /// 
             public IPAddress IPAddress { get; set; }
+
+            /// <summary>
+            /// J2000 is used by the starbook controller (Default is True)
+            /// </summary>
+            /// 
+            public bool J2000 { get; set; }
 
             /// <summary>
             /// Get firmware version of the starbook controller.

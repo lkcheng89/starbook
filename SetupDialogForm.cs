@@ -25,7 +25,6 @@ namespace ASCOM.Starbook
 
         private void InitializeComponentProfile()
         {
-            chkTraceLogger.Checked = Telescope.traceLogger.Enabled;
             // set the list of com ports to those that are currently available
 
             byte[] ipAddress = Telescope.starbook.IPAddress.GetAddressBytes();
@@ -50,12 +49,63 @@ namespace ASCOM.Starbook
             textBoxGuideRate7.Text = Telescope.guideRates[7].ToString(CultureInfo.InvariantCulture);
             textBoxGuideRate8.Text = Telescope.guideRates[8].ToString(CultureInfo.InvariantCulture);
 
+            checkBoxJ2000.Checked = Telescope.j2000;
+            checkBoxAutoMeridianFlip.Checked = Telescope.autoMeridianFlip > 0;
+            checkBoxTraceLogger.Checked = Telescope.traceLogger.Enabled;
+
             Util util = new Util();
-            labelPlatformVersion.Text = string.Format(CultureInfo.InvariantCulture, "Platform Version: {0}.{1}", util.MajorVersion, util.MinorVersion);
-            //labelPlatformVersion.Text = string.Format(CultureInfo.InvariantCulture, "Platform Version: {0}.{1} {4}, Build {0}.{1}.{2}.{3}", util.MajorVersion, util.MinorVersion, util.ServicePack, util.BuildNumber, util.ServicePack > 0 ? string.Format("SP{0}", util.ServicePack) : string.Empty);
+
+            if (util.ServicePack > 0)
+            {
+                labelPlatformVersion.Text = string.Format(CultureInfo.InvariantCulture, "Platform Version: {0}.{1} SP{2}", util.MajorVersion, util.MinorVersion, util.ServicePack);
+            }
+            else
+            {
+                labelPlatformVersion.Text = string.Format(CultureInfo.InvariantCulture, "Platform Version: {0}.{1}", util.MajorVersion, util.MinorVersion);
+            }
 
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            labelDriverVersion.Text = String.Format(CultureInfo.InvariantCulture, "Driver Version: {0}.{1}", version.Major, version.Minor);
+            labelDriverVersion.Text = string.Format(CultureInfo.InvariantCulture, "Driver Version: {0}.{1}", version.Major, version.Minor);
+
+            /////
+
+            textBoxIPAddress1.TextChanged += buttonApply_Monitored;
+            textBoxIPAddress2.TextChanged += buttonApply_Monitored;
+            textBoxIPAddress3.TextChanged += buttonApply_Monitored;
+            textBoxIPAddress4.TextChanged += buttonApply_Monitored;
+
+            textBoxLatitudeDegree.TextChanged += buttonApply_Monitored;
+            textBoxLatitudeMinute.TextChanged += buttonApply_Monitored;
+            comboBoxLatitudeDirection.SelectedIndexChanged += buttonApply_Monitored;
+            textBoxLongitudeDegree.TextChanged += buttonApply_Monitored;
+            textBoxLongitudeMinute.TextChanged += buttonApply_Monitored;
+            comboBoxLongitudeDirection.SelectedIndexChanged += buttonApply_Monitored;
+            checkBoxSetLocation.CheckedChanged += buttonApply_Monitored;
+
+            textBoxYear.TextChanged += buttonApply_Monitored;
+            textBoxMonth.TextChanged += buttonApply_Monitored;
+            textBoxDay.TextChanged += buttonApply_Monitored;
+            textBoxHour.TextChanged += buttonApply_Monitored;
+            textBoxMinute.TextChanged += buttonApply_Monitored;
+            textBoxSecond.TextChanged += buttonApply_Monitored;
+            checkBoxSetDateTime.CheckedChanged += buttonApply_Monitored;
+            checkBoxSyncSystemTime.CheckedChanged += buttonApply_Monitored;
+
+            comboBoxGuideRate.SelectedIndexChanged += buttonApply_Monitored;
+            textBoxGuideRate0.TextChanged += buttonApply_Monitored;
+            textBoxGuideRate1.TextChanged += buttonApply_Monitored;
+            textBoxGuideRate2.TextChanged += buttonApply_Monitored;
+            textBoxGuideRate3.TextChanged += buttonApply_Monitored;
+            textBoxGuideRate4.TextChanged += buttonApply_Monitored;
+            textBoxGuideRate5.TextChanged += buttonApply_Monitored;
+            textBoxGuideRate6.TextChanged += buttonApply_Monitored;
+            textBoxGuideRate7.TextChanged += buttonApply_Monitored;
+            textBoxGuideRate8.TextChanged += buttonApply_Monitored;
+            checkBoxSetGuideRate.CheckedChanged += buttonApply_Monitored;
+
+            checkBoxJ2000.CheckedChanged += buttonApply_Monitored;
+            checkBoxAutoMeridianFlip.CheckedChanged += buttonApply_Monitored;
+            checkBoxTraceLogger.CheckedChanged += buttonApply_Monitored;
         }
 
         private bool CheckComponentIPAddress(out IPAddress ipAddress)
@@ -447,97 +497,6 @@ namespace ASCOM.Starbook
             Telescope.starbook.IPAddress = ipAddress;
         }
 
-        private void buttonOK_Click(object sender, EventArgs e) // OK button event handler
-        {
-            // Place any validation constraint checks here
-            // Update the state variables with results from the dialogue
-
-            IPAddress ipAddress;
-
-            if (!CheckComponentIPAddress(out ipAddress))
-            {
-                this.DialogResult = DialogResult.None; return;
-            }
-
-            Telescope.starbook.IPAddress = ipAddress;
-
-            if (checkBoxSetLocation.Enabled && checkBoxSetLocation.Checked)
-            {
-                Telescope.Starbook.Place location;
-
-                if (!CheckComponentLocation(out location))
-                {
-                    this.DialogResult = DialogResult.None; return;
-                }
-
-                Telescope.Starbook.Response response = Telescope.starbook.SetPlace(location);
-
-                if (response != Telescope.Starbook.Response.OK)
-                {
-                    MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot set location: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-
-            if (checkBoxSetDateTime.Enabled && checkBoxSetDateTime.Checked)
-            {
-                DateTime dateTime;
-
-                if (!CheckComponentDateTime(out dateTime))
-                {
-                    this.DialogResult = DialogResult.None; return;
-                }
-
-                Telescope.Starbook.Response response = Telescope.starbook.SetTime(dateTime);
-
-                if (response != Telescope.Starbook.Response.OK)
-                {
-                    MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot set date & time: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-
-            if (checkBoxSetGuideRate.Enabled && checkBoxSetGuideRate.Checked)
-            {
-                Telescope.Starbook.Response response = Telescope.starbook.SetSpeed(comboBoxGuideRate.SelectedIndex);
-
-                if (response != Telescope.Starbook.Response.OK)
-                {
-                    MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot set guide rate: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-
-            if ((checkBoxSetLocation.Enabled && checkBoxSetLocation.Checked) || (checkBoxSetDateTime.Enabled && checkBoxSetDateTime.Checked) || (checkBoxSetGuideRate.Enabled && checkBoxSetGuideRate.Checked))
-            {
-                Telescope.Starbook.Response response = Telescope.starbook.Save();
-
-                if (response != Telescope.Starbook.Response.OK)
-                {
-                    MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot save setting: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-
-            if (checkBoxSetGuideRate.Enabled && checkBoxSetGuideRate.Checked)
-            {
-                Telescope.guideRate = comboBoxGuideRate.SelectedIndex;
-
-                if (!CheckComponentGuideRate(textBoxGuideRate0, 0, out Telescope.guideRates[0])) { this.DialogResult = DialogResult.None; return; }
-                if (!CheckComponentGuideRate(textBoxGuideRate1, 1, out Telescope.guideRates[1])) { this.DialogResult = DialogResult.None; return; }
-                if (!CheckComponentGuideRate(textBoxGuideRate2, 2, out Telescope.guideRates[2])) { this.DialogResult = DialogResult.None; return; }
-                if (!CheckComponentGuideRate(textBoxGuideRate3, 3, out Telescope.guideRates[3])) { this.DialogResult = DialogResult.None; return; }
-                if (!CheckComponentGuideRate(textBoxGuideRate4, 4, out Telescope.guideRates[4])) { this.DialogResult = DialogResult.None; return; }
-                if (!CheckComponentGuideRate(textBoxGuideRate5, 5, out Telescope.guideRates[5])) { this.DialogResult = DialogResult.None; return; }
-                if (!CheckComponentGuideRate(textBoxGuideRate6, 6, out Telescope.guideRates[6])) { this.DialogResult = DialogResult.None; return; }
-                if (!CheckComponentGuideRate(textBoxGuideRate7, 7, out Telescope.guideRates[7])) { this.DialogResult = DialogResult.None; return; }
-                if (!CheckComponentGuideRate(textBoxGuideRate8, 8, out Telescope.guideRates[8])) { this.DialogResult = DialogResult.None; return; }
-            }
-
-            Telescope.traceLogger.Enabled = chkTraceLogger.Checked;
-        }
-
-        private void buttonCancel_Click(object sender, EventArgs e) // Cancel button event handler
-        {
-            Close();
-        }
-
         private void checkBoxSetLocation_CheckedChanged(object sender, EventArgs e)
         {
             textBoxLatitudeDegree.ReadOnly = !checkBoxSetLocation.Checked;
@@ -627,6 +586,142 @@ namespace ASCOM.Starbook
             {
                 MessageBox.Show(other.Message);
             }
+        }
+
+        private void buttonOK_Click(object sender, EventArgs e) // OK button event handler
+        {
+            // Place any validation constraint checks here
+            // Update the state variables with results from the dialogue
+
+            if (buttonApply.Enabled && MessageBox.Show(this, "Do you want to apply the changes?", string.Empty, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                buttonApply_Click(sender, e);
+            }
+        }
+
+        private void buttonCancel_Click(object sender, EventArgs e) // Cancel button event handler
+        {
+            
+        }
+
+        private void buttonApply_Click(object sender, EventArgs e)
+        {
+            IPAddress ipAddress;
+
+            if (!CheckComponentIPAddress(out ipAddress))
+            {
+                this.DialogResult = DialogResult.None; return;
+            }
+
+            Telescope.starbook.IPAddress = ipAddress;
+
+            if (checkBoxSetLocation.Enabled && checkBoxSetLocation.Checked)
+            {
+                Telescope.Starbook.Place location;
+
+                if (!CheckComponentLocation(out location))
+                {
+                    this.DialogResult = DialogResult.None; return;
+                }
+
+                Telescope.Starbook.Response response = Telescope.starbook.SetPlace(location);
+
+                if (response != Telescope.Starbook.Response.OK)
+                {
+                    MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot set location: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+            if (checkBoxSetDateTime.Enabled && checkBoxSetDateTime.Checked)
+            {
+                DateTime dateTime;
+
+                if (!CheckComponentDateTime(out dateTime))
+                {
+                    this.DialogResult = DialogResult.None; return;
+                }
+
+                Telescope.Starbook.Response response = Telescope.starbook.SetTime(dateTime);
+
+                if (response != Telescope.Starbook.Response.OK)
+                {
+                    MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot set date & time: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+            if (checkBoxSetGuideRate.Enabled && checkBoxSetGuideRate.Checked)
+            {
+                Telescope.Starbook.Response response = Telescope.starbook.SetSpeed(comboBoxGuideRate.SelectedIndex);
+
+                if (response != Telescope.Starbook.Response.OK)
+                {
+                    MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot set guide rate: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+            if ((checkBoxSetLocation.Enabled && checkBoxSetLocation.Checked) || (checkBoxSetDateTime.Enabled && checkBoxSetDateTime.Checked) || (checkBoxSetGuideRate.Enabled && checkBoxSetGuideRate.Checked))
+            {
+                Telescope.Starbook.Response response = Telescope.starbook.Save();
+
+                if (response != Telescope.Starbook.Response.OK)
+                {
+                    MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot save setting: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+            if (checkBoxSetGuideRate.Enabled && checkBoxSetGuideRate.Checked)
+            {
+                Telescope.guideRate = comboBoxGuideRate.SelectedIndex;
+
+                if (!CheckComponentGuideRate(textBoxGuideRate0, 0, out Telescope.guideRates[0])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate1, 1, out Telescope.guideRates[1])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate2, 2, out Telescope.guideRates[2])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate3, 3, out Telescope.guideRates[3])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate4, 4, out Telescope.guideRates[4])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate5, 5, out Telescope.guideRates[5])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate6, 6, out Telescope.guideRates[6])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate7, 7, out Telescope.guideRates[7])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate8, 8, out Telescope.guideRates[8])) { this.DialogResult = DialogResult.None; return; }
+            }
+
+            Telescope.j2000 = checkBoxJ2000.Checked;
+            Telescope.autoMeridianFlip = checkBoxAutoMeridianFlip.Checked ? 60 : 0;
+            Telescope.traceLogger.Enabled = checkBoxTraceLogger.Checked;
+
+            buttonApply.Enabled = false;
+        }
+
+        private void buttonApply_Monitored(object sender, EventArgs e)
+        {
+            if (sender is TextBox)
+            {
+                TextBox textBox = sender as TextBox;
+
+                if (textBox == null || !textBox.Enabled || textBox.ReadOnly)
+                {
+                    return;
+                }
+            }
+            else if (sender is ComboBox)
+            {
+                ComboBox comboBox = sender as ComboBox;
+
+                if (comboBox == null || !comboBox.Enabled)
+                {
+                    return;
+                }
+            }
+            else if (sender is CheckBox)
+            {
+                CheckBox checkBox = sender as CheckBox;
+
+                if (checkBox == null || !checkBox.Enabled)
+                {
+                    return;
+                }
+            }
+
+            buttonApply.Enabled = true;
         }
     }
 }
