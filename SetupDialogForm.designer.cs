@@ -99,10 +99,10 @@
             this.comboBoxGuideRate = new System.Windows.Forms.ComboBox();
             this.textBoxGuideRate0 = new System.Windows.Forms.TextBox();
             this.groupBoxAdvanced = new System.Windows.Forms.GroupBox();
+            this.checkBoxAutoMeridianFlip = new System.Windows.Forms.CheckBox();
             this.checkBoxJ2000 = new System.Windows.Forms.CheckBox();
             this.buttonApply = new System.Windows.Forms.Button();
             this.labelSeperator = new System.Windows.Forms.Label();
-            this.checkBoxAutoMeridianFlip = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             this.groupBoxConnection.SuspendLayout();
             this.groupBoxLocation.SuspendLayout();
@@ -760,7 +760,7 @@
             // labelGuideRateX
             // 
             this.labelGuideRateX.AutoSize = true;
-            this.labelGuideRateX.Location = new System.Drawing.Point(415, 53);
+            this.labelGuideRateX.Location = new System.Drawing.Point(415, 52);
             this.labelGuideRateX.Name = "labelGuideRateX";
             this.labelGuideRateX.Size = new System.Drawing.Size(13, 14);
             this.labelGuideRateX.TabIndex = 56;
@@ -917,6 +917,17 @@
             this.groupBoxAdvanced.TabStop = false;
             this.groupBoxAdvanced.Text = "Advanced Setting";
             // 
+            // checkBoxAutoMeridianFlip
+            // 
+            this.checkBoxAutoMeridianFlip.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.checkBoxAutoMeridianFlip.AutoSize = true;
+            this.checkBoxAutoMeridianFlip.Location = new System.Drawing.Point(17, 51);
+            this.checkBoxAutoMeridianFlip.Name = "checkBoxAutoMeridianFlip";
+            this.checkBoxAutoMeridianFlip.Size = new System.Drawing.Size(128, 18);
+            this.checkBoxAutoMeridianFlip.TabIndex = 61;
+            this.checkBoxAutoMeridianFlip.Text = "Auto Meridian Flip";
+            this.checkBoxAutoMeridianFlip.UseVisualStyleBackColor = true;
+            // 
             // checkBoxJ2000
             // 
             this.checkBoxJ2000.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
@@ -949,18 +960,6 @@
             this.labelSeperator.Name = "labelSeperator";
             this.labelSeperator.Size = new System.Drawing.Size(439, 2);
             this.labelSeperator.TabIndex = 67;
-            // 
-            // checkBoxAutoMeridianFlip
-            // 
-            this.checkBoxAutoMeridianFlip.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.checkBoxAutoMeridianFlip.AutoSize = true;
-            this.checkBoxAutoMeridianFlip.Enabled = false;
-            this.checkBoxAutoMeridianFlip.Location = new System.Drawing.Point(17, 51);
-            this.checkBoxAutoMeridianFlip.Name = "checkBoxAutoMeridianFlip";
-            this.checkBoxAutoMeridianFlip.Size = new System.Drawing.Size(128, 18);
-            this.checkBoxAutoMeridianFlip.TabIndex = 61;
-            this.checkBoxAutoMeridianFlip.Text = "Auto Meridian Flip";
-            this.checkBoxAutoMeridianFlip.UseVisualStyleBackColor = true;
             // 
             // SetupDialogForm
             // 

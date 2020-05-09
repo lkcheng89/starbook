@@ -76,6 +76,10 @@ namespace ASCOM.Starbook
 
         internal static string ipAddressProfileName = "IPAddress"; // Constants used for Profile persistence
         internal static IPAddress ipAddressDefault = new IPAddress(new byte[] { 169, 254, 1, 1 });
+        internal static string siteElevationProfileName = "SiteElevation";
+        internal static double siteElevationDefault = 0;
+        internal static string siteTemperatureProfileName = "SiteTemperature";
+        internal static double siteTemperatureDefault = 20;
         internal static string slewSettleTimeProfileName = "SlewSettleTime";
         internal static short slewSettleTimeDefault = 0;
         internal static string guideRateProfileName = "GuideRate";
@@ -143,15 +147,15 @@ namespace ASCOM.Starbook
         private bool pulseGuiding;
         private bool tracking;
 
-        private int round;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Starbook"/> class.
         /// Must be public for COM registration.
         /// </summary>
         public Telescope()
         {
+            transform = new Astrometry.Transform.Transform();  // Initialise astrometry transform object
             traceLogger = new TraceLogger("", "Starbook");
+
             ReadProfile(); // Read device configuration from the ASCOM Profile store
 
             traceLogger.LogMessage("Telescope", "Starting initialisation");
@@ -159,10 +163,6 @@ namespace ASCOM.Starbook
             connectedState = false; // Initialise connected to false
             utilities = new Util(); //Initialise util object
             astroUtilities = new AstroUtils(); // Initialise astro utilities object
-
-            transform = new Astrometry.Transform.Transform();  // Initialise astrometry transform object
-            transform.SiteElevation = 0;
-            transform.SiteTemperature = 20;
 
             //TODO: Implement your additional construction here
 
@@ -186,8 +186,6 @@ namespace ASCOM.Starbook
             movingAxis = false;
             pulseGuiding = false;
             tracking = true;
-
-            round = 0;
 
             traceLogger.LogMessage("Telescope", "Completed initialisation");
         }
@@ -448,20 +446,9 @@ namespace ASCOM.Starbook
                     throw new ASCOM.InvalidOperationException("Altitude_get: Starbook.GetTime() is not working.");
                 }
 
-                transform.SiteLatitude = place.Latitude.Value;
-                transform.SiteLongitude = place.Longitude.Value;
-                transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-place.Timezone));
+                Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
+                          status.RA.Value, status.Dec.Value, starbook.J2000, out double azimuth, out double altitude);
 
-                if (starbook.J2000)
-                {
-                    transform.SetJ2000(status.RA.Value, status.Dec.Value);
-                }
-                else
-                {
-                    transform.SetTopocentric(status.RA.Value, status.Dec.Value);
-                }
-
-                double altitude = transform.ElevationTopocentric;
                 LogMessage("Altitude_get", "{0}", altitude);
                 return altitude;
             }
@@ -557,20 +544,9 @@ namespace ASCOM.Starbook
                     throw new ASCOM.InvalidOperationException("Azimuth_get: Starbook.GetTime() is not working.");
                 }
 
-                transform.SiteLatitude = place.Latitude.Value;
-                transform.SiteLongitude = place.Longitude.Value;
-                transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-place.Timezone));
+                Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
+                          status.RA.Value, status.Dec.Value, starbook.J2000, out double azimuth, out double altitude);
 
-                if (starbook.J2000)
-                {
-                    transform.SetJ2000(status.RA.Value, status.Dec.Value);
-                }
-                else
-                {
-                    transform.SetTopocentric(status.RA.Value, status.Dec.Value);
-                }
-
-                double azimuth = transform.AzimuthTopocentric;
                 LogMessage("Azimuth_get", "{0}", azimuth);
                 return azimuth;
             }
@@ -788,22 +764,10 @@ namespace ASCOM.Starbook
                         throw new ASCOM.InvalidOperationException("Declination_get: Starbook.GetTime() is not working.");
                     }
 
-                    transform.SiteLatitude = place.Latitude.Value;
-                    transform.SiteLongitude = place.Longitude.Value;
-                    transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-place.Timezone));
-
                     double statusDecValue = status.Dec.Value;
 
-                    if (starbook.J2000)
-                    {
-                        transform.SetJ2000(status.RA.Value, statusDecValue);
-                        declination = transform.DECTopocentric;
-                    }
-                    else
-                    {
-                        transform.SetTopocentric(status.RA.Value, statusDecValue);
-                        declination = transform.DecJ2000;
-                    }
+                    Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
+                              status.RA.Value, statusDecValue, starbook.J2000, out double rightAscension, out declination, j2000);
 
                     LogMessage("Declination_get", "{0}=>{1}: Status.Dec={2}", statusDecValue, declination, status.Dec);
                 }
@@ -1119,23 +1083,8 @@ namespace ASCOM.Starbook
                     throw new ASCOM.InvalidOperationException("SetPark: Starbook.GetTime() is not working.");
                 }
 
-                transform.SiteLatitude = place.Latitude.Value;
-                transform.SiteLongitude = place.Longitude.Value;
-                transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-place.Timezone));
-                transform.SetAzimuthElevation(parkAzimuth, parkElevation);
-
-                double parkRightAscension, parkDeclination;
-
-                if (starbook.J2000)
-                {
-                    parkRightAscension = transform.RAJ2000;
-                    parkDeclination = transform.DecJ2000;
-                }
-                else
-                {
-                    parkRightAscension = transform.RATopocentric;
-                    parkDeclination = transform.DECTopocentric;
-                }
+                Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
+                          parkAzimuth, parkElevation, out double parkRightAscension, out double parkDeclination, starbook.J2000);
 
                 if (!Starbook.HMS.FromValue(parkRightAscension, out Starbook.HMS rightAscension))
                 {
@@ -1273,22 +1222,10 @@ namespace ASCOM.Starbook
                         throw new ASCOM.InvalidOperationException("RightAscension_get: Starbook.GetTime() is not working.");
                     }
 
-                    transform.SiteLatitude = place.Latitude.Value;
-                    transform.SiteLongitude = place.Longitude.Value;
-                    transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-place.Timezone));
-
                     double statusRAValue = status.RA.Value;
 
-                    if (starbook.J2000)
-                    {
-                        transform.SetJ2000(statusRAValue, status.Dec.Value);
-                        rightAscension = transform.RATopocentric;
-                    }
-                    else
-                    {
-                        transform.SetTopocentric(statusRAValue, status.Dec.Value);
-                        rightAscension = transform.RAJ2000;
-                    }
+                    Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
+                              statusRAValue, status.Dec.Value, starbook.J2000, out rightAscension, out double declination, j2000);
 
                     LogMessage("RightAscension_get", "{0}=>{1}: Status.RA={2}", statusRAValue, rightAscension, status.RA);
                 }
@@ -1340,21 +1277,8 @@ namespace ASCOM.Starbook
                 throw new ASCOM.InvalidOperationException("SetPark: Starbook.GetTime() is not working.");
             }
 
-            transform.SiteLatitude = place.Latitude.Value;
-            transform.SiteLongitude = place.Longitude.Value;
-            transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-place.Timezone));
-
-            if (starbook.J2000)
-            {
-                transform.SetJ2000(status.RA.Value, status.Dec.Value);
-            }
-            else
-            {
-                transform.SetTopocentric(status.RA.Value, status.Dec.Value);
-            }
-
-            parkAzimuth = transform.AzimuthTopocentric;
-            parkElevation = transform.ElevationTopocentric;
+            Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
+                      status.RA.Value, status.Dec.Value, starbook.J2000, out parkAzimuth, out parkElevation);
 
             LogMessage("SetPark", "OK: Altitude={0},Azimuth={1},RightAscension={2},Declination={3}", parkElevation, parkAzimuth, status.RA, status.Dec);
         }
@@ -1363,33 +1287,28 @@ namespace ASCOM.Starbook
         {
             get
             {
-                Starbook.Response response;
+                CheckConnected("SideOfPier_get");
 
-                if (round == 0)
+                Starbook.Response response = starbook.GetRound(out int round);
+
+                if (response != Starbook.Response.OK)
                 {
-                    response = starbook.GetRound(out int rovnd);
-
-                    if (response != Starbook.Response.OK)
-                    {
-                        LogMessage("SideOfPier", "InvalidOperationException: Starbook.GetRound()={0}", response);
-                        throw new ASCOM.InvalidOperationException("SideOfPier: Starbook.GetRound() is not working.");
-                    }
-
-                    round = rovnd;
+                    LogMessage("SideOfPier_get", "InvalidOperationException: Starbook.GetRound()={0}", response);
+                    throw new ASCOM.InvalidOperationException("SideOfPier_get: Starbook.GetRound() is not working.");
                 }
 
                 response = starbook.GetXY(out Starbook.XY xy);
 
                 if (response != Starbook.Response.OK)
                 {
-                    LogMessage("SideOfPier", "InvalidOperationException: Starbook.GetXY()={0}", response);
-                    throw new ASCOM.InvalidOperationException("SideOfPier: Starbook.GetXY() is not working.");
+                    LogMessage("SideOfPier_get", "InvalidOperationException: Starbook.GetXY()={0}", response);
+                    throw new ASCOM.InvalidOperationException("SideOfPier_get: Starbook.GetXY() is not working.");
                 }
 
-                double mechanicalDec = -360.0 * xy.Y / round;
+                GetMechanicalCoordinate(round, xy, out double x, out double y);
 
-                PierSide sideOfPier = Math.Abs(mechanicalDec) <= 90 ? PierSide.pierEast : PierSide.pierWest;
-                LogMessage("SideOfPier_get", "{0}: MechanicalDec={1}", sideOfPier, mechanicalDec);
+                PierSide sideOfPier = (-90 <= y && y <= 90) ? PierSide.pierEast : PierSide.pierWest;
+                LogMessage("SideOfPier_get", "{0}: X={1},Y={2}", sideOfPier, x, y);
                 return sideOfPier;
             }
             set
@@ -1604,23 +1523,14 @@ namespace ASCOM.Starbook
                 throw new ASCOM.InvalidOperationException("SlewToAltAz: Starbook.GetTime() is not working.");
             }
 
-            transform.SiteLatitude = place.Latitude.Value;
-            transform.SiteLongitude = place.Longitude.Value;
-            transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-place.Timezone));
-            transform.SetAzimuthElevation(Azimuth, Altitude);
+            double latitude = place.Latitude.Value;
+            double longitude = place.Longitude.Value; int timezone = place.Timezone;
 
-            double RightAscension, Declination;
+            Transform(latitude, longitude, time, timezone,
+                      Azimuth, Altitude, out targetRightAscension, out targetDeclination, j2000);
 
-            if (starbook.J2000)
-            {
-                RightAscension = transform.RAJ2000;
-                Declination = transform.DecJ2000;
-            }
-            else
-            {
-                RightAscension = transform.RATopocentric;
-                Declination = transform.DECTopocentric;
-            }
+            Transform(latitude, longitude, time, timezone,
+                      Azimuth, Altitude, out double RightAscension, out double Declination, starbook.J2000);
 
             if (!Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension))
             {
@@ -1632,17 +1542,6 @@ namespace ASCOM.Starbook
             {
                 LogMessage("SlewToAltAz", "InvalidValueException: Declination={0}", Declination);
                 throw new ASCOM.InvalidValueException("SlewToAltAz", "Declination", "-90 to 90");
-            }
-
-            if (j2000)
-            {
-                targetRightAscension = transform.RAJ2000;
-                targetDeclination = transform.DecJ2000;
-            }
-            else
-            {
-                targetRightAscension = transform.RATopocentric;
-                targetDeclination = transform.DECTopocentric;
             }
 
             response = Goto(rightAscension, declination);
@@ -1712,23 +1611,14 @@ namespace ASCOM.Starbook
                 throw new ASCOM.InvalidOperationException("SlewToAltAzAsync: Starbook.GetTime() is not working.");
             }
 
-            transform.SiteLatitude = place.Latitude.Value;
-            transform.SiteLongitude = place.Longitude.Value;
-            transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-place.Timezone));
-            transform.SetAzimuthElevation(Azimuth, Altitude);
+            double latitude = place.Latitude.Value;
+            double longitude = place.Longitude.Value; int timezone = place.Timezone;
 
-            double RightAscension, Declination;
+            Transform(latitude, longitude, time, timezone,
+                      Azimuth, Altitude, out targetRightAscension, out targetDeclination, j2000);
 
-            if (starbook.J2000)
-            {
-                RightAscension = transform.RAJ2000;
-                Declination = transform.DecJ2000;
-            }
-            else
-            {
-                RightAscension = transform.RATopocentric;
-                Declination = transform.DECTopocentric;
-            }
+            Transform(latitude, longitude, time, timezone,
+                      Azimuth, Altitude, out double RightAscension, out double Declination, starbook.J2000);
 
             if (!Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension))
             {
@@ -1740,17 +1630,6 @@ namespace ASCOM.Starbook
             {
                 LogMessage("SlewToAltAzAsync", "InvalidValueException: Declination={0}", Declination);
                 throw new ASCOM.InvalidValueException("SlewToAltAzAsync", "Declination", "-90 to 90");
-            }
-
-            if (j2000)
-            {
-                targetRightAscension = transform.RAJ2000;
-                targetDeclination = transform.DecJ2000;
-            }
-            else
-            {
-                targetRightAscension = transform.RATopocentric;
-                targetDeclination = transform.DECTopocentric;
             }
 
             response = Goto(rightAscension, declination);
@@ -1810,24 +1689,8 @@ namespace ASCOM.Starbook
                     throw new ASCOM.InvalidOperationException("SlewToCoordinates: Starbook.GetTime() is not working.");
                 }
 
-                transform.SiteLatitude = place.Latitude.Value;
-                transform.SiteLongitude = place.Longitude.Value;
-                transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-place.Timezone));
-
-                double transformRightAscension, transformDeclination;
-
-                if (starbook.J2000)
-                {
-                    transform.SetTopocentric(RightAscension, Declination);
-                    transformRightAscension = transform.RAJ2000;
-                    transformDeclination = transform.DecJ2000;
-                }
-                else
-                {
-                    transform.SetJ2000(RightAscension, Declination);
-                    transformRightAscension = transform.RATopocentric;
-                    transformDeclination = transform.DECTopocentric;
-                }
+                Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
+                          RightAscension, Declination, j2000, out double transformRightAscension, out double transformDeclination, starbook.J2000);
 
                 if (!Starbook.HMS.FromValue(transformRightAscension, out rightAscension))
                 {
@@ -1920,24 +1783,8 @@ namespace ASCOM.Starbook
                     throw new ASCOM.InvalidOperationException("SlewToCoordinatesAsync: Starbook.GetTime() is not working.");
                 }
 
-                transform.SiteLatitude = place.Latitude.Value;
-                transform.SiteLongitude = place.Longitude.Value;
-                transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-place.Timezone));
-
-                double transformRightAscension, transformDeclination;
-
-                if (starbook.J2000)
-                {
-                    transform.SetTopocentric(RightAscension, Declination);
-                    transformRightAscension = transform.RAJ2000;
-                    transformDeclination = transform.DecJ2000;
-                }
-                else
-                {
-                    transform.SetJ2000(RightAscension, Declination);
-                    transformRightAscension = transform.RATopocentric;
-                    transformDeclination = transform.DECTopocentric;
-                }
+                Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
+                          RightAscension, Declination, j2000, out double transformRightAscension, out double transformDeclination, starbook.J2000);
 
                 if (!Starbook.HMS.FromValue(transformRightAscension, out rightAscension))
                 {
@@ -2012,34 +1859,18 @@ namespace ASCOM.Starbook
                     throw new ASCOM.InvalidOperationException("SlewToTarget: Starbook.GetTime() is not working.");
                 }
 
-                transform.SiteLatitude = place.Latitude.Value;
-                transform.SiteLongitude = place.Longitude.Value;
-                transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-place.Timezone));
+                Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
+                          targetRightAscension, targetDeclination, j2000, out double RightAscension, out double Declination, starbook.J2000);
 
-                double transformRightAscension, transformDeclination;
-
-                if (starbook.J2000)
+                if (!Starbook.HMS.FromValue(RightAscension, out rightAscension))
                 {
-                    transform.SetTopocentric(targetRightAscension, targetDeclination);
-                    transformRightAscension = transform.RAJ2000;
-                    transformDeclination = transform.DecJ2000;
-                }
-                else
-                {
-                    transform.SetJ2000(targetRightAscension, targetDeclination);
-                    transformRightAscension = transform.RATopocentric;
-                    transformDeclination = transform.DECTopocentric;
-                }
-
-                if (!Starbook.HMS.FromValue(transformRightAscension, out rightAscension))
-                {
-                    LogMessage("SlewToTarget", "InvalidValueException: RightAscension={0}=>{1}", targetRightAscension, transformRightAscension);
+                    LogMessage("SlewToTarget", "InvalidValueException: RightAscension={0}=>{1}", targetRightAscension, RightAscension);
                     throw new ASCOM.InvalidValueException("SlewToTarget", "RightAscension", "0 to 24");
                 }
 
-                if (!Starbook.DMS.FromValue(transformDeclination, out declination))
+                if (!Starbook.DMS.FromValue(Declination, out declination))
                 {
-                    LogMessage("SlewToTarget", "InvalidValueException: Declination={0}=>{1}", targetDeclination, transformDeclination);
+                    LogMessage("SlewToTarget", "InvalidValueException: Declination={0}=>{1}", targetDeclination, Declination);
                     throw new ASCOM.InvalidValueException("SlewToTarget", "Declination", "-90 to 90");
                 }
             }
@@ -2119,34 +1950,18 @@ namespace ASCOM.Starbook
                     throw new ASCOM.InvalidOperationException("SlewToTargetAsync: Starbook.GetTime() is not working.");
                 }
 
-                transform.SiteLatitude = place.Latitude.Value;
-                transform.SiteLongitude = place.Longitude.Value;
-                transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-place.Timezone));
+                Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
+                          targetRightAscension, targetDeclination, j2000, out double RightAscension, out double Declination, starbook.J2000);
 
-                double transformRightAscension, transformDeclination;
-
-                if (starbook.J2000)
+                if (!Starbook.HMS.FromValue(RightAscension, out rightAscension))
                 {
-                    transform.SetTopocentric(targetRightAscension, targetDeclination);
-                    transformRightAscension = transform.RAJ2000;
-                    transformDeclination = transform.DecJ2000;
-                }
-                else
-                {
-                    transform.SetJ2000(targetRightAscension, targetDeclination);
-                    transformRightAscension = transform.RATopocentric;
-                    transformDeclination = transform.DECTopocentric;
-                }
-
-                if (!Starbook.HMS.FromValue(transformRightAscension, out rightAscension))
-                {
-                    LogMessage("SlewToTargetAsync", "InvalidValueException: RightAscension={0}=>{1}", targetRightAscension, transformRightAscension);
+                    LogMessage("SlewToTargetAsync", "InvalidValueException: RightAscension={0}=>{1}", targetRightAscension, RightAscension);
                     throw new ASCOM.InvalidValueException("SlewToTargetAsync", "RightAscension", "0 to 24");
                 }
 
-                if (!Starbook.DMS.FromValue(transformDeclination, out declination))
+                if (!Starbook.DMS.FromValue(Declination, out declination))
                 {
-                    LogMessage("SlewToTargetAsync", "InvalidValueException: Declination={0}=>{1}", targetDeclination, transformDeclination);
+                    LogMessage("SlewToTargetAsync", "InvalidValueException: Declination={0}=>{1}", targetDeclination, Declination);
                     throw new ASCOM.InvalidValueException("SlewToTargetAsync", "Declination", "-90 to 90");
                 }
             }
@@ -2231,23 +2046,14 @@ namespace ASCOM.Starbook
                 throw new ASCOM.InvalidOperationException("SyncToAltAz: Starbook.GetTime() is not working.");
             }
 
-            transform.SiteLatitude = place.Latitude.Value;
-            transform.SiteLongitude = place.Longitude.Value;
-            transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-place.Timezone));
-            transform.SetAzimuthElevation(Azimuth, Altitude);
+            double latitude = place.Latitude.Value;
+            double longitude = place.Longitude.Value; int timezone = place.Timezone;
 
-            double RightAscension, Declination;
+            Transform(latitude, longitude, time, timezone,
+                      Azimuth, Altitude, out targetRightAscension, out targetDeclination, j2000);
 
-            if (starbook.J2000)
-            {
-                RightAscension = transform.RAJ2000;
-                Declination = transform.DecJ2000;
-            }
-            else
-            {
-                RightAscension = transform.RATopocentric;
-                Declination = transform.DECTopocentric;
-            }
+            Transform(latitude, longitude, time, timezone,
+                      Azimuth, Altitude, out double RightAscension, out double Declination, starbook.J2000);
 
             if (!Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension))
             {
@@ -2259,17 +2065,6 @@ namespace ASCOM.Starbook
             {
                 LogMessage("SyncToAltAz", "InvalidValueException: Declination={0}", Declination);
                 throw new ASCOM.InvalidValueException("SyncToAltAz", "Declination", "-90 to 90");
-            }
-
-            if (j2000)
-            {
-                targetRightAscension = transform.RAJ2000;
-                targetDeclination = transform.DecJ2000;
-            }
-            else
-            {
-                targetRightAscension = transform.RATopocentric;
-                targetDeclination = transform.DECTopocentric;
             }
 
             response = Align(rightAscension, declination);
@@ -2329,24 +2124,8 @@ namespace ASCOM.Starbook
                     throw new ASCOM.InvalidOperationException("SyncToCoordinates: Starbook.GetTime() is not working.");
                 }
 
-                transform.SiteLatitude = place.Latitude.Value;
-                transform.SiteLongitude = place.Longitude.Value;
-                transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-place.Timezone));
-
-                double transformRightAscension, transformDeclination;
-
-                if (starbook.J2000)
-                {
-                    transform.SetTopocentric(RightAscension, Declination);
-                    transformRightAscension = transform.RAJ2000;
-                    transformDeclination = transform.DecJ2000;
-                }
-                else
-                {
-                    transform.SetJ2000(RightAscension, Declination);
-                    transformRightAscension = transform.RATopocentric;
-                    transformDeclination = transform.DECTopocentric;
-                }
+                Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
+                          RightAscension, Declination, j2000, out double transformRightAscension, out double transformDeclination, starbook.J2000);
 
                 if (!Starbook.HMS.FromValue(transformRightAscension, out rightAscension))
                 {
@@ -2421,34 +2200,18 @@ namespace ASCOM.Starbook
                     throw new ASCOM.InvalidOperationException("SyncToTarget: Starbook.GetTime() is not working.");
                 }
 
-                transform.SiteLatitude = place.Latitude.Value;
-                transform.SiteLongitude = place.Longitude.Value;
-                transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-place.Timezone));
+                Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
+                          targetRightAscension, targetDeclination, j2000, out double RightAscension, out double Declination, starbook.J2000);
 
-                double transformRightAscension, transformDeclination;
-
-                if (starbook.J2000)
+                if (!Starbook.HMS.FromValue(RightAscension, out rightAscension))
                 {
-                    transform.SetTopocentric(targetRightAscension, targetDeclination);
-                    transformRightAscension = transform.RAJ2000;
-                    transformDeclination = transform.DecJ2000;
-                }
-                else
-                {
-                    transform.SetJ2000(targetRightAscension, targetDeclination);
-                    transformRightAscension = transform.RATopocentric;
-                    transformDeclination = transform.DECTopocentric;
-                }
-
-                if (!Starbook.HMS.FromValue(transformRightAscension, out rightAscension))
-                {
-                    LogMessage("SyncToTarget", "InvalidValueException: RightAscension={0}=>{1}", targetRightAscension, transformRightAscension);
+                    LogMessage("SyncToTarget", "InvalidValueException: RightAscension={0}=>{1}", targetRightAscension, RightAscension);
                     throw new ASCOM.InvalidValueException("SyncToTarget", "RightAscension", "0 to 24");
                 }
 
-                if (!Starbook.DMS.FromValue(transformDeclination, out declination))
+                if (!Starbook.DMS.FromValue(Declination, out declination))
                 {
-                    LogMessage("SyncToTarget", "InvalidValueException: Declination={0}=>{1}", targetDeclination, transformDeclination);
+                    LogMessage("SyncToTarget", "InvalidValueException: Declination={0}=>{1}", targetDeclination, Declination);
                     throw new ASCOM.InvalidValueException("SyncToTarget", "Declination", "-90 to 90");
                 }
             }
@@ -2816,6 +2579,22 @@ namespace ASCOM.Starbook
 
                 starbook.IPAddress = ipAddress;
 
+                if (!double.TryParse(driverProfile.GetValue(driverID, siteElevationProfileName, string.Empty, string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out double siteElevation))
+                {
+                    siteElevation = siteElevationDefault; recovering = true;
+                }
+
+                if (!double.TryParse(driverProfile.GetValue(driverID, siteTemperatureProfileName, string.Empty, string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out double siteTemperature))
+                {
+                    siteTemperature = siteTemperatureDefault; recovering = true;
+                }
+
+                lock (transform)
+                {
+                    transform.SiteElevation = siteElevation;
+                    transform.SiteTemperature = siteTemperature;
+                }
+
                 if (!short.TryParse(driverProfile.GetValue(driverID, slewSettleTimeProfileName, string.Empty, string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out slewSettleTime))
                 {
                     slewSettleTime = slewSettleTimeDefault; recovering = true;
@@ -2881,9 +2660,11 @@ namespace ASCOM.Starbook
             using (Profile driverProfile = new Profile())
             {
                 driverProfile.DeviceType = "Telescope";
-                driverProfile.WriteValue(driverID, ipAddressProfileName, starbook.IPAddress.ToString());
-                driverProfile.WriteValue(driverID, slewSettleTimeProfileName, slewSettleTime.ToString(CultureInfo.InvariantCulture));
 
+                driverProfile.WriteValue(driverID, ipAddressProfileName, starbook.IPAddress.ToString());
+                driverProfile.WriteValue(driverID, siteElevationProfileName, transform.SiteElevation.ToString(CultureInfo.InvariantCulture));
+                driverProfile.WriteValue(driverID, siteTemperatureProfileName, transform.SiteTemperature.ToString(CultureInfo.InvariantCulture));
+                driverProfile.WriteValue(driverID, slewSettleTimeProfileName, slewSettleTime.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, guideRateProfileName, guideRate.ToString(CultureInfo.InvariantCulture));
 
                 string[] guideRateStrings = new string[9];
@@ -2901,11 +2682,90 @@ namespace ASCOM.Starbook
                 }
 
                 driverProfile.WriteValue(driverID, guideRatesProfileName, string.Join(",", guideRateStrings));
-
                 driverProfile.WriteValue(driverID, j2000ProfileName, j2000.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, autoMeridianFlipProfileName, autoMeridianFlip.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, traceLoggerProfileName, traceLogger.Enabled.ToString(CultureInfo.InvariantCulture));
             }
+        }
+
+        internal void Transform(double latitude, double longitude, DateTime time, int timezone, double srcRA, double srcDec, bool srcJ2000, out double dstRA, out double dstDec, bool dstJ2000)
+        {
+            if (srcJ2000 == dstJ2000)
+            {
+                dstRA = srcRA; dstDec = srcDec;
+            }
+            else
+            {
+                lock (transform)
+                {
+                    transform.SiteLatitude = latitude;
+                    transform.SiteLongitude = longitude;
+                    transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-timezone));
+
+                    if (srcJ2000)
+                    {
+                        transform.SetJ2000(srcRA, srcDec);
+                        dstRA = transform.RATopocentric;
+                        dstDec = transform.DECTopocentric;
+                    }
+                    else
+                    {
+                        transform.SetTopocentric(srcRA, srcDec);
+                        dstRA = transform.RAJ2000;
+                        dstDec = transform.DecJ2000;
+                    }
+                }
+            }
+        }
+
+        internal void Transform(double latitude, double longitude, DateTime time, int timezone, double ra, double dec, bool j2000, out double azimuth, out double altitude)
+        {
+            lock (transform)
+            {
+                transform.SiteLatitude = latitude;
+                transform.SiteLongitude = longitude;
+                transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-timezone));
+
+                if (j2000)
+                {
+                    transform.SetJ2000(ra, dec);
+                }
+                else
+                {
+                    transform.SetTopocentric(ra, dec);
+                }
+
+                azimuth = transform.AzimuthTopocentric;
+                altitude = transform.ElevationTopocentric;
+            }
+        }
+
+        internal void Transform(double latitude, double longitude, DateTime time, int timezone, double azimuth, double altitude, out double ra, out double dec, bool j2000)
+        {
+            lock (transform)
+            {
+                transform.SiteLatitude = latitude;
+                transform.SiteLongitude = longitude;
+                transform.JulianDateUTC = utilities.DateUTCToJulian(time.AddHours(-timezone));
+                transform.SetAzimuthElevation(azimuth, altitude);
+
+                if (j2000)
+                {
+                    ra = transform.RAJ2000;
+                    dec = transform.DecJ2000;
+                }
+                else
+                {
+                    ra = transform.RATopocentric;
+                    dec = transform.DECTopocentric;
+                }
+            }
+        }
+
+        private void GetMechanicalCoordinate(int round, Starbook.XY xy, out double x, out double y)
+        {
+            x = 360.0 * xy.X / round;
+            y = 360.0 * xy.Y / round;
         }
 
         /// <summary>
@@ -2946,6 +2806,7 @@ namespace ASCOM.Starbook
             int slewingState = 0; // 0: NotSlewing, 1: Slewing, 2: SlewingSettle
             DateTime slewingSettle = DateTime.MinValue;
             bool findingHome = false;
+            DateTime autoMeridianFlip = DateTime.MinValue;
             Starbook.Response response;
 
             for (bool initializing = true; threadRunning; )
@@ -3134,6 +2995,31 @@ namespace ASCOM.Starbook
                         }
                     }
 
+                    if (Telescope.autoMeridianFlip > 0)
+                    {
+                        if (slewingState == 0) // NotSlewing
+                        {
+                            if (autoMeridianFlip == DateTime.MinValue)
+                            {
+                                autoMeridianFlip = DateTime.Now;
+                            }
+                            else
+                            {
+                                TimeSpan timeSpan = DateTime.Now - autoMeridianFlip;
+
+                                if (timeSpan.TotalSeconds >= Telescope.autoMeridianFlip)
+                                {
+                                    AutoMeridianFlip(status);
+                                    autoMeridianFlip = DateTime.Now;
+                                }
+                            }
+                        }
+                        else // Slewing & SlewingSettle
+                        {
+                            autoMeridianFlip = DateTime.MinValue;
+                        }
+                    }
+
                     lock (this)
                     {
                         this.status = status; this.response = response;
@@ -3155,6 +3041,68 @@ namespace ASCOM.Starbook
 
                 this.requests.Clear();
             }
+        }
+
+        private void AutoMeridianFlip(Starbook.Status status)
+        {
+            do
+            {
+                Starbook.Response response = starbook.GetRound(out int round);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("AutoMeridianFlip", "InvalidOperationException: Starbook.GetRound()={0}", response); break;
+                }
+
+                response = starbook.GetXY(out Starbook.XY xy);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("AutoMeridianFlip", "InvalidOperationException: Starbook.GetXY()={0}", response); break;
+                }
+
+                response = GetPlace(out Starbook.Place place);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("AutoMeridianFlip", "InvalidOperationException: Starbook.GetPlace()={0}", response); break;
+                }
+
+                response = starbook.GetTime(out DateTime time);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("AutoMeridianFlip", "InvalidOperationException: Starbook.GetTime()={0}", response); break;
+                }
+
+                GetMechanicalCoordinate(round, xy, out double x, out double y);
+
+                Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
+                          status.RA.Value, status.Dec.Value, starbook.J2000, out double azimuth, out double altitude);
+
+                PierSide sideOfPier1 = (-90 <= y && y <= 90) ? PierSide.pierEast : PierSide.pierWest;
+                PierSide sideOfPier2 = (0 <= azimuth && azimuth <= 180) ? PierSide.pierWest : PierSide.pierEast;
+
+                if (sideOfPier1 == sideOfPier2)
+                {
+                    LogMessage("AutoMeridianFlip", "NoFlip: SideOfPier={0},X={1},Y={2},Azimuth={3},Altitude={4}", sideOfPier1, x, y, azimuth, altitude);
+                }
+                else
+                {
+                    Starbook.HMS rightAscension = status.RA;
+                    Starbook.DMS declination = status.Dec;
+
+                    response = Goto(rightAscension, declination); // Starbook chooses the good side-of-pier while slewing.
+
+                    if (response != Starbook.Response.OK)
+                    {
+                        LogMessage("AutoMeridianFlip", "InvalidOperationException: Starbook.Goto({0},{1})={2}", rightAscension, declination, response); break;
+                    }
+
+                    LogMessage("AutoMeridianFlip", "Flip: SideOfPier={0}=>{1},X={2},Y={3},Azimuth={4},Altitude={5}", sideOfPier1, sideOfPier2, x, y, azimuth, altitude);
+                }
+            }
+            while (false);
         }
 
         private Starbook.Response GetPlace(out Starbook.Place place)
@@ -3193,7 +3141,7 @@ namespace ASCOM.Starbook
 
                 TimeSpan timeSpan = DateTime.Now - dateTime;
 
-                if (timeSpan.TotalSeconds >= 60 || !connected)
+                if (timeSpan.TotalSeconds >= 20 || !connected)
                 {
                     status = new Starbook.Status(); return Starbook.Response.ErrorUnknown;
                 }
@@ -3270,7 +3218,7 @@ namespace ASCOM.Starbook
 
                 TimeSpan timeSpan = DateTime.Now - dateTime;
 
-                if (timeSpan.TotalSeconds >= 60)
+                if (timeSpan.TotalSeconds >= 5)
                 {
                     lock (request)
                     {

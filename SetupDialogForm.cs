@@ -563,7 +563,7 @@ namespace ASCOM.Starbook
         {
             try
             {
-                System.Diagnostics.Process.Start("http://ascom-standards.org/");
+                System.Diagnostics.Process.Start("https://github.com/lkcheng89/starbook");
             }
             catch (System.ComponentModel.Win32Exception noBrowser)
             {
