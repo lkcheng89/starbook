@@ -54,12 +54,12 @@
             this.comboBoxLatitudeDirection = new System.Windows.Forms.ComboBox();
             this.comboBoxLongitudeDirection = new System.Windows.Forms.ComboBox();
             this.labelTimezone = new System.Windows.Forms.Label();
-            this.textBoxTimezone = new System.Windows.Forms.TextBox();
+            this.textBoxElevation = new System.Windows.Forms.TextBox();
             this.groupBoxConnection = new System.Windows.Forms.GroupBox();
             this.buttonCheck = new System.Windows.Forms.Button();
             this.groupBoxLocation = new System.Windows.Forms.GroupBox();
             this.checkBoxSetLocation = new System.Windows.Forms.CheckBox();
-            this.labelTimezoneHour = new System.Windows.Forms.Label();
+            this.labelElevationMeter = new System.Windows.Forms.Label();
             this.groupBoxDateTime = new System.Windows.Forms.GroupBox();
             this.checkBoxSyncSystemTime = new System.Windows.Forms.CheckBox();
             this.checkBoxSetDateTime = new System.Windows.Forms.CheckBox();
@@ -103,6 +103,7 @@
             this.checkBoxJ2000 = new System.Windows.Forms.CheckBox();
             this.buttonApply = new System.Windows.Forms.Button();
             this.labelSeperator = new System.Windows.Forms.Label();
+            this.comboBoxTimezone = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             this.groupBoxConnection.SuspendLayout();
             this.groupBoxLocation.SuspendLayout();
@@ -365,20 +366,20 @@
             this.labelTimezone.AutoSize = true;
             this.labelTimezone.Location = new System.Drawing.Point(17, 73);
             this.labelTimezone.Name = "labelTimezone";
-            this.labelTimezone.Size = new System.Drawing.Size(60, 14);
+            this.labelTimezone.Size = new System.Drawing.Size(57, 14);
             this.labelTimezone.TabIndex = 24;
-            this.labelTimezone.Text = "Timezone";
+            this.labelTimezone.Text = "Elevation";
             // 
-            // textBoxTimezone
+            // textBoxElevation
             // 
-            this.textBoxTimezone.Enabled = false;
-            this.textBoxTimezone.Location = new System.Drawing.Point(92, 71);
-            this.textBoxTimezone.Margin = new System.Windows.Forms.Padding(2);
-            this.textBoxTimezone.Name = "textBoxTimezone";
-            this.textBoxTimezone.ReadOnly = true;
-            this.textBoxTimezone.Size = new System.Drawing.Size(33, 22);
-            this.textBoxTimezone.TabIndex = 25;
-            this.textBoxTimezone.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.textBoxElevation.Enabled = false;
+            this.textBoxElevation.Location = new System.Drawing.Point(92, 71);
+            this.textBoxElevation.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxElevation.Name = "textBoxElevation";
+            this.textBoxElevation.ReadOnly = true;
+            this.textBoxElevation.Size = new System.Drawing.Size(33, 22);
+            this.textBoxElevation.TabIndex = 25;
+            this.textBoxElevation.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // groupBoxConnection
             // 
@@ -415,7 +416,7 @@
             // groupBoxLocation
             // 
             this.groupBoxLocation.Controls.Add(this.checkBoxSetLocation);
-            this.groupBoxLocation.Controls.Add(this.textBoxTimezone);
+            this.groupBoxLocation.Controls.Add(this.textBoxElevation);
             this.groupBoxLocation.Controls.Add(this.labelLatitude);
             this.groupBoxLocation.Controls.Add(this.labelLongitude);
             this.groupBoxLocation.Controls.Add(this.comboBoxLongitudeDirection);
@@ -423,7 +424,7 @@
             this.groupBoxLocation.Controls.Add(this.comboBoxLatitudeDirection);
             this.groupBoxLocation.Controls.Add(this.labelLatitudeDegree);
             this.groupBoxLocation.Controls.Add(this.textBoxLongitudeMinute);
-            this.groupBoxLocation.Controls.Add(this.labelTimezoneHour);
+            this.groupBoxLocation.Controls.Add(this.labelElevationMeter);
             this.groupBoxLocation.Controls.Add(this.labelLongitudeDegree);
             this.groupBoxLocation.Controls.Add(this.textBoxLatitudeMinute);
             this.groupBoxLocation.Controls.Add(this.labelLatitudeMinute);
@@ -452,18 +453,19 @@
             this.checkBoxSetLocation.UseVisualStyleBackColor = true;
             this.checkBoxSetLocation.CheckedChanged += new System.EventHandler(this.checkBoxSetLocation_CheckedChanged);
             // 
-            // labelTimezoneHour
+            // labelElevationMeter
             // 
-            this.labelTimezoneHour.AutoSize = true;
-            this.labelTimezoneHour.Location = new System.Drawing.Point(125, 75);
-            this.labelTimezoneHour.Margin = new System.Windows.Forms.Padding(0);
-            this.labelTimezoneHour.Name = "labelTimezoneHour";
-            this.labelTimezoneHour.Size = new System.Drawing.Size(14, 14);
-            this.labelTimezoneHour.TabIndex = 26;
-            this.labelTimezoneHour.Text = "h";
+            this.labelElevationMeter.AutoSize = true;
+            this.labelElevationMeter.Location = new System.Drawing.Point(125, 75);
+            this.labelElevationMeter.Margin = new System.Windows.Forms.Padding(0);
+            this.labelElevationMeter.Name = "labelElevationMeter";
+            this.labelElevationMeter.Size = new System.Drawing.Size(17, 14);
+            this.labelElevationMeter.TabIndex = 26;
+            this.labelElevationMeter.Text = "m";
             // 
             // groupBoxDateTime
             // 
+            this.groupBoxDateTime.Controls.Add(this.comboBoxTimezone);
             this.groupBoxDateTime.Controls.Add(this.checkBoxSyncSystemTime);
             this.groupBoxDateTime.Controls.Add(this.checkBoxSetDateTime);
             this.groupBoxDateTime.Controls.Add(this.labelTime);
@@ -961,6 +963,44 @@
             this.labelSeperator.Size = new System.Drawing.Size(439, 2);
             this.labelSeperator.TabIndex = 67;
             // 
+            // comboBoxTimezone
+            // 
+            this.comboBoxTimezone.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxTimezone.Enabled = false;
+            this.comboBoxTimezone.FormattingEnabled = true;
+            this.comboBoxTimezone.Items.AddRange(new object[] {
+            "-12H",
+            "-11H",
+            "-10H",
+            "-9H",
+            "-8H",
+            "-7H",
+            "-6H",
+            "-5H",
+            "-4H",
+            "-3H",
+            "-2h",
+            "-1h",
+            "±0H",
+            "+1H",
+            "+2H",
+            "+3H",
+            "+4H",
+            "+5H",
+            "+6H",
+            "+7H",
+            "+8H",
+            "+9H",
+            "+10H",
+            "+11H",
+            "+12H",
+            "+13H",
+            "+14H"});
+            this.comboBoxTimezone.Location = new System.Drawing.Point(224, 48);
+            this.comboBoxTimezone.Name = "comboBoxTimezone";
+            this.comboBoxTimezone.Size = new System.Drawing.Size(45, 22);
+            this.comboBoxTimezone.TabIndex = 43;
+            // 
             // SetupDialogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -1033,7 +1073,7 @@
         private System.Windows.Forms.ComboBox comboBoxLatitudeDirection;
         private System.Windows.Forms.ComboBox comboBoxLongitudeDirection;
         private System.Windows.Forms.Label labelTimezone;
-        private System.Windows.Forms.TextBox textBoxTimezone;
+        private System.Windows.Forms.TextBox textBoxElevation;
         private System.Windows.Forms.GroupBox groupBoxConnection;
         private System.Windows.Forms.GroupBox groupBoxLocation;
         private System.Windows.Forms.GroupBox groupBoxDateTime;
@@ -1057,7 +1097,7 @@
         private System.Windows.Forms.Timer timer;
         private System.Windows.Forms.Label labelPlatformVersion;
         private System.Windows.Forms.Label labelDriverVersion;
-        private System.Windows.Forms.Label labelTimezoneHour;
+        private System.Windows.Forms.Label labelElevationMeter;
         private System.Windows.Forms.Label labelCopyright;
         private System.Windows.Forms.Label labelEmail;
         private System.Windows.Forms.Button buttonCancel;
@@ -1082,5 +1122,6 @@
         private System.Windows.Forms.Button buttonApply;
         private System.Windows.Forms.Label labelSeperator;
         private System.Windows.Forms.CheckBox checkBoxAutoMeridianFlip;
+        private System.Windows.Forms.ComboBox comboBoxTimezone;
     }
 }

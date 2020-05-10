@@ -118,7 +118,7 @@ namespace ASCOM.Starbook
         /// <summary>
         /// Private variable to hold an ASCOM Astrometry object to provide the Conversion method
         /// </summary>
-        private ASCOM.Astrometry.Transform.Transform transform;
+        internal ASCOM.Astrometry.Transform.Transform transform;
 
         /// <summary>
         /// Variable to hold the trace logger object (creates a diagnostic log file with information that you specify)
@@ -219,7 +219,7 @@ namespace ASCOM.Starbook
                 System.Windows.Forms.MessageBox.Show("Already connected, just press OK");
             }
 
-            using (SetupDialogForm F = new SetupDialogForm())
+            using (SetupDialogForm F = new SetupDialogForm(this))
             {
                 var result = F.ShowDialog();
                 if (result == System.Windows.Forms.DialogResult.OK)
@@ -878,21 +878,15 @@ namespace ASCOM.Starbook
 
         public static int GuideRate(double guideRate)
         {
-            double guideRateDifference = double.MaxValue;
-            int guideRateIndex = 0;
-
             for (int index = 0; index <= 8; index++)
             {
-                double difference = Math.Abs(guideRate - GuideRate(index));
-
-                if (guideRateDifference > difference)
+                if (guideRate == GuideRate(index))
                 {
-                    guideRateDifference = difference;
-                    guideRateIndex = index;
+                    return index;
                 }
             }
 
-            return guideRateIndex;
+            return -1;
         }
 
         public double GuideRateDeclination
@@ -907,15 +901,23 @@ namespace ASCOM.Starbook
             {
                 CheckConnected("GuideRateDeclination_set");
 
-                Starbook.Response response = starbook.SetSpeed(Telescope.guideRate = GuideRate(value));
+                int guideRate = GuideRate(value);
+
+                if (guideRate < 0)
+                {
+                    LogMessage("GuideRateDeclination_set", "InvalidValueException: {0}", value);
+                    throw new ASCOM.InvalidValueException("GuideRateDeclination_set", "GuideRateDeclination", "AxisRates(axisSecondary)");
+                }
+
+                Starbook.Response response = starbook.SetSpeed(guideRate);
 
                 if (response != Starbook.Response.OK)
                 {
-                    LogMessage("GuideRateDeclination_set", "InvalidOperationException: {0}, Starbook.SetSpeed({1})={2}", value, Telescope.guideRate, response);
+                    LogMessage("GuideRateDeclination_set", "InvalidOperationException: {0}, Starbook.SetSpeed({1})={2}", value, guideRate, response);
                     throw new ASCOM.InvalidOperationException("GuideRateDeclination_set: Starbook.SetSpeed() is not working.");
                 }
 
-                LogMessage("GuideRateDeclination_set", "OK: {0}, GuideRate={1}", value, Telescope.guideRate);
+                LogMessage("GuideRateDeclination_set", "OK: {0}, GuideRate={1}", value, Telescope.guideRate = guideRate);
             }
         }
 
@@ -931,15 +933,23 @@ namespace ASCOM.Starbook
             {
                 CheckConnected("GuideRateRightAscension_set");
 
-                Starbook.Response response = starbook.SetSpeed(guideRate = GuideRate(value));
+                int guideRate = GuideRate(value);
+
+                if (guideRate < 0)
+                {
+                    LogMessage("GuideRateRightAscension_set", "InvalidValueException: {0}", value);
+                    throw new ASCOM.InvalidValueException("GuideRateRightAscension_set", "GuideRateRightAscension", "AxisRates(axisPrimary)");
+                }
+
+                Starbook.Response response = starbook.SetSpeed(guideRate);
 
                 if (response != Starbook.Response.OK)
                 {
-                    LogMessage("GuideRateRightAscension_set", "InvalidOperationException: {0}, Starbook.SetSpeed({1})={2}", value, Telescope.guideRate, response);
+                    LogMessage("GuideRateRightAscension_set", "InvalidOperationException: {0}, Starbook.SetSpeed({1})={2}", value, guideRate, response);
                     throw new ASCOM.InvalidOperationException("GuideRateRightAscension_set: Starbook.SetSpeed() is not working.");
                 }
 
-                LogMessage("GuideRateRightAscension_set", "OK: {0}, GuideRate={1}", value, Telescope.guideRate);
+                LogMessage("GuideRateRightAscension_set", "OK: {0}, GuideRate={1}", value, Telescope.guideRate = guideRate);
             }
         }
 
@@ -1001,16 +1011,13 @@ namespace ASCOM.Starbook
                     }
                     else
                     {
-                        double minRate = GuideRate(0);
-                        double maxRate = GuideRate(8);
-
-                        if (Math.Abs(Rate) < minRate || maxRate < Math.Abs(Rate))
-                        {
-                            LogMessage("MoveAxis", "InvalidValueException: Rate={0}", Rate);
-                            throw new ASCOM.InvalidValueException("MoveAxis", "Rate", string.Format(CultureInfo.InvariantCulture, "{0} to {1} or {2} to {3}", minRate, maxRate, -maxRate, -minRate));
-                        }
-
                         int guideRate = GuideRate(Math.Abs(Rate));
+
+                        if (guideRate < 0)
+                        {
+                            LogMessage("MoveAxis", "InvalidValueException: {0}", Rate);
+                            throw new ASCOM.InvalidValueException("MoveAxis", "Rate", string.Format("AxisRates({0})", Axis));
+                        }
 
                         Starbook.Response response = starbook.SetSpeed(guideRate);
 
@@ -1348,7 +1355,13 @@ namespace ASCOM.Starbook
         {
             get
             {
-                double siteElevation = 0;
+                double siteElevation;
+
+                lock (transform)
+                {
+                    siteElevation = transform.SiteElevation;
+                }
+
                 LogMessage("SiteElevation_get", "{0}", siteElevation);
                 return siteElevation;
             }

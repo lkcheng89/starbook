@@ -17,8 +17,16 @@ namespace ASCOM.Starbook
     [ComVisible(false)]					// Form not registered for COM!
     public partial class SetupDialogForm : Form
     {
-        public SetupDialogForm()
+        Telescope telescope;
+        Telescope.Starbook.Place place;
+        DateTime dateTime;
+
+        public SetupDialogForm(Telescope telescope)
         {
+            this.telescope = telescope;
+            this.place = new Telescope.Starbook.Place();
+            this.dateTime = DateTime.MinValue;
+
             InitializeComponent();
             InitializeComponentProfile();
         }
@@ -88,6 +96,7 @@ namespace ASCOM.Starbook
             textBoxHour.TextChanged += buttonApply_Monitored;
             textBoxMinute.TextChanged += buttonApply_Monitored;
             textBoxSecond.TextChanged += buttonApply_Monitored;
+            comboBoxTimezone.SelectedIndexChanged += buttonApply_Monitored;
             checkBoxSetDateTime.CheckedChanged += buttonApply_Monitored;
             checkBoxSyncSystemTime.CheckedChanged += buttonApply_Monitored;
 
@@ -149,9 +158,9 @@ namespace ASCOM.Starbook
             return true;
         }
 
-        private bool CheckComponentLocation(out Telescope.Starbook.Place location)
+        private bool CheckComponentLocation(ref Telescope.Starbook.Place place)
         {
-            location = new Telescope.Starbook.Place(); Telescope.Starbook.Direction direction;
+            Telescope.Starbook.Direction direction;
 
             if (!int.TryParse(textBoxLatitudeDegree.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int degree) || degree < 0 || 90 < degree)
             {
@@ -181,7 +190,7 @@ namespace ASCOM.Starbook
                     return false;
             }
 
-            location.Latitude = new Telescope.Starbook.DMS(direction, degree, minute, 0);
+            place.Latitude = new Telescope.Starbook.DMS(direction, degree, minute, 0);
 
             if (!int.TryParse(textBoxLongitudeDegree.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out degree) || degree < 0 || 180 < degree)
             {
@@ -211,24 +220,24 @@ namespace ASCOM.Starbook
                     return false;
             }
 
-            location.Longitude = new Telescope.Starbook.DMS(direction, degree, minute, 0);
+            place.Longitude = new Telescope.Starbook.DMS(direction, degree, minute, 0);
 
-            if (!int.TryParse(textBoxTimezone.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int timezone) || timezone < -12 || 14 < timezone)
+            if (!int.TryParse(textBoxElevation.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int elevation))
             {
-                MessageBox.Show(this, "Time zone should be ranged from -12 to 14.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                textBoxTimezone.SelectAll();
-                textBoxTimezone.Focus();
+                MessageBox.Show(this, "Elevation should be a valid integer.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                textBoxElevation.SelectAll();
+                textBoxElevation.Focus();
                 return false;
             }
 
-            location.Timezone = timezone;
+            telescope.transform.SiteElevation = elevation;
 
             return true;
         }
 
-        private bool CheckComponentDateTime(out DateTime dateTime)
+        private bool CheckComponentDateTime(ref Telescope.Starbook.Place place, ref DateTime dateTime)
         {
-            dateTime = DateTime.MinValue;
+            place.Timezone = comboBoxTimezone.SelectedIndex - 12;
 
             if (!int.TryParse(textBoxYear.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int year) || year < 1 || 9999 < year)
             {
@@ -303,9 +312,7 @@ namespace ASCOM.Starbook
 
         private void buttonCheck_Click(object sender, EventArgs e)
         {
-            IPAddress ipAddressCheck;
-
-            if (!CheckComponentIPAddress(out ipAddressCheck))
+            if (!CheckComponentIPAddress(out IPAddress ipAddressCheck))
             {
                 this.DialogResult = DialogResult.None; return;
             }
@@ -337,7 +344,7 @@ namespace ASCOM.Starbook
                 textBoxLongitudeMinute.Clear();
                 comboBoxLongitudeDirection.SelectedItem = string.Empty;
 
-                textBoxTimezone.Clear();
+                textBoxElevation.Clear();
 
                 textBoxYear.Clear();
                 textBoxMonth.Clear();
@@ -345,8 +352,9 @@ namespace ASCOM.Starbook
                 textBoxHour.Clear();
                 textBoxMinute.Clear();
                 textBoxSecond.Clear();
+                comboBoxTimezone.SelectedItem = string.Empty;
 
-                labelFirmwareVersion.Text = "Firmware Version:";
+                labelFirmwareVersion.Text = "Firmware Version: --";
             }
             else
             {
@@ -361,7 +369,7 @@ namespace ASCOM.Starbook
 
                 if (response == Telescope.Starbook.Response.OK)
                 {
-                    Telescope.LogMessage("SetupDialogForm", "Check: Starbook.GetPlace()={0} / Latitude={1}, Longitude={2}, Timezone={3}", response, place.Latitude, place.Longitude, place.Timezone);
+                    Telescope.LogMessage("SetupDialogForm", "Check: Starbook.GetPlace()={0} / Latitude={1}, Longitude={2}, Timezone={3}", response, place.Latitude, place.Longitude, place.Timezone); this.place = place;
                 }
                 else
                 {
@@ -372,7 +380,7 @@ namespace ASCOM.Starbook
 
                 if (response == Telescope.Starbook.Response.OK)
                 {
-                    Telescope.LogMessage("SetupDialogForm", "Check: Starbook.GetTime()={0} / Time={1:yyyy/MM/dd HH:mm:ss}", response, dateTime);
+                    Telescope.LogMessage("SetupDialogForm", "Check: Starbook.GetTime()={0} / Time={1:yyyy/MM/dd HH:mm:ss}", response, dateTime); this.dateTime = dateTime;
                 }
                 else
                 {
@@ -403,7 +411,7 @@ namespace ASCOM.Starbook
                     comboBoxLongitudeDirection.SelectedItem = "W";
                 }
 
-                textBoxTimezone.Text = place.Timezone.ToString(CultureInfo.InvariantCulture);
+                textBoxElevation.Text = telescope.transform.SiteElevation.ToString(CultureInfo.InvariantCulture);
 
                 textBoxYear.Text = dateTime.Year.ToString(CultureInfo.InvariantCulture);
                 textBoxMonth.Text = dateTime.Month.ToString(CultureInfo.InvariantCulture);
@@ -411,6 +419,8 @@ namespace ASCOM.Starbook
                 textBoxHour.Text = dateTime.Hour.ToString(CultureInfo.InvariantCulture);
                 textBoxMinute.Text = dateTime.Minute.ToString(CultureInfo.InvariantCulture);
                 textBoxSecond.Text = dateTime.Second.ToString(CultureInfo.InvariantCulture);
+
+                comboBoxTimezone.SelectedIndex = place.Timezone + 12;
 
                 response = Telescope.starbook.GetVersion(out string version);
 
@@ -420,7 +430,7 @@ namespace ASCOM.Starbook
                 }
                 else
                 {
-                    Telescope.LogMessage("SetupDialogForm", "Check: Starbook.GetVersion()={0}", response); version = string.Empty;
+                    Telescope.LogMessage("SetupDialogForm", "Check: Starbook.GetVersion()={0}", response); version = "N/A";
                 }
 
                 labelFirmwareVersion.Text = string.Format(CultureInfo.InvariantCulture, "Firmware Version: {0}", version);
@@ -442,8 +452,8 @@ namespace ASCOM.Starbook
             textBoxLongitudeMinute.Enabled = connected && initializing;
             comboBoxLongitudeDirection.Enabled = connected && initializing && checkBoxSetLocation.Checked;
 
-            textBoxTimezone.ReadOnly = !checkBoxSetLocation.Checked;
-            textBoxTimezone.Enabled = connected && initializing;
+            textBoxElevation.ReadOnly = !checkBoxSetLocation.Checked;
+            textBoxElevation.Enabled = connected && initializing;
 
             checkBoxSetLocation.Enabled = connected && initializing;
 
@@ -464,6 +474,8 @@ namespace ASCOM.Starbook
             textBoxHour.Enabled = connected && initializing;
             textBoxMinute.Enabled = connected && initializing;
             textBoxSecond.Enabled = connected && initializing;
+
+            comboBoxTimezone.Enabled = connected && initializing && checkBoxSetDateTime.Checked;
 
             checkBoxSetDateTime.Enabled = connected && initializing;
             checkBoxSyncSystemTime.Enabled = connected && initializing && checkBoxSetDateTime.Checked;
@@ -507,25 +519,35 @@ namespace ASCOM.Starbook
             textBoxLongitudeMinute.ReadOnly = !checkBoxSetLocation.Checked;
             comboBoxLongitudeDirection.Enabled = checkBoxSetLocation.Checked;
 
-            textBoxTimezone.ReadOnly = !checkBoxSetLocation.Checked;
+            textBoxElevation.ReadOnly = !checkBoxSetLocation.Checked;
         }
 
         private void checkBoxSetDateTime_CheckedChanged(object sender, EventArgs e)
         {
-            textBoxYear.ReadOnly = !checkBoxSetDateTime.Checked;
-            textBoxMonth.ReadOnly = !checkBoxSetDateTime.Checked;
-            textBoxDay.ReadOnly = !checkBoxSetDateTime.Checked;
+            textBoxYear.ReadOnly = !checkBoxSetDateTime.Checked || checkBoxSyncSystemTime.Checked;
+            textBoxMonth.ReadOnly = !checkBoxSetDateTime.Checked || checkBoxSyncSystemTime.Checked;
+            textBoxDay.ReadOnly = !checkBoxSetDateTime.Checked || checkBoxSyncSystemTime.Checked;
 
-            textBoxHour.ReadOnly = !checkBoxSetDateTime.Checked;
-            textBoxMinute.ReadOnly = !checkBoxSetDateTime.Checked;
-            textBoxSecond.ReadOnly = !checkBoxSetDateTime.Checked;
+            textBoxHour.ReadOnly = !checkBoxSetDateTime.Checked || checkBoxSyncSystemTime.Checked;
+            textBoxMinute.ReadOnly = !checkBoxSetDateTime.Checked || checkBoxSyncSystemTime.Checked;
+            textBoxSecond.ReadOnly = !checkBoxSetDateTime.Checked || checkBoxSyncSystemTime.Checked;
+
+            comboBoxTimezone.Enabled = checkBoxSetDateTime.Checked && !checkBoxSyncSystemTime.Checked;
 
             checkBoxSyncSystemTime.Enabled = checkBoxSetDateTime.Checked;
         }
 
         private void checkBoxSyncSystemTime_CheckedChanged(object sender, EventArgs e)
         {
-            
+            textBoxYear.ReadOnly = !checkBoxSetDateTime.Checked || checkBoxSyncSystemTime.Checked;
+            textBoxMonth.ReadOnly = !checkBoxSetDateTime.Checked || checkBoxSyncSystemTime.Checked;
+            textBoxDay.ReadOnly = !checkBoxSetDateTime.Checked || checkBoxSyncSystemTime.Checked;
+
+            textBoxHour.ReadOnly = !checkBoxSetDateTime.Checked || checkBoxSyncSystemTime.Checked;
+            textBoxMinute.ReadOnly = !checkBoxSetDateTime.Checked || checkBoxSyncSystemTime.Checked;
+            textBoxSecond.ReadOnly = !checkBoxSetDateTime.Checked || checkBoxSyncSystemTime.Checked;
+
+            comboBoxTimezone.Enabled = checkBoxSetDateTime.Checked && !checkBoxSyncSystemTime.Checked;
         }
 
         private void checkBoxSetGuideRate_CheckedChanged(object sender, EventArgs e)
@@ -556,6 +578,10 @@ namespace ASCOM.Starbook
                 textBoxHour.Text = dateTime.Hour.ToString(CultureInfo.InvariantCulture);
                 textBoxMinute.Text = dateTime.Minute.ToString(CultureInfo.InvariantCulture);
                 textBoxSecond.Text = dateTime.Second.ToString(CultureInfo.InvariantCulture);
+
+                double timezone = Math.Min(Math.Max(TimeZoneInfo.Local.GetUtcOffset(dateTime).TotalHours, -12), 14);
+
+                comboBoxTimezone.SelectedIndex = (int)timezone + 12;
             }
         }
 
@@ -615,73 +641,106 @@ namespace ASCOM.Starbook
 
             Telescope.starbook.IPAddress = ipAddress;
 
+            bool setLocation = false, setDateTime = false, setGuideRate = false;
+
+            Telescope.Starbook.Place place = this.place;
+            DateTime dateTime = this.dateTime;
+            int guideRate = Telescope.guideRate;
+            double[] guideRates = new double[9];
+            Array.Copy(Telescope.guideRates, guideRates, 9);
+
             if (checkBoxSetLocation.Enabled && checkBoxSetLocation.Checked)
             {
-                Telescope.Starbook.Place location;
-
-                if (!CheckComponentLocation(out location))
+                if (!CheckComponentLocation(ref place))
                 {
                     this.DialogResult = DialogResult.None; return;
                 }
 
-                Telescope.Starbook.Response response = Telescope.starbook.SetPlace(location);
+                setLocation = true;
+            }
 
-                if (response != Telescope.Starbook.Response.OK)
+            if (checkBoxSetDateTime.Enabled && checkBoxSetDateTime.Checked)
+            {
+                if (!CheckComponentDateTime(ref place, ref dateTime))
+                {
+                    this.DialogResult = DialogResult.None; return;
+                }
+
+                setDateTime = true;
+            }
+
+            if (checkBoxSetGuideRate.Enabled && checkBoxSetGuideRate.Checked)
+            {
+                guideRate = comboBoxGuideRate.SelectedIndex;
+
+                if (!CheckComponentGuideRate(textBoxGuideRate1, 1, out guideRates[1])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate2, 2, out guideRates[2])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate3, 3, out guideRates[3])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate4, 4, out guideRates[4])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate5, 5, out guideRates[5])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate6, 6, out guideRates[6])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate7, 7, out guideRates[7])) { this.DialogResult = DialogResult.None; return; }
+                if (!CheckComponentGuideRate(textBoxGuideRate8, 8, out guideRates[8])) { this.DialogResult = DialogResult.None; return; }
+
+                setGuideRate = true;
+            }
+
+            if (setLocation || setDateTime)
+            {
+                Telescope.Starbook.Response response = Telescope.starbook.SetPlace(place);
+                Telescope.LogMessage("SetupDialogForm", "Apply: Starbook.SetPlace({0},{1},{2})={3}", place.Latitude, place.Longitude, place.Timezone, response);
+
+                if (response == Telescope.Starbook.Response.OK)
+                {
+                    this.place = place;
+                }
+                else
                 {
                     MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot set location: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 
-            if (checkBoxSetDateTime.Enabled && checkBoxSetDateTime.Checked)
+            if (setDateTime)
             {
-                DateTime dateTime;
-
-                if (!CheckComponentDateTime(out dateTime))
-                {
-                    this.DialogResult = DialogResult.None; return;
-                }
-
                 Telescope.Starbook.Response response = Telescope.starbook.SetTime(dateTime);
+                Telescope.LogMessage("SetupDialogForm", "Apply: Starbook.SetTime({0:yyyy/MM/dd HH:mm:ss})={1}", dateTime, response);
 
-                if (response != Telescope.Starbook.Response.OK)
+                if (response == Telescope.Starbook.Response.OK)
+                {
+                    this.dateTime = dateTime;
+                }
+                else
                 {
                     MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot set date & time: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 
-            if (checkBoxSetGuideRate.Enabled && checkBoxSetGuideRate.Checked)
+            if (setGuideRate)
             {
-                Telescope.Starbook.Response response = Telescope.starbook.SetSpeed(comboBoxGuideRate.SelectedIndex);
+                Telescope.Starbook.Response response = Telescope.starbook.SetSpeed(guideRate);
+                Telescope.LogMessage("SetupDialogForm", "Apply: Starbook.SetSpeed({0})={1}", guideRate, response);
 
-                if (response != Telescope.Starbook.Response.OK)
+                if (response == Telescope.Starbook.Response.OK)
+                {
+                    Telescope.guideRate = guideRate;
+                }
+                else
                 {
                     MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot set guide rate: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+
+                Array.Copy(guideRates, Telescope.guideRates, 9);
             }
 
-            if ((checkBoxSetLocation.Enabled && checkBoxSetLocation.Checked) || (checkBoxSetDateTime.Enabled && checkBoxSetDateTime.Checked) || (checkBoxSetGuideRate.Enabled && checkBoxSetGuideRate.Checked))
+            if (setLocation || setDateTime || setGuideRate)
             {
                 Telescope.Starbook.Response response = Telescope.starbook.Save();
+                Telescope.LogMessage("SetupDialogForm", "Apply: Starbook.Save()={0}", response);
 
                 if (response != Telescope.Starbook.Response.OK)
                 {
                     MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot save setting: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-            }
-
-            if (checkBoxSetGuideRate.Enabled && checkBoxSetGuideRate.Checked)
-            {
-                Telescope.guideRate = comboBoxGuideRate.SelectedIndex;
-
-                if (!CheckComponentGuideRate(textBoxGuideRate0, 0, out Telescope.guideRates[0])) { this.DialogResult = DialogResult.None; return; }
-                if (!CheckComponentGuideRate(textBoxGuideRate1, 1, out Telescope.guideRates[1])) { this.DialogResult = DialogResult.None; return; }
-                if (!CheckComponentGuideRate(textBoxGuideRate2, 2, out Telescope.guideRates[2])) { this.DialogResult = DialogResult.None; return; }
-                if (!CheckComponentGuideRate(textBoxGuideRate3, 3, out Telescope.guideRates[3])) { this.DialogResult = DialogResult.None; return; }
-                if (!CheckComponentGuideRate(textBoxGuideRate4, 4, out Telescope.guideRates[4])) { this.DialogResult = DialogResult.None; return; }
-                if (!CheckComponentGuideRate(textBoxGuideRate5, 5, out Telescope.guideRates[5])) { this.DialogResult = DialogResult.None; return; }
-                if (!CheckComponentGuideRate(textBoxGuideRate6, 6, out Telescope.guideRates[6])) { this.DialogResult = DialogResult.None; return; }
-                if (!CheckComponentGuideRate(textBoxGuideRate7, 7, out Telescope.guideRates[7])) { this.DialogResult = DialogResult.None; return; }
-                if (!CheckComponentGuideRate(textBoxGuideRate8, 8, out Telescope.guideRates[8])) { this.DialogResult = DialogResult.None; return; }
             }
 
             Telescope.j2000 = checkBoxJ2000.Checked;

@@ -5,12 +5,12 @@
 [Setup]
 AppID={{6ca208b7-9809-44c8-a717-486a889f1186}
 AppName=Starbook Driver
-AppVerName=Starbook Driver v0.6
-AppVersion=0.6
+AppVerName=Starbook Driver v0.7
+AppVersion=0.7
 AppPublisher=Lung-Kai Cheng <lkcheng89@gmail.com>
 AppPublisherURL=mailto:lkcheng89@gmail.com
-AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/
-AppUpdatesURL=http://ascom-standards.org/
+AppSupportURL=https://github.com/lkcheng89/starbook
+AppUpdatesURL=https://github.com/lkcheng89/starbook
 VersionInfoVersion=1.0.0
 MinVersion=0,5.0.2195sp4
 DefaultDirName="{cf}\ASCOM\Telescope"
@@ -24,7 +24,7 @@ SolidCompression=yes
 WizardImageFile="C:\Program Files (x86)\ASCOM\Platform 6 Developer Components\Installer Generator\Resources\WizardImage.bmp"
 LicenseFile=".\LICENSE"
 ; {cf}\ASCOM\Uninstall\Telescope folder created by Platform, always
-UninstallFilesDir="{cf}\ASCOM\Uninstall\Telescope\Starbook"
+UninstallFilesDir="{cf}\ASCOM\Uninstall\Telescope\Starbook"SetupIconFile=.\ASCOM.ico
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -36,7 +36,7 @@ Name: "{cf}\ASCOM\Uninstall\Telescope\Starbook"
 [Files]
 Source: ".\bin\Release\ASCOM.Starbook.Telescope.dll"; DestDir: "{app}"
 ; Require a read-me HTML to appear after installation, maybe driver's Help doc
-Source: ".\README.html"; DestDir: "{app}"; Flags: isreadme
+Source: ".\CHANGES.txt"; DestDir: "{app}"; Flags: isreadme
 ; TODO: Add other files needed by your driver here (add subfolders above)
 
 

@@ -1,0 +1,45 @@
+Changelog
+=========
+
+Starbook Driver v0.7
+--------------------
+
+* Add J2000 & JNow equatorial system options.
+* Add Auto Meridian Flip feature.
+
+Starbook Driver v0.6
+--------------------
+
+* Fix the bug that numeric parser gets wrong floating number under some locales.
+
+Starbook Driver v0.5
+--------------------
+
+* Introduce multi-thread structure to overcome stuck problem in Stellarium.
+* Add Slew & Sync under Alt/Az coordinate.
+* Fix the problem that FindHome doesn't set AtHome to True.
+
+Starbook Driver v0.4
+--------------------
+
+* Fix several bugs to pass ASCOM Conformance Checker.
+
+Starbook Driver v0.3
+--------------------
+
+* Improve robustness with more defensive coding.
+* Fix some UI state errors in SetupDialogForm
+* Add SetPark and Park functions (Park will not stop tracking because of the limitation of Starbook)
+* Add AtHome by XY encode values.
+
+Starbook Driver v0.2
+--------------------
+
+* Add user input validation in setup dialog to prevent unexpected driver behaviour.
+* Add GuideRateDeclination and GuideRateRightAscension setter for PulseGuide.
+* Add MoveAxis and Park support.
+
+Starbook Driver v0.1
+--------------------
+
+* First release.

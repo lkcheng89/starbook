@@ -363,9 +363,9 @@ namespace ASCOM.Starbook
             /// 
             public Response GetRound(out int round)
             {
-                round = 0; Response response = this.Handshake("GETROUND");
+                round = 0; Response response = this.Handshake("GETROUND", out Dictionary<string, string> dictionary);
 
-                if (response == Response.ErrorUnknown && int.TryParse(response.Reply, NumberStyles.Number, CultureInfo.InvariantCulture, out round))
+                if (response == Response.ErrorUnknown && dictionary.TryGetValue("ROUND", out string s) && int.TryParse(s, NumberStyles.Number, CultureInfo.InvariantCulture, out round))
                 {
                     response.Assign(Response.OK);
                 }

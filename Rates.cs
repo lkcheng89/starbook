@@ -75,7 +75,7 @@ namespace ASCOM.Starbook
     public class AxisRates : IAxisRates, IEnumerable
     {
         private TelescopeAxes axis;
-        private readonly Rate[] rates;
+        private List<Rate> rates;
 
         //
         // Constructor - Internal prevents public creation
@@ -84,6 +84,7 @@ namespace ASCOM.Starbook
         internal AxisRates(TelescopeAxes axis)
         {
             this.axis = axis;
+            this.rates = new List<Rate>();
             //
             // This collection must hold zero or more Rate objects describing the 
             // rates of motion ranges for the Telescope.MoveAxis() method
@@ -98,13 +99,23 @@ namespace ASCOM.Starbook
             {
                 case TelescopeAxes.axisPrimary:
                 case TelescopeAxes.axisSecondary:
-                    double minimum = Telescope.GuideRate(0);
-                    double maximum = Telescope.GuideRate(8);
-                    this.rates = new Rate[] { new Rate(minimum, maximum) };
+                {
+                    HashSet<double> rates = new HashSet<double>();
+                    for (int index = 0; index <= 8; index++)
+                    {
+                        double rate = Telescope.GuideRate(index);
+                        if (!rates.Contains(rate))
+                        {
+                            rates.Add(rate);
+                            this.rates.Add(new Rate(rate, rate));
+                        }
+                    }
                     break;
+                }
                 case TelescopeAxes.axisTertiary:
-                    this.rates = new Rate[0];
+                {
                     break;
+                }
             }
         }
 
@@ -112,7 +123,7 @@ namespace ASCOM.Starbook
 
         public int Count
         {
-            get { return this.rates.Length; }
+            get { return this.rates.Count; }
         }
 
         public void Dispose()
