@@ -2911,6 +2911,10 @@ namespace ASCOM.Starbook
                                         this.status = null; this.response = null; this.atHome = false;
                                     }
                                 }
+                                else if (request.Parameters.ContainsKey("AutoMeridianFlip"))
+                                {
+                                    LogMessage("AutoMeridianFlip", "InvalidOperationException: Starbook.Goto({0},{1})={2}", ra, dec, response);
+                                }
 
                                 break;
                             }
@@ -3102,14 +3106,14 @@ namespace ASCOM.Starbook
                 }
                 else
                 {
-                    Starbook.HMS rightAscension = status.RA;
-                    Starbook.DMS declination = status.Dec;
+                    Request request = new Request("Goto");
+                    request.Parameters.Add("RA", status.RA);
+                    request.Parameters.Add("Dec", status.Dec);
+                    request.Parameters.Add("AutoMeridianFlip", true);
 
-                    response = Goto(rightAscension, declination); // Starbook chooses the good side-of-pier while slewing.
-
-                    if (response != Starbook.Response.OK)
+                    lock (this.requests)
                     {
-                        LogMessage("AutoMeridianFlip", "InvalidOperationException: Starbook.Goto({0},{1})={2}", rightAscension, declination, response); break;
+                        this.requests.Enqueue(request); // Fire And Forgot
                     }
 
                     LogMessage("AutoMeridianFlip", "Flip: SideOfPier={0}=>{1},X={2},Y={3},Azimuth={4},Altitude={5}", sideOfPier1, sideOfPier2, x, y, azimuth, altitude);
