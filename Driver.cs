@@ -85,7 +85,10 @@ namespace ASCOM.Starbook
         internal static string guideRateProfileName = "GuideRate";
         internal static int guideRateDefault = 0;
         internal static string guideRatesProfileName = "GuideRates";
-        internal static double[] guideRatesDefault = new double[] { 0.75, 0.75, 18, 37, 75, 150, 300, 500, 1000 };
+        internal static double[] guideRatesStarbook    = new double[] { 2.00, 2.00, 12, 24, 48,  96, 198, 396,  798 };
+        internal static double[] guideRatesStarbookS   = new double[] { 0.75, 0.75, 18, 37, 75, 150, 300, 500, 1000 };
+        internal static double[] guideRatesStarbookTen = new double[] { 0.50, 1.00,  2,  5, 10,  30, 100, 300,  500 };
+        internal static double[] guideRatesDefault = guideRatesStarbookS;
         internal static string j2000ProfileName = "J2000";
         internal static bool j2000Default = true;
         internal static string autoMeridianFlipProfileName = "AutoMeridianFlip";

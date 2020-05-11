@@ -29,12 +29,12 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SetupDialogForm));
             this.buttonOK = new System.Windows.Forms.Button();
             this.labelIPAddress = new System.Windows.Forms.Label();
             this.pictureBox = new System.Windows.Forms.PictureBox();
             this.checkBoxTraceLogger = new System.Windows.Forms.CheckBox();
             this.textBoxIPAddress1 = new System.Windows.Forms.TextBox();
-            this.textBoxStatus = new System.Windows.Forms.TextBox();
             this.textBoxIPAddress2 = new System.Windows.Forms.TextBox();
             this.textBoxIPAddress3 = new System.Windows.Forms.TextBox();
             this.textBoxIPAddress4 = new System.Windows.Forms.TextBox();
@@ -61,6 +61,7 @@
             this.checkBoxSetLocation = new System.Windows.Forms.CheckBox();
             this.labelElevationMeter = new System.Windows.Forms.Label();
             this.groupBoxDateTime = new System.Windows.Forms.GroupBox();
+            this.comboBoxTimezone = new System.Windows.Forms.ComboBox();
             this.checkBoxSyncSystemTime = new System.Windows.Forms.CheckBox();
             this.checkBoxSetDateTime = new System.Windows.Forms.CheckBox();
             this.labelTime = new System.Windows.Forms.Label();
@@ -87,6 +88,7 @@
             this.checkBoxSetGuideRate = new System.Windows.Forms.CheckBox();
             this.labelGuideRateX = new System.Windows.Forms.Label();
             this.labelGuideRates = new System.Windows.Forms.Label();
+            this.labelPredefinedGuideRates = new System.Windows.Forms.Label();
             this.labelGuideRate = new System.Windows.Forms.Label();
             this.textBoxGuideRate1 = new System.Windows.Forms.TextBox();
             this.textBoxGuideRate8 = new System.Windows.Forms.TextBox();
@@ -96,6 +98,7 @@
             this.textBoxGuideRate4 = new System.Windows.Forms.TextBox();
             this.textBoxGuideRate3 = new System.Windows.Forms.TextBox();
             this.textBoxGuideRate2 = new System.Windows.Forms.TextBox();
+            this.comboBoxPredefinedGuideRates = new System.Windows.Forms.ComboBox();
             this.comboBoxGuideRate = new System.Windows.Forms.ComboBox();
             this.textBoxGuideRate0 = new System.Windows.Forms.TextBox();
             this.groupBoxAdvanced = new System.Windows.Forms.GroupBox();
@@ -103,7 +106,7 @@
             this.checkBoxJ2000 = new System.Windows.Forms.CheckBox();
             this.buttonApply = new System.Windows.Forms.Button();
             this.labelSeperator = new System.Windows.Forms.Label();
-            this.comboBoxTimezone = new System.Windows.Forms.ComboBox();
+            this.labelStatus = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             this.groupBoxConnection.SuspendLayout();
             this.groupBoxLocation.SuspendLayout();
@@ -119,7 +122,7 @@
             this.buttonOK.Location = new System.Drawing.Point(258, 540);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(59, 28);
-            this.buttonOK.TabIndex = 69;
+            this.buttonOK.TabIndex = 72;
             this.buttonOK.Text = "OK";
             this.buttonOK.UseVisualStyleBackColor = true;
             this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
@@ -154,7 +157,7 @@
             this.checkBoxTraceLogger.Location = new System.Drawing.Point(160, 550);
             this.checkBoxTraceLogger.Name = "checkBoxTraceLogger";
             this.checkBoxTraceLogger.Size = new System.Drawing.Size(92, 18);
-            this.checkBoxTraceLogger.TabIndex = 68;
+            this.checkBoxTraceLogger.TabIndex = 71;
             this.checkBoxTraceLogger.Text = "Trace Logger";
             this.checkBoxTraceLogger.UseVisualStyleBackColor = true;
             // 
@@ -162,25 +165,16 @@
             // 
             this.textBoxIPAddress1.Location = new System.Drawing.Point(92, 27);
             this.textBoxIPAddress1.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxIPAddress1.MaxLength = 3;
             this.textBoxIPAddress1.Name = "textBoxIPAddress1";
             this.textBoxIPAddress1.Size = new System.Drawing.Size(33, 22);
             this.textBoxIPAddress1.TabIndex = 2;
-            // 
-            // textBoxStatus
-            // 
-            this.textBoxStatus.Location = new System.Drawing.Point(267, 27);
-            this.textBoxStatus.Margin = new System.Windows.Forms.Padding(2);
-            this.textBoxStatus.Name = "textBoxStatus";
-            this.textBoxStatus.ReadOnly = true;
-            this.textBoxStatus.Size = new System.Drawing.Size(86, 22);
-            this.textBoxStatus.TabIndex = 9;
-            this.textBoxStatus.Text = "Unknown";
-            this.textBoxStatus.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // textBoxIPAddress2
             // 
             this.textBoxIPAddress2.Location = new System.Drawing.Point(136, 27);
             this.textBoxIPAddress2.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxIPAddress2.MaxLength = 3;
             this.textBoxIPAddress2.Name = "textBoxIPAddress2";
             this.textBoxIPAddress2.Size = new System.Drawing.Size(33, 22);
             this.textBoxIPAddress2.TabIndex = 4;
@@ -189,6 +183,7 @@
             // 
             this.textBoxIPAddress3.Location = new System.Drawing.Point(180, 27);
             this.textBoxIPAddress3.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxIPAddress3.MaxLength = 3;
             this.textBoxIPAddress3.Name = "textBoxIPAddress3";
             this.textBoxIPAddress3.Size = new System.Drawing.Size(33, 22);
             this.textBoxIPAddress3.TabIndex = 6;
@@ -197,6 +192,7 @@
             // 
             this.textBoxIPAddress4.Location = new System.Drawing.Point(224, 27);
             this.textBoxIPAddress4.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxIPAddress4.MaxLength = 3;
             this.textBoxIPAddress4.Name = "textBoxIPAddress4";
             this.textBoxIPAddress4.Size = new System.Drawing.Size(33, 22);
             this.textBoxIPAddress4.TabIndex = 8;
@@ -274,6 +270,7 @@
             this.textBoxLatitudeDegree.Enabled = false;
             this.textBoxLatitudeDegree.Location = new System.Drawing.Point(92, 25);
             this.textBoxLatitudeDegree.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxLatitudeDegree.MaxLength = 2;
             this.textBoxLatitudeDegree.Name = "textBoxLatitudeDegree";
             this.textBoxLatitudeDegree.ReadOnly = true;
             this.textBoxLatitudeDegree.Size = new System.Drawing.Size(33, 22);
@@ -285,6 +282,7 @@
             this.textBoxLatitudeMinute.Enabled = false;
             this.textBoxLatitudeMinute.Location = new System.Drawing.Point(136, 25);
             this.textBoxLatitudeMinute.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxLatitudeMinute.MaxLength = 2;
             this.textBoxLatitudeMinute.Name = "textBoxLatitudeMinute";
             this.textBoxLatitudeMinute.ReadOnly = true;
             this.textBoxLatitudeMinute.Size = new System.Drawing.Size(33, 22);
@@ -316,6 +314,7 @@
             this.textBoxLongitudeDegree.Enabled = false;
             this.textBoxLongitudeDegree.Location = new System.Drawing.Point(92, 48);
             this.textBoxLongitudeDegree.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxLongitudeDegree.MaxLength = 3;
             this.textBoxLongitudeDegree.Name = "textBoxLongitudeDegree";
             this.textBoxLongitudeDegree.ReadOnly = true;
             this.textBoxLongitudeDegree.Size = new System.Drawing.Size(33, 22);
@@ -327,6 +326,7 @@
             this.textBoxLongitudeMinute.Enabled = false;
             this.textBoxLongitudeMinute.Location = new System.Drawing.Point(136, 48);
             this.textBoxLongitudeMinute.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxLongitudeMinute.MaxLength = 2;
             this.textBoxLongitudeMinute.Name = "textBoxLongitudeMinute";
             this.textBoxLongitudeMinute.ReadOnly = true;
             this.textBoxLongitudeMinute.Size = new System.Drawing.Size(33, 22);
@@ -375,6 +375,7 @@
             this.textBoxElevation.Enabled = false;
             this.textBoxElevation.Location = new System.Drawing.Point(92, 71);
             this.textBoxElevation.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxElevation.MaxLength = 4;
             this.textBoxElevation.Name = "textBoxElevation";
             this.textBoxElevation.ReadOnly = true;
             this.textBoxElevation.Size = new System.Drawing.Size(33, 22);
@@ -385,9 +386,9 @@
             // 
             this.groupBoxConnection.Controls.Add(this.buttonCheck);
             this.groupBoxConnection.Controls.Add(this.textBoxIPAddress4);
+            this.groupBoxConnection.Controls.Add(this.labelStatus);
             this.groupBoxConnection.Controls.Add(this.labelIPAddress);
             this.groupBoxConnection.Controls.Add(this.labelIPAddressDot1);
-            this.groupBoxConnection.Controls.Add(this.textBoxStatus);
             this.groupBoxConnection.Controls.Add(this.labelIPAddressDot2);
             this.groupBoxConnection.Controls.Add(this.labelIPAddressDot3);
             this.groupBoxConnection.Controls.Add(this.textBoxIPAddress1);
@@ -489,6 +490,44 @@
             this.groupBoxDateTime.TabStop = false;
             this.groupBoxDateTime.Text = "Date && Time Setting";
             // 
+            // comboBoxTimezone
+            // 
+            this.comboBoxTimezone.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxTimezone.Enabled = false;
+            this.comboBoxTimezone.FormattingEnabled = true;
+            this.comboBoxTimezone.Items.AddRange(new object[] {
+            "-12H",
+            "-11H",
+            "-10H",
+            "-9H",
+            "-8H",
+            "-7H",
+            "-6H",
+            "-5H",
+            "-4H",
+            "-3H",
+            "-2h",
+            "-1h",
+            "±0H",
+            "+1H",
+            "+2H",
+            "+3H",
+            "+4H",
+            "+5H",
+            "+6H",
+            "+7H",
+            "+8H",
+            "+9H",
+            "+10H",
+            "+11H",
+            "+12H",
+            "+13H",
+            "+14H"});
+            this.comboBoxTimezone.Location = new System.Drawing.Point(224, 48);
+            this.comboBoxTimezone.Name = "comboBoxTimezone";
+            this.comboBoxTimezone.Size = new System.Drawing.Size(45, 22);
+            this.comboBoxTimezone.TabIndex = 41;
+            // 
             // checkBoxSyncSystemTime
             // 
             this.checkBoxSyncSystemTime.AutoSize = true;
@@ -497,7 +536,7 @@
             this.checkBoxSyncSystemTime.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxSyncSystemTime.Name = "checkBoxSyncSystemTime";
             this.checkBoxSyncSystemTime.Size = new System.Drawing.Size(120, 18);
-            this.checkBoxSyncSystemTime.TabIndex = 42;
+            this.checkBoxSyncSystemTime.TabIndex = 43;
             this.checkBoxSyncSystemTime.Text = "Sync System Time";
             this.checkBoxSyncSystemTime.UseVisualStyleBackColor = true;
             this.checkBoxSyncSystemTime.CheckedChanged += new System.EventHandler(this.checkBoxSyncSystemTime_CheckedChanged);
@@ -510,7 +549,7 @@
             this.checkBoxSetDateTime.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxSetDateTime.Name = "checkBoxSetDateTime";
             this.checkBoxSetDateTime.Size = new System.Drawing.Size(113, 18);
-            this.checkBoxSetDateTime.TabIndex = 41;
+            this.checkBoxSetDateTime.TabIndex = 42;
             this.checkBoxSetDateTime.Text = "Set Date && Time";
             this.checkBoxSetDateTime.UseVisualStyleBackColor = true;
             this.checkBoxSetDateTime.CheckedChanged += new System.EventHandler(this.checkBoxSetDateTime_CheckedChanged);
@@ -538,6 +577,7 @@
             this.textBoxMinute.Enabled = false;
             this.textBoxMinute.Location = new System.Drawing.Point(136, 48);
             this.textBoxMinute.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxMinute.MaxLength = 2;
             this.textBoxMinute.Name = "textBoxMinute";
             this.textBoxMinute.ReadOnly = true;
             this.textBoxMinute.Size = new System.Drawing.Size(33, 22);
@@ -549,6 +589,7 @@
             this.textBoxMonth.Enabled = false;
             this.textBoxMonth.Location = new System.Drawing.Point(136, 25);
             this.textBoxMonth.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxMonth.MaxLength = 2;
             this.textBoxMonth.Name = "textBoxMonth";
             this.textBoxMonth.ReadOnly = true;
             this.textBoxMonth.Size = new System.Drawing.Size(33, 22);
@@ -560,6 +601,7 @@
             this.textBoxSecond.Enabled = false;
             this.textBoxSecond.Location = new System.Drawing.Point(181, 48);
             this.textBoxSecond.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxSecond.MaxLength = 2;
             this.textBoxSecond.Name = "textBoxSecond";
             this.textBoxSecond.ReadOnly = true;
             this.textBoxSecond.Size = new System.Drawing.Size(33, 22);
@@ -571,6 +613,7 @@
             this.textBoxHour.Enabled = false;
             this.textBoxHour.Location = new System.Drawing.Point(92, 48);
             this.textBoxHour.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxHour.MaxLength = 2;
             this.textBoxHour.Name = "textBoxHour";
             this.textBoxHour.ReadOnly = true;
             this.textBoxHour.Size = new System.Drawing.Size(33, 22);
@@ -582,6 +625,7 @@
             this.textBoxDay.Enabled = false;
             this.textBoxDay.Location = new System.Drawing.Point(181, 25);
             this.textBoxDay.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxDay.MaxLength = 2;
             this.textBoxDay.Name = "textBoxDay";
             this.textBoxDay.ReadOnly = true;
             this.textBoxDay.Size = new System.Drawing.Size(33, 22);
@@ -603,6 +647,7 @@
             this.textBoxYear.Enabled = false;
             this.textBoxYear.Location = new System.Drawing.Point(92, 25);
             this.textBoxYear.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxYear.MaxLength = 4;
             this.textBoxYear.Name = "textBoxYear";
             this.textBoxYear.ReadOnly = true;
             this.textBoxYear.Size = new System.Drawing.Size(33, 22);
@@ -646,7 +691,7 @@
             this.labelFirmwareVersion.Location = new System.Drawing.Point(9, 467);
             this.labelFirmwareVersion.Name = "labelFirmwareVersion";
             this.labelFirmwareVersion.Size = new System.Drawing.Size(116, 14);
-            this.labelFirmwareVersion.TabIndex = 62;
+            this.labelFirmwareVersion.TabIndex = 65;
             this.labelFirmwareVersion.Text = "Firmware Version: --";
             // 
             // timer
@@ -662,7 +707,7 @@
             this.labelPlatformVersion.Location = new System.Drawing.Point(9, 487);
             this.labelPlatformVersion.Name = "labelPlatformVersion";
             this.labelPlatformVersion.Size = new System.Drawing.Size(110, 14);
-            this.labelPlatformVersion.TabIndex = 63;
+            this.labelPlatformVersion.TabIndex = 66;
             this.labelPlatformVersion.Text = "Platform Version: --";
             // 
             // labelDriverVersion
@@ -672,7 +717,7 @@
             this.labelDriverVersion.Location = new System.Drawing.Point(9, 508);
             this.labelDriverVersion.Name = "labelDriverVersion";
             this.labelDriverVersion.Size = new System.Drawing.Size(97, 14);
-            this.labelDriverVersion.TabIndex = 64;
+            this.labelDriverVersion.TabIndex = 67;
             this.labelDriverVersion.Text = "Driver Version: --";
             // 
             // labelCopyright
@@ -682,7 +727,7 @@
             this.labelCopyright.Location = new System.Drawing.Point(262, 467);
             this.labelCopyright.Name = "labelCopyright";
             this.labelCopyright.Size = new System.Drawing.Size(182, 14);
-            this.labelCopyright.TabIndex = 65;
+            this.labelCopyright.TabIndex = 68;
             this.labelCopyright.Text = "Copyright © 2020 Lung-Kai Cheng";
             // 
             // labelEmail
@@ -695,7 +740,7 @@
             this.labelEmail.Location = new System.Drawing.Point(262, 487);
             this.labelEmail.Name = "labelEmail";
             this.labelEmail.Size = new System.Drawing.Size(128, 14);
-            this.labelEmail.TabIndex = 66;
+            this.labelEmail.TabIndex = 69;
             this.labelEmail.Text = "lkcheng89@gmail.com";
             this.labelEmail.Click += new System.EventHandler(this.labelEmail_Click);
             // 
@@ -706,7 +751,7 @@
             this.buttonCancel.Location = new System.Drawing.Point(323, 540);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(59, 28);
-            this.buttonCancel.TabIndex = 70;
+            this.buttonCancel.TabIndex = 73;
             this.buttonCancel.Text = "Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
@@ -717,6 +762,7 @@
             this.groupBoxGuideRate.Controls.Add(this.checkBoxSetGuideRate);
             this.groupBoxGuideRate.Controls.Add(this.labelGuideRateX);
             this.groupBoxGuideRate.Controls.Add(this.labelGuideRates);
+            this.groupBoxGuideRate.Controls.Add(this.labelPredefinedGuideRates);
             this.groupBoxGuideRate.Controls.Add(this.labelGuideRate);
             this.groupBoxGuideRate.Controls.Add(this.textBoxGuideRate1);
             this.groupBoxGuideRate.Controls.Add(this.textBoxGuideRate8);
@@ -726,6 +772,7 @@
             this.groupBoxGuideRate.Controls.Add(this.textBoxGuideRate4);
             this.groupBoxGuideRate.Controls.Add(this.textBoxGuideRate3);
             this.groupBoxGuideRate.Controls.Add(this.textBoxGuideRate2);
+            this.groupBoxGuideRate.Controls.Add(this.comboBoxPredefinedGuideRates);
             this.groupBoxGuideRate.Controls.Add(this.comboBoxGuideRate);
             this.groupBoxGuideRate.Controls.Add(this.textBoxGuideRate0);
             this.groupBoxGuideRate.Location = new System.Drawing.Point(8, 273);
@@ -733,28 +780,28 @@
             this.groupBoxGuideRate.Name = "groupBoxGuideRate";
             this.groupBoxGuideRate.Padding = new System.Windows.Forms.Padding(2);
             this.groupBoxGuideRate.Size = new System.Drawing.Size(439, 103);
-            this.groupBoxGuideRate.TabIndex = 43;
+            this.groupBoxGuideRate.TabIndex = 44;
             this.groupBoxGuideRate.TabStop = false;
             this.groupBoxGuideRate.Text = "Pulse Guide Setting";
             // 
             // labelGuideRateNote
             // 
             this.labelGuideRateNote.AutoSize = true;
-            this.labelGuideRateNote.Location = new System.Drawing.Point(89, 75);
+            this.labelGuideRateNote.Location = new System.Drawing.Point(89, 77);
             this.labelGuideRateNote.Name = "labelGuideRateNote";
             this.labelGuideRateNote.Size = new System.Drawing.Size(149, 14);
-            this.labelGuideRateNote.TabIndex = 57;
+            this.labelGuideRateNote.TabIndex = 60;
             this.labelGuideRateNote.Text = "X = Times of Sidereal Rate";
             // 
             // checkBoxSetGuideRate
             // 
             this.checkBoxSetGuideRate.AutoSize = true;
             this.checkBoxSetGuideRate.Enabled = false;
-            this.checkBoxSetGuideRate.Location = new System.Drawing.Point(309, 75);
+            this.checkBoxSetGuideRate.Location = new System.Drawing.Point(309, 77);
             this.checkBoxSetGuideRate.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxSetGuideRate.Name = "checkBoxSetGuideRate";
             this.checkBoxSetGuideRate.Size = new System.Drawing.Size(107, 18);
-            this.checkBoxSetGuideRate.TabIndex = 58;
+            this.checkBoxSetGuideRate.TabIndex = 61;
             this.checkBoxSetGuideRate.Text = "Set Guide Rate";
             this.checkBoxSetGuideRate.UseVisualStyleBackColor = true;
             this.checkBoxSetGuideRate.CheckedChanged += new System.EventHandler(this.checkBoxSetGuideRate_CheckedChanged);
@@ -762,20 +809,29 @@
             // labelGuideRateX
             // 
             this.labelGuideRateX.AutoSize = true;
-            this.labelGuideRateX.Location = new System.Drawing.Point(415, 52);
+            this.labelGuideRateX.Location = new System.Drawing.Point(415, 54);
             this.labelGuideRateX.Name = "labelGuideRateX";
             this.labelGuideRateX.Size = new System.Drawing.Size(13, 14);
-            this.labelGuideRateX.TabIndex = 56;
+            this.labelGuideRateX.TabIndex = 59;
             this.labelGuideRateX.Text = "X";
             // 
             // labelGuideRates
             // 
             this.labelGuideRates.AutoSize = true;
-            this.labelGuideRates.Location = new System.Drawing.Point(17, 50);
+            this.labelGuideRates.Location = new System.Drawing.Point(17, 52);
             this.labelGuideRates.Name = "labelGuideRates";
             this.labelGuideRates.Size = new System.Drawing.Size(74, 14);
-            this.labelGuideRates.TabIndex = 46;
+            this.labelGuideRates.TabIndex = 49;
             this.labelGuideRates.Text = "Guide Rates";
+            // 
+            // labelPredefinedGuideRates
+            // 
+            this.labelPredefinedGuideRates.AutoSize = true;
+            this.labelPredefinedGuideRates.Location = new System.Drawing.Point(226, 28);
+            this.labelPredefinedGuideRates.Name = "labelPredefinedGuideRates";
+            this.labelPredefinedGuideRates.Size = new System.Drawing.Size(79, 14);
+            this.labelPredefinedGuideRates.TabIndex = 47;
+            this.labelPredefinedGuideRates.Text = "↓ Predefined";
             // 
             // labelGuideRate
             // 
@@ -783,96 +839,113 @@
             this.labelGuideRate.Location = new System.Drawing.Point(17, 27);
             this.labelGuideRate.Name = "labelGuideRate";
             this.labelGuideRate.Size = new System.Drawing.Size(68, 14);
-            this.labelGuideRate.TabIndex = 44;
+            this.labelGuideRate.TabIndex = 45;
             this.labelGuideRate.Text = "Guide Rate";
             // 
             // textBoxGuideRate1
             // 
             this.textBoxGuideRate1.Enabled = false;
-            this.textBoxGuideRate1.Location = new System.Drawing.Point(128, 48);
+            this.textBoxGuideRate1.Location = new System.Drawing.Point(128, 50);
             this.textBoxGuideRate1.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxGuideRate1.Name = "textBoxGuideRate1";
             this.textBoxGuideRate1.ReadOnly = true;
             this.textBoxGuideRate1.Size = new System.Drawing.Size(33, 22);
-            this.textBoxGuideRate1.TabIndex = 48;
+            this.textBoxGuideRate1.TabIndex = 51;
             this.textBoxGuideRate1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate8
             // 
             this.textBoxGuideRate8.Enabled = false;
-            this.textBoxGuideRate8.Location = new System.Drawing.Point(380, 48);
+            this.textBoxGuideRate8.Location = new System.Drawing.Point(380, 50);
             this.textBoxGuideRate8.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxGuideRate8.Name = "textBoxGuideRate8";
             this.textBoxGuideRate8.ReadOnly = true;
             this.textBoxGuideRate8.Size = new System.Drawing.Size(33, 22);
-            this.textBoxGuideRate8.TabIndex = 55;
+            this.textBoxGuideRate8.TabIndex = 58;
             this.textBoxGuideRate8.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate7
             // 
             this.textBoxGuideRate7.Enabled = false;
-            this.textBoxGuideRate7.Location = new System.Drawing.Point(344, 48);
+            this.textBoxGuideRate7.Location = new System.Drawing.Point(344, 50);
             this.textBoxGuideRate7.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxGuideRate7.Name = "textBoxGuideRate7";
             this.textBoxGuideRate7.ReadOnly = true;
             this.textBoxGuideRate7.Size = new System.Drawing.Size(33, 22);
-            this.textBoxGuideRate7.TabIndex = 54;
+            this.textBoxGuideRate7.TabIndex = 57;
             this.textBoxGuideRate7.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate6
             // 
             this.textBoxGuideRate6.Enabled = false;
-            this.textBoxGuideRate6.Location = new System.Drawing.Point(308, 48);
+            this.textBoxGuideRate6.Location = new System.Drawing.Point(308, 50);
             this.textBoxGuideRate6.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxGuideRate6.Name = "textBoxGuideRate6";
             this.textBoxGuideRate6.ReadOnly = true;
             this.textBoxGuideRate6.Size = new System.Drawing.Size(33, 22);
-            this.textBoxGuideRate6.TabIndex = 53;
+            this.textBoxGuideRate6.TabIndex = 56;
             this.textBoxGuideRate6.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate5
             // 
             this.textBoxGuideRate5.Enabled = false;
-            this.textBoxGuideRate5.Location = new System.Drawing.Point(272, 48);
+            this.textBoxGuideRate5.Location = new System.Drawing.Point(272, 50);
             this.textBoxGuideRate5.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxGuideRate5.Name = "textBoxGuideRate5";
             this.textBoxGuideRate5.ReadOnly = true;
             this.textBoxGuideRate5.Size = new System.Drawing.Size(33, 22);
-            this.textBoxGuideRate5.TabIndex = 52;
+            this.textBoxGuideRate5.TabIndex = 55;
             this.textBoxGuideRate5.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate4
             // 
             this.textBoxGuideRate4.Enabled = false;
-            this.textBoxGuideRate4.Location = new System.Drawing.Point(236, 48);
+            this.textBoxGuideRate4.Location = new System.Drawing.Point(236, 50);
             this.textBoxGuideRate4.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxGuideRate4.Name = "textBoxGuideRate4";
             this.textBoxGuideRate4.ReadOnly = true;
             this.textBoxGuideRate4.Size = new System.Drawing.Size(33, 22);
-            this.textBoxGuideRate4.TabIndex = 51;
+            this.textBoxGuideRate4.TabIndex = 54;
             this.textBoxGuideRate4.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate3
             // 
             this.textBoxGuideRate3.Enabled = false;
-            this.textBoxGuideRate3.Location = new System.Drawing.Point(200, 48);
+            this.textBoxGuideRate3.Location = new System.Drawing.Point(200, 50);
             this.textBoxGuideRate3.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxGuideRate3.Name = "textBoxGuideRate3";
             this.textBoxGuideRate3.ReadOnly = true;
             this.textBoxGuideRate3.Size = new System.Drawing.Size(33, 22);
-            this.textBoxGuideRate3.TabIndex = 50;
+            this.textBoxGuideRate3.TabIndex = 53;
             this.textBoxGuideRate3.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textBoxGuideRate2
             // 
             this.textBoxGuideRate2.Enabled = false;
-            this.textBoxGuideRate2.Location = new System.Drawing.Point(164, 48);
+            this.textBoxGuideRate2.Location = new System.Drawing.Point(164, 50);
             this.textBoxGuideRate2.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxGuideRate2.Name = "textBoxGuideRate2";
             this.textBoxGuideRate2.ReadOnly = true;
             this.textBoxGuideRate2.Size = new System.Drawing.Size(33, 22);
-            this.textBoxGuideRate2.TabIndex = 49;
+            this.textBoxGuideRate2.TabIndex = 52;
             this.textBoxGuideRate2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // comboBoxPredefinedGuideRates
+            // 
+            this.comboBoxPredefinedGuideRates.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxPredefinedGuideRates.Enabled = false;
+            this.comboBoxPredefinedGuideRates.FormattingEnabled = true;
+            this.comboBoxPredefinedGuideRates.Items.AddRange(new object[] {
+            "--",
+            "Starbook",
+            "Starbook S",
+            "Starbook Ten"});
+            this.comboBoxPredefinedGuideRates.Location = new System.Drawing.Point(308, 25);
+            this.comboBoxPredefinedGuideRates.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBoxPredefinedGuideRates.Name = "comboBoxPredefinedGuideRates";
+            this.comboBoxPredefinedGuideRates.Size = new System.Drawing.Size(105, 22);
+            this.comboBoxPredefinedGuideRates.TabIndex = 48;
+            this.comboBoxPredefinedGuideRates.SelectedIndexChanged += new System.EventHandler(this.comboBoxPredefinedGuideRates_SelectedIndexChanged);
             // 
             // comboBoxGuideRate
             // 
@@ -893,17 +966,17 @@
             this.comboBoxGuideRate.Margin = new System.Windows.Forms.Padding(2);
             this.comboBoxGuideRate.Name = "comboBoxGuideRate";
             this.comboBoxGuideRate.Size = new System.Drawing.Size(33, 22);
-            this.comboBoxGuideRate.TabIndex = 45;
+            this.comboBoxGuideRate.TabIndex = 46;
             // 
             // textBoxGuideRate0
             // 
             this.textBoxGuideRate0.Enabled = false;
-            this.textBoxGuideRate0.Location = new System.Drawing.Point(92, 48);
+            this.textBoxGuideRate0.Location = new System.Drawing.Point(92, 50);
             this.textBoxGuideRate0.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxGuideRate0.Name = "textBoxGuideRate0";
             this.textBoxGuideRate0.ReadOnly = true;
             this.textBoxGuideRate0.Size = new System.Drawing.Size(33, 22);
-            this.textBoxGuideRate0.TabIndex = 47;
+            this.textBoxGuideRate0.TabIndex = 50;
             this.textBoxGuideRate0.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // groupBoxAdvanced
@@ -915,7 +988,7 @@
             this.groupBoxAdvanced.Name = "groupBoxAdvanced";
             this.groupBoxAdvanced.Padding = new System.Windows.Forms.Padding(2);
             this.groupBoxAdvanced.Size = new System.Drawing.Size(439, 80);
-            this.groupBoxAdvanced.TabIndex = 59;
+            this.groupBoxAdvanced.TabIndex = 62;
             this.groupBoxAdvanced.TabStop = false;
             this.groupBoxAdvanced.Text = "Advanced Setting";
             // 
@@ -926,7 +999,7 @@
             this.checkBoxAutoMeridianFlip.Location = new System.Drawing.Point(17, 51);
             this.checkBoxAutoMeridianFlip.Name = "checkBoxAutoMeridianFlip";
             this.checkBoxAutoMeridianFlip.Size = new System.Drawing.Size(128, 18);
-            this.checkBoxAutoMeridianFlip.TabIndex = 61;
+            this.checkBoxAutoMeridianFlip.TabIndex = 64;
             this.checkBoxAutoMeridianFlip.Text = "Auto Meridian Flip";
             this.checkBoxAutoMeridianFlip.UseVisualStyleBackColor = true;
             // 
@@ -939,7 +1012,7 @@
             this.checkBoxJ2000.Location = new System.Drawing.Point(17, 27);
             this.checkBoxJ2000.Name = "checkBoxJ2000";
             this.checkBoxJ2000.Size = new System.Drawing.Size(219, 18);
-            this.checkBoxJ2000.TabIndex = 60;
+            this.checkBoxJ2000.TabIndex = 63;
             this.checkBoxJ2000.Text = "J2000 (Uncheck if JNow is preferred)";
             this.checkBoxJ2000.UseVisualStyleBackColor = true;
             // 
@@ -950,7 +1023,7 @@
             this.buttonApply.Location = new System.Drawing.Point(388, 540);
             this.buttonApply.Name = "buttonApply";
             this.buttonApply.Size = new System.Drawing.Size(59, 28);
-            this.buttonApply.TabIndex = 71;
+            this.buttonApply.TabIndex = 74;
             this.buttonApply.Text = "Apply";
             this.buttonApply.UseVisualStyleBackColor = true;
             this.buttonApply.Click += new System.EventHandler(this.buttonApply_Click);
@@ -961,45 +1034,17 @@
             this.labelSeperator.Location = new System.Drawing.Point(8, 532);
             this.labelSeperator.Name = "labelSeperator";
             this.labelSeperator.Size = new System.Drawing.Size(439, 2);
-            this.labelSeperator.TabIndex = 67;
+            this.labelSeperator.TabIndex = 70;
             // 
-            // comboBoxTimezone
+            // labelStatus
             // 
-            this.comboBoxTimezone.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxTimezone.Enabled = false;
-            this.comboBoxTimezone.FormattingEnabled = true;
-            this.comboBoxTimezone.Items.AddRange(new object[] {
-            "-12H",
-            "-11H",
-            "-10H",
-            "-9H",
-            "-8H",
-            "-7H",
-            "-6H",
-            "-5H",
-            "-4H",
-            "-3H",
-            "-2h",
-            "-1h",
-            "±0H",
-            "+1H",
-            "+2H",
-            "+3H",
-            "+4H",
-            "+5H",
-            "+6H",
-            "+7H",
-            "+8H",
-            "+9H",
-            "+10H",
-            "+11H",
-            "+12H",
-            "+13H",
-            "+14H"});
-            this.comboBoxTimezone.Location = new System.Drawing.Point(224, 48);
-            this.comboBoxTimezone.Name = "comboBoxTimezone";
-            this.comboBoxTimezone.Size = new System.Drawing.Size(45, 22);
-            this.comboBoxTimezone.TabIndex = 43;
+            this.labelStatus.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.labelStatus.Location = new System.Drawing.Point(267, 27);
+            this.labelStatus.Name = "labelStatus";
+            this.labelStatus.Size = new System.Drawing.Size(86, 22);
+            this.labelStatus.TabIndex = 9;
+            this.labelStatus.Text = "Unknown";
+            this.labelStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // SetupDialogForm
             // 
@@ -1024,6 +1069,7 @@
             this.Controls.Add(this.buttonCancel);
             this.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "SetupDialogForm";
@@ -1053,7 +1099,6 @@
         private System.Windows.Forms.PictureBox pictureBox;
         private System.Windows.Forms.CheckBox checkBoxTraceLogger;
         private System.Windows.Forms.TextBox textBoxIPAddress1;
-        private System.Windows.Forms.TextBox textBoxStatus;
         private System.Windows.Forms.TextBox textBoxIPAddress2;
         private System.Windows.Forms.TextBox textBoxIPAddress3;
         private System.Windows.Forms.TextBox textBoxIPAddress4;
@@ -1123,5 +1168,8 @@
         private System.Windows.Forms.Label labelSeperator;
         private System.Windows.Forms.CheckBox checkBoxAutoMeridianFlip;
         private System.Windows.Forms.ComboBox comboBoxTimezone;
+        private System.Windows.Forms.ComboBox comboBoxPredefinedGuideRates;
+        private System.Windows.Forms.Label labelPredefinedGuideRates;
+        private System.Windows.Forms.Label labelStatus;
     }
 }

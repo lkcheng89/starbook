@@ -57,6 +57,8 @@ namespace ASCOM.Starbook
             textBoxGuideRate7.Text = Telescope.guideRates[7].ToString(CultureInfo.InvariantCulture);
             textBoxGuideRate8.Text = Telescope.guideRates[8].ToString(CultureInfo.InvariantCulture);
 
+            comboBoxPredefinedGuideRates.SelectedIndex = 0;
+
             checkBoxJ2000.Checked = Telescope.j2000;
             checkBoxAutoMeridianFlip.Checked = Telescope.autoMeridianFlip > 0;
             checkBoxTraceLogger.Checked = Telescope.traceLogger.Enabled;
@@ -77,44 +79,84 @@ namespace ASCOM.Starbook
 
             /////
 
-            textBoxIPAddress1.TextChanged += buttonApply_Monitored;
-            textBoxIPAddress2.TextChanged += buttonApply_Monitored;
-            textBoxIPAddress3.TextChanged += buttonApply_Monitored;
-            textBoxIPAddress4.TextChanged += buttonApply_Monitored;
+            HashSet<TextBox> dotKeyTextBoxes = new HashSet<TextBox>();
+            HashSet<TextBox> integerTextBoxes = new HashSet<TextBox>();
+            HashSet<TextBox> floatTextBoxes = new HashSet<TextBox>();
 
-            textBoxLatitudeDegree.TextChanged += buttonApply_Monitored;
-            textBoxLatitudeMinute.TextChanged += buttonApply_Monitored;
-            comboBoxLatitudeDirection.SelectedIndexChanged += buttonApply_Monitored;
-            textBoxLongitudeDegree.TextChanged += buttonApply_Monitored;
-            textBoxLongitudeMinute.TextChanged += buttonApply_Monitored;
-            comboBoxLongitudeDirection.SelectedIndexChanged += buttonApply_Monitored;
-            checkBoxSetLocation.CheckedChanged += buttonApply_Monitored;
+            dotKeyTextBoxes.Add(this.textBoxIPAddress1);
+            dotKeyTextBoxes.Add(this.textBoxIPAddress2);
+            dotKeyTextBoxes.Add(this.textBoxIPAddress3);
 
-            textBoxYear.TextChanged += buttonApply_Monitored;
-            textBoxMonth.TextChanged += buttonApply_Monitored;
-            textBoxDay.TextChanged += buttonApply_Monitored;
-            textBoxHour.TextChanged += buttonApply_Monitored;
-            textBoxMinute.TextChanged += buttonApply_Monitored;
-            textBoxSecond.TextChanged += buttonApply_Monitored;
-            comboBoxTimezone.SelectedIndexChanged += buttonApply_Monitored;
-            checkBoxSetDateTime.CheckedChanged += buttonApply_Monitored;
-            checkBoxSyncSystemTime.CheckedChanged += buttonApply_Monitored;
+            integerTextBoxes.Add(this.textBoxIPAddress1);
+            integerTextBoxes.Add(this.textBoxIPAddress2);
+            integerTextBoxes.Add(this.textBoxIPAddress3);
+            integerTextBoxes.Add(this.textBoxIPAddress4);
+            integerTextBoxes.Add(this.textBoxLatitudeDegree);
+            integerTextBoxes.Add(this.textBoxLatitudeMinute);
+            integerTextBoxes.Add(this.textBoxLongitudeDegree);
+            integerTextBoxes.Add(this.textBoxLongitudeMinute);
+            integerTextBoxes.Add(this.textBoxElevation);
+            integerTextBoxes.Add(this.textBoxYear);
+            integerTextBoxes.Add(this.textBoxMonth);
+            integerTextBoxes.Add(this.textBoxDay);
+            integerTextBoxes.Add(this.textBoxHour);
+            integerTextBoxes.Add(this.textBoxMinute);
+            integerTextBoxes.Add(this.textBoxSecond);
 
-            comboBoxGuideRate.SelectedIndexChanged += buttonApply_Monitored;
-            textBoxGuideRate0.TextChanged += buttonApply_Monitored;
-            textBoxGuideRate1.TextChanged += buttonApply_Monitored;
-            textBoxGuideRate2.TextChanged += buttonApply_Monitored;
-            textBoxGuideRate3.TextChanged += buttonApply_Monitored;
-            textBoxGuideRate4.TextChanged += buttonApply_Monitored;
-            textBoxGuideRate5.TextChanged += buttonApply_Monitored;
-            textBoxGuideRate6.TextChanged += buttonApply_Monitored;
-            textBoxGuideRate7.TextChanged += buttonApply_Monitored;
-            textBoxGuideRate8.TextChanged += buttonApply_Monitored;
-            checkBoxSetGuideRate.CheckedChanged += buttonApply_Monitored;
+            floatTextBoxes.Add(this.textBoxGuideRate0);
+            floatTextBoxes.Add(this.textBoxGuideRate1);
+            floatTextBoxes.Add(this.textBoxGuideRate2);
+            floatTextBoxes.Add(this.textBoxGuideRate3);
+            floatTextBoxes.Add(this.textBoxGuideRate4);
+            floatTextBoxes.Add(this.textBoxGuideRate5);
+            floatTextBoxes.Add(this.textBoxGuideRate6);
+            floatTextBoxes.Add(this.textBoxGuideRate7);
+            floatTextBoxes.Add(this.textBoxGuideRate8);
 
-            checkBoxJ2000.CheckedChanged += buttonApply_Monitored;
-            checkBoxAutoMeridianFlip.CheckedChanged += buttonApply_Monitored;
-            checkBoxTraceLogger.CheckedChanged += buttonApply_Monitored;
+            Queue<Control> controls = new Queue<Control>(); 
+
+            for (controls.Enqueue(this); controls.Count > 0; )
+            {
+                Control control = controls.Dequeue();
+
+                if (control is TextBox textBox)
+                {
+                    textBox.Enter += textBox_FocusMonitored;
+                    textBox.MouseClick += textBox_MouseMonitored;
+
+                    if (dotKeyTextBoxes.Contains(textBox))
+                    {
+                        textBox.KeyPress += textBox_DotKeyMonitored;
+                    }
+
+                    if (integerTextBoxes.Contains(textBox))
+                    {
+                        textBox.KeyPress += textBox_IntegerMonitored;
+                    }
+
+                    if (floatTextBoxes.Contains(textBox))
+                    {
+                        textBox.KeyPress += textBox_FloatMonitored;
+                    }
+
+                    textBox.TextChanged += buttonApply_Monitored;
+                }
+                else if (control is ComboBox comboBox)
+                {
+                    comboBox.SelectedIndexChanged += buttonApply_Monitored;
+                }
+                else if (control is CheckBox checkBox)
+                {
+                    checkBox.CheckedChanged += buttonApply_Monitored;
+                }
+                else
+                {
+                    foreach (Control ctrl in control.Controls)
+                    {
+                        controls.Enqueue(ctrl);
+                    }
+                }
+            }
         }
 
         private bool CheckComponentIPAddress(out IPAddress ipAddress)
@@ -334,7 +376,7 @@ namespace ASCOM.Starbook
 
             if (status.State == Telescope.Starbook.State.Unknown)
             {
-                textBoxStatus.Text = "Disconnected";
+                labelStatus.Text = "Disconnected";
 
                 textBoxLatitudeDegree.Clear();
                 textBoxLatitudeMinute.Clear();
@@ -358,7 +400,7 @@ namespace ASCOM.Starbook
             }
             else
             {
-                textBoxStatus.Text = "Connected"; connected = true;
+                labelStatus.Text = "Connected"; connected = true;
 
                 if (status.State == Telescope.Starbook.State.Init)
                 {
@@ -484,15 +526,15 @@ namespace ASCOM.Starbook
 
             comboBoxGuideRate.Enabled = connected && checkBoxSetGuideRate.Checked;
 
-            textBoxGuideRate0.ReadOnly = !checkBoxSetGuideRate.Checked;
-            textBoxGuideRate1.ReadOnly = !checkBoxSetGuideRate.Checked;
-            textBoxGuideRate2.ReadOnly = !checkBoxSetGuideRate.Checked;
-            textBoxGuideRate3.ReadOnly = !checkBoxSetGuideRate.Checked;
-            textBoxGuideRate4.ReadOnly = !checkBoxSetGuideRate.Checked;
-            textBoxGuideRate5.ReadOnly = !checkBoxSetGuideRate.Checked;
-            textBoxGuideRate6.ReadOnly = !checkBoxSetGuideRate.Checked;
-            textBoxGuideRate7.ReadOnly = !checkBoxSetGuideRate.Checked;
-            textBoxGuideRate8.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate0.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate1.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate2.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate3.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate4.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate5.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate6.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate7.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate8.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
 
             textBoxGuideRate0.Enabled = connected;
             textBoxGuideRate1.Enabled = connected;
@@ -503,6 +545,8 @@ namespace ASCOM.Starbook
             textBoxGuideRate6.Enabled = connected;
             textBoxGuideRate7.Enabled = connected;
             textBoxGuideRate8.Enabled = connected;
+
+            comboBoxPredefinedGuideRates.Enabled = connected && checkBoxSetGuideRate.Checked;
 
             checkBoxSetGuideRate.Enabled = connected;
 
@@ -550,19 +594,59 @@ namespace ASCOM.Starbook
             comboBoxTimezone.Enabled = checkBoxSetDateTime.Checked && !checkBoxSyncSystemTime.Checked;
         }
 
+        private void comboBoxPredefinedGuideRates_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            double[] guideRates;
+
+            switch (comboBoxPredefinedGuideRates.SelectedIndex)
+            {
+                case 0:
+                default:
+                    guideRates = Telescope.guideRates; break;
+                case 1:
+                    guideRates = Telescope.guideRatesStarbook; break;
+                case 2:
+                    guideRates = Telescope.guideRatesStarbookS; break;
+                case 3:
+                    guideRates = Telescope.guideRatesStarbookTen; break;
+            }
+
+            textBoxGuideRate0.Text = guideRates[0].ToString(CultureInfo.InvariantCulture);
+            textBoxGuideRate1.Text = guideRates[1].ToString(CultureInfo.InvariantCulture);
+            textBoxGuideRate2.Text = guideRates[2].ToString(CultureInfo.InvariantCulture);
+            textBoxGuideRate3.Text = guideRates[3].ToString(CultureInfo.InvariantCulture);
+            textBoxGuideRate4.Text = guideRates[4].ToString(CultureInfo.InvariantCulture);
+            textBoxGuideRate5.Text = guideRates[5].ToString(CultureInfo.InvariantCulture);
+            textBoxGuideRate6.Text = guideRates[6].ToString(CultureInfo.InvariantCulture);
+            textBoxGuideRate7.Text = guideRates[7].ToString(CultureInfo.InvariantCulture);
+            textBoxGuideRate8.Text = guideRates[8].ToString(CultureInfo.InvariantCulture);
+
+            textBoxGuideRate0.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate1.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate2.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate3.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate4.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate5.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate6.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate7.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate8.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+        }
+
         private void checkBoxSetGuideRate_CheckedChanged(object sender, EventArgs e)
         {
             comboBoxGuideRate.Enabled = checkBoxSetGuideRate.Checked;
 
-            textBoxGuideRate0.ReadOnly = !checkBoxSetGuideRate.Checked;
-            textBoxGuideRate1.ReadOnly = !checkBoxSetGuideRate.Checked;
-            textBoxGuideRate2.ReadOnly = !checkBoxSetGuideRate.Checked;
-            textBoxGuideRate3.ReadOnly = !checkBoxSetGuideRate.Checked;
-            textBoxGuideRate4.ReadOnly = !checkBoxSetGuideRate.Checked;
-            textBoxGuideRate5.ReadOnly = !checkBoxSetGuideRate.Checked;
-            textBoxGuideRate6.ReadOnly = !checkBoxSetGuideRate.Checked;
-            textBoxGuideRate7.ReadOnly = !checkBoxSetGuideRate.Checked;
-            textBoxGuideRate8.ReadOnly = !checkBoxSetGuideRate.Checked;
+            textBoxGuideRate0.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate1.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate2.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate3.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate4.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate5.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate6.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate7.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+            textBoxGuideRate8.ReadOnly = !checkBoxSetGuideRate.Checked || comboBoxPredefinedGuideRates.SelectedIndex != 0;
+
+            comboBoxPredefinedGuideRates.Enabled = checkBoxSetGuideRate.Checked;
         }
 
         private void timer_Tick(object sender, EventArgs e)
@@ -717,18 +801,7 @@ namespace ASCOM.Starbook
 
             if (setGuideRate)
             {
-                Telescope.Starbook.Response response = Telescope.starbook.SetSpeed(guideRate);
-                Telescope.LogMessage("SetupDialogForm", "Apply: Starbook.SetSpeed({0})={1}", guideRate, response);
-
-                if (response == Telescope.Starbook.Response.OK)
-                {
-                    Telescope.guideRate = guideRate;
-                }
-                else
-                {
-                    MessageBox.Show(this, string.Format(CultureInfo.InvariantCulture, "Cannot set guide rate: {0}", response), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-
+                Telescope.guideRate = guideRate;
                 Array.Copy(guideRates, Telescope.guideRates, 9);
             }
 
@@ -750,31 +823,76 @@ namespace ASCOM.Starbook
             buttonApply.Enabled = false;
         }
 
+        private void textBox_FocusMonitored(object sender, EventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+
+            if (textBox != null)
+            {
+                textBox.SelectAll();
+            }
+        }
+
+        private void textBox_MouseMonitored(object sender, MouseEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+
+            if (textBox != null)
+            {
+                textBox.SelectAll();
+            }
+        }
+
+        private void textBox_DotKeyMonitored(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == '.')
+            {
+                e.Handled = true; SelectNextControl(ActiveControl, true, true, true, true);
+            }
+        }
+
+        private void textBox_IntegerMonitored(object sender, KeyPressEventArgs e)
+        {
+            char keyChar = e.KeyChar;
+
+            if (!char.IsControl(keyChar) && !char.IsDigit(keyChar))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void textBox_FloatMonitored(object sender, KeyPressEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                char keyChar = e.KeyChar;
+
+                if (!char.IsControl(keyChar) && ((keyChar != '.' && !char.IsDigit(keyChar)) || (keyChar == '.' && textBox.Text.Contains("."))))
+                {
+                    e.Handled = true;
+                }
+            }
+        }
+
         private void buttonApply_Monitored(object sender, EventArgs e)
         {
-            if (sender is TextBox)
+            if (sender is TextBox textBox)
             {
-                TextBox textBox = sender as TextBox;
-
-                if (textBox == null || !textBox.Enabled || textBox.ReadOnly)
+                if (!textBox.Enabled || textBox.ReadOnly)
                 {
                     return;
                 }
             }
-            else if (sender is ComboBox)
+            else if (sender is ComboBox comboBox)
             {
-                ComboBox comboBox = sender as ComboBox;
-
-                if (comboBox == null || !comboBox.Enabled)
+                if (!comboBox.Enabled)
                 {
                     return;
                 }
             }
-            else if (sender is CheckBox)
+            else if (sender is CheckBox checkBox)
             {
-                CheckBox checkBox = sender as CheckBox;
-
-                if (checkBox == null || !checkBox.Enabled)
+                if (!checkBox.Enabled)
                 {
                     return;
                 }
