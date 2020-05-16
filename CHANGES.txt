@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Starbook Driver v0.8
+--------------------
+
+* Add predefined guide rates for Starbook, Starbook S and Starbook Ten.
+* Fix some minor bugs.
+
 Starbook Driver v0.7
 --------------------
 
