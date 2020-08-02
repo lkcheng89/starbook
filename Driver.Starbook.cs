@@ -541,10 +541,10 @@ namespace ASCOM.Starbook
                 {
                     MatchCollection matches = Regex.Matches(response.Reply, @"(?<Name>[^&=]+)=(?<Value>[^&]+)");
 
-                    foreach (Match natch in matches)
+                    foreach (Match match in matches)
                     {
-                        string name = natch.Groups["Name"].Value.ToUpper();
-                        string value = natch.Groups["Value"].Value;
+                        string name = match.Groups["Name"].Value.ToUpper();
+                        string value = match.Groups["Value"].Value;
 
                         dictionary[name] = value;
                     }
@@ -565,6 +565,11 @@ namespace ASCOM.Starbook
                     }
                 }
                 catch
+                {
+                    strinq = null;
+                }
+
+                if (string.IsNullOrEmpty(strinq))
                 {
                     return "ERROR:NETWORK";
                 }
