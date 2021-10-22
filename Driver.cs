@@ -89,6 +89,10 @@ namespace ASCOM.Starbook
         internal static double[] guideRatesStarbookS   = new double[] { 0.75, 0.75, 18, 37, 75, 150, 300, 500, 1000 };
         internal static double[] guideRatesStarbookTen = new double[] { 0.50, 1.00,  2,  5, 10,  30, 100, 300,  500 };
         internal static double[] guideRatesDefault = guideRatesStarbookS;
+        internal static string parkAzimuthProfileName = "ParkAzimuth";
+        internal static double parkAzimuthDefault = 270;
+        internal static string parkElevationProfileName = "ParkElevation";
+        internal static double parkElevationDefault = 0;
         internal static string j2000ProfileName = "J2000";
         internal static bool j2000Default = true;
         internal static string autoMeridianFlipProfileName = "AutoMeridianFlip";
@@ -100,6 +104,8 @@ namespace ASCOM.Starbook
         internal static short slewSettleTime;
         internal static int guideRate;
         internal static double[] guideRates;
+        internal static double parkAzimuth;
+        internal static double parkElevation;
         internal static bool j2000;
         internal static int autoMeridianFlip;
 
@@ -128,8 +134,6 @@ namespace ASCOM.Starbook
         /// </summary>
         internal static TraceLogger traceLogger;
 
-        private double parkAzimuth;
-        private double parkElevation;
         private bool parking;
 
         private Starbook.Place placeCache;
@@ -169,8 +173,6 @@ namespace ASCOM.Starbook
 
             //TODO: Implement your additional construction here
 
-            parkAzimuth = 270;
-            parkElevation = 0;
             parking = false;
 
             placeCached = false;
@@ -1289,6 +1291,14 @@ namespace ASCOM.Starbook
 
             Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
                       status.RA.Value, status.Dec.Value, starbook.J2000, out parkAzimuth, out parkElevation);
+
+            using (Profile driverProfile = new Profile())
+            {
+                driverProfile.DeviceType = "Telescope";
+
+                driverProfile.WriteValue(driverID, parkAzimuthProfileName, parkAzimuth.ToString(CultureInfo.InvariantCulture));
+                driverProfile.WriteValue(driverID, parkElevationProfileName, parkElevation.ToString(CultureInfo.InvariantCulture));
+            }
 
             LogMessage("SetPark", "OK: Altitude={0},Azimuth={1},RightAscension={2},Declination={3}", parkElevation, parkAzimuth, status.RA, status.Dec);
         }
@@ -2644,6 +2654,16 @@ namespace ASCOM.Starbook
                     Array.Copy(guideRatesDefault, guideRates, 9); recovering = true;
                 }
 
+                if (!double.TryParse(driverProfile.GetValue(driverID, parkAzimuthProfileName, string.Empty, string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out parkAzimuth))
+                {
+                    parkAzimuth = parkAzimuthDefault; recovering = true;
+                }
+
+                if (!double.TryParse(driverProfile.GetValue(driverID, parkElevationProfileName, string.Empty, string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out parkElevation))
+                {
+                    parkElevation = parkElevationDefault; recovering = true;
+                }
+
                 if (!bool.TryParse(driverProfile.GetValue(driverID, j2000ProfileName, string.Empty, string.Empty), out j2000))
                 {
                     j2000 = j2000Default; recovering = true;
@@ -2698,6 +2718,8 @@ namespace ASCOM.Starbook
                 }
 
                 driverProfile.WriteValue(driverID, guideRatesProfileName, string.Join(",", guideRateStrings));
+                driverProfile.WriteValue(driverID, parkAzimuthProfileName, parkAzimuth.ToString(CultureInfo.InvariantCulture));
+                driverProfile.WriteValue(driverID, parkElevationProfileName, parkElevation.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, j2000ProfileName, j2000.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, autoMeridianFlipProfileName, autoMeridianFlip.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, traceLoggerProfileName, traceLogger.Enabled.ToString(CultureInfo.InvariantCulture));
