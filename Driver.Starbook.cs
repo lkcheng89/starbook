@@ -581,6 +581,9 @@ namespace ASCOM.Starbook
                     strinq = match.Groups["String"].Value;
                 }
 
+                strinq = Regex.Replace(strinq, @"^<[^>]+>", string.Empty);
+                strinq = Regex.Replace(strinq, @"</[^>]+>$", string.Empty);
+
                 return strinq;
             }
 

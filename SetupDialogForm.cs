@@ -757,6 +757,7 @@ namespace ASCOM.Starbook
             {
                 guideRate = comboBoxGuideRate.SelectedIndex;
 
+                if (!CheckComponentGuideRate(textBoxGuideRate0, 0, out guideRates[0])) { this.DialogResult = DialogResult.None; return; }
                 if (!CheckComponentGuideRate(textBoxGuideRate1, 1, out guideRates[1])) { this.DialogResult = DialogResult.None; return; }
                 if (!CheckComponentGuideRate(textBoxGuideRate2, 2, out guideRates[2])) { this.DialogResult = DialogResult.None; return; }
                 if (!CheckComponentGuideRate(textBoxGuideRate3, 3, out guideRates[3])) { this.DialogResult = DialogResult.None; return; }
