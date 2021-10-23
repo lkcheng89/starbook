@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Starbook Driver v0.9
+--------------------
+
+* Fix the bug that SetPark not working under Starbook Ten.
+* Remember the last Parked Azimuth/Elevation for the ease of automation.
+* Fix some minor bugs.
+
 Starbook Driver v0.8
 --------------------
 

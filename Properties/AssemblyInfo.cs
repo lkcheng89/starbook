@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Lung-Kai Cheng")]
 [assembly: AssemblyProduct("ASCOM Telescope Driver for Starbook")]
-[assembly: AssemblyCopyright("Copyright © 2020 Lung-Kai Cheng")]
+[assembly: AssemblyCopyright("Copyright © 2021 Lung-Kai Cheng")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -35,5 +35,5 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 //
 // TODO - Set your driver's version here
-[assembly: AssemblyVersion("0.8.0.0")]
+[assembly: AssemblyVersion("0.9.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]

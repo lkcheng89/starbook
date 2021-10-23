@@ -728,7 +728,7 @@
             this.labelCopyright.Name = "labelCopyright";
             this.labelCopyright.Size = new System.Drawing.Size(182, 14);
             this.labelCopyright.TabIndex = 68;
-            this.labelCopyright.Text = "Copyright © 2020 Lung-Kai Cheng";
+            this.labelCopyright.Text = "Copyright © 2021 Lung-Kai Cheng";
             // 
             // labelEmail
             // 
