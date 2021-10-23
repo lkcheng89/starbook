@@ -89,6 +89,8 @@ namespace ASCOM.Starbook
         internal static double[] guideRatesStarbookS   = new double[] { 0.75, 0.75, 18, 37, 75, 150, 300, 500, 1000 };
         internal static double[] guideRatesStarbookTen = new double[] { 0.50, 1.00,  2,  5, 10,  30, 100, 300,  500 };
         internal static double[] guideRatesDefault = guideRatesStarbookS;
+        internal static string predefinedGuideRatesProfileName = "PredefinedGuideRates";
+        internal static int predefinedGuideRatesDefault = 0;
         internal static string parkAzimuthProfileName = "ParkAzimuth";
         internal static double parkAzimuthDefault = 270;
         internal static string parkElevationProfileName = "ParkElevation";
@@ -104,6 +106,7 @@ namespace ASCOM.Starbook
         internal static short slewSettleTime;
         internal static int guideRate;
         internal static double[] guideRates;
+        internal static int predefinedGuideRates;
         internal static double parkAzimuth;
         internal static double parkElevation;
         internal static bool j2000;
@@ -2654,6 +2657,11 @@ namespace ASCOM.Starbook
                     Array.Copy(guideRatesDefault, guideRates, 9); recovering = true;
                 }
 
+                if (!int.TryParse(driverProfile.GetValue(driverID, predefinedGuideRatesProfileName, string.Empty, string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out predefinedGuideRates))
+                {
+                    predefinedGuideRates = predefinedGuideRatesDefault; recovering = true;
+                }
+
                 if (!double.TryParse(driverProfile.GetValue(driverID, parkAzimuthProfileName, string.Empty, string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out parkAzimuth))
                 {
                     parkAzimuth = parkAzimuthDefault; recovering = true;
@@ -2718,6 +2726,7 @@ namespace ASCOM.Starbook
                 }
 
                 driverProfile.WriteValue(driverID, guideRatesProfileName, string.Join(",", guideRateStrings));
+                driverProfile.WriteValue(driverID, predefinedGuideRatesProfileName, predefinedGuideRates.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, parkAzimuthProfileName, parkAzimuth.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, parkElevationProfileName, parkElevation.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, j2000ProfileName, j2000.ToString(CultureInfo.InvariantCulture));

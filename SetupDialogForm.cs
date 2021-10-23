@@ -57,7 +57,7 @@ namespace ASCOM.Starbook
             textBoxGuideRate7.Text = Telescope.guideRates[7].ToString(CultureInfo.InvariantCulture);
             textBoxGuideRate8.Text = Telescope.guideRates[8].ToString(CultureInfo.InvariantCulture);
 
-            comboBoxPredefinedGuideRates.SelectedIndex = 0;
+            comboBoxPredefinedGuideRates.SelectedIndex = Telescope.predefinedGuideRates;
 
             checkBoxJ2000.Checked = Telescope.j2000;
             checkBoxAutoMeridianFlip.Checked = Telescope.autoMeridianFlip > 0;
@@ -731,6 +731,7 @@ namespace ASCOM.Starbook
             DateTime dateTime = this.dateTime;
             int guideRate = Telescope.guideRate;
             double[] guideRates = new double[9];
+            int predefinedGuideRates = Telescope.predefinedGuideRates;
             Array.Copy(Telescope.guideRates, guideRates, 9);
 
             if (checkBoxSetLocation.Enabled && checkBoxSetLocation.Checked)
@@ -766,6 +767,8 @@ namespace ASCOM.Starbook
                 if (!CheckComponentGuideRate(textBoxGuideRate6, 6, out guideRates[6])) { this.DialogResult = DialogResult.None; return; }
                 if (!CheckComponentGuideRate(textBoxGuideRate7, 7, out guideRates[7])) { this.DialogResult = DialogResult.None; return; }
                 if (!CheckComponentGuideRate(textBoxGuideRate8, 8, out guideRates[8])) { this.DialogResult = DialogResult.None; return; }
+
+                predefinedGuideRates = comboBoxPredefinedGuideRates.SelectedIndex;
 
                 setGuideRate = true;
             }
@@ -804,6 +807,7 @@ namespace ASCOM.Starbook
             {
                 Telescope.guideRate = guideRate;
                 Array.Copy(guideRates, Telescope.guideRates, 9);
+                Telescope.predefinedGuideRates = predefinedGuideRates;
             }
 
             if (setLocation || setDateTime || setGuideRate)
