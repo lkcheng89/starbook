@@ -520,6 +520,299 @@ namespace ASCOM.Starbook
                 return this.HandshakeString(command);
             }
 
+            #region Extended Methods (Supported by Starbook Ten)
+
+            /// <summary>
+            /// Calculate the pierside of mount.
+            /// </summary>
+            /// <param name="pierSide">Pierside of mount</param>
+            /// <returns>Response string: OK or ERROR:%</returns>
+            /// 
+            public Response CalcSideOfPier(out PierSide pierSide)
+            {
+                pierSide = PierSide.Unknown; Response response = this.Handshake("CALC_SIDEOFPIER", out Dictionary<string, string> dictionary);
+
+                if (response == Response.ErrorUnknown && dictionary.TryGetValue("PIERSIDE", out string s) && TryParsePierSide(s, out pierSide))
+                {
+                    response.Assign(Response.OK);
+                }
+
+                return response;
+            }
+
+            /// <summary>
+            /// Get the altitude and azimuth of mount.
+            /// </summary>
+            /// <param name="altitude">Altitude of mount (DMS)</param>
+            /// <param name="azimuth">Azimuth of mount (DMS)</param>
+            /// <returns>Response string: OK or ERROR:%</returns>
+            /// 
+            public Response GetAltAz(out double altitude, out double azimuth)
+            {
+                altitude = azimuth = 0; Response response = this.Handshake("GETALTAZ", out Dictionary<string, string> dictionary);
+
+                if (response == Response.ErrorUnknown && dictionary.TryGetValue("ALTITUDE", out string s) && double.TryParse(s, NumberStyles.Number, CultureInfo.InvariantCulture, out altitude) &&
+                                                         dictionary.TryGetValue("AZIMUTH", out s) && double.TryParse(s, NumberStyles.Number, CultureInfo.InvariantCulture, out azimuth))
+                {
+                    response.Assign(Response.OK);
+                }
+
+                return response;
+            }
+
+            /// <summary>
+            /// Get the pulse guide statuses of mount.
+            /// </summary>
+            /// <param name="rap">Pulse guide status of RA+</param>
+            /// <param name="ran">Pulse guide status of RA-</param>
+            /// <param name="decp">Pulse guide status of DEC+</param>
+            /// <param name="decn">Pulse guide status of DEC-</param>
+            /// <returns>Response string: OK or ERROR:%</returns>
+            /// 
+            public Response GetGuideStatus(out bool rap, out bool ran, out bool decp, out bool decn)
+            {
+                rap = ran = decp = decn = false; Response response = this.Handshake("GETGUIDESTATUS", out Dictionary<string, string> dictionary);
+
+                if (response == Response.ErrorUnknown && dictionary.TryGetValue("RA+", out string s) && TryParseState(s, out rap) &&
+                                                         dictionary.TryGetValue("RA-", out s) && TryParseState(s, out ran) &&
+                                                         dictionary.TryGetValue("DEC+", out s) && TryParseState(s, out decp) &&
+                                                         dictionary.TryGetValue("DEC-", out s) && TryParseState(s, out decn))
+                {
+                    response.Assign(Response.OK);
+                }
+
+                return response;
+            }
+
+            /// <summary>
+            /// Get the pierside of mount.
+            /// </summary>
+            /// <param name="pierSide">Pierside of mount</param>
+            /// <returns>Response string: OK or ERROR:%</returns>
+            /// 
+            public Response GetPierSide(out PierSide pierSide)
+            {
+                pierSide = PierSide.Unknown; Response response = this.Handshake("GET_PIERSIDE", out Dictionary<string, string> dictionary);
+
+                if (response == Response.ErrorUnknown && dictionary.TryGetValue("PIERSIDE", out string s) && TryParsePierSide(s, out pierSide))
+                {
+                    response.Assign(Response.OK);
+                }
+
+                return response;
+            }
+
+            /// <summary>
+            /// Get the code of mount.
+            /// </summary>
+            /// <param name="type">Code of mount</param>
+            /// <returns>Response string: OK or ERROR:%</returns>
+            /// 
+            public Response GetMountCode(out string code)
+            {
+                code = string.Empty; Response response = this.Handshake("GETMOUNTCODE", out Dictionary<string, string> dictionary);
+
+                if (response == Response.ErrorUnknown && dictionary.TryGetValue("CODE"/*TBD*/, out code))
+                {
+                    response.Assign(Response.OK);
+                }
+
+                return response;
+            }
+
+            /// <summary>
+            /// Get the RA/DEC type of mount.
+            /// </summary>
+            /// <param name="type">RA/DEC type of mount</param>
+            /// <returns>Response string: OK or ERROR:%</returns>
+            /// 
+            public Response GetRADecType(out RADecType type)
+            {
+                type = RADecType.Unknown; Response response = this.Handshake("GETRADECTYPE", out Dictionary<string, string> dictionary);
+
+                if (response == Response.ErrorUnknown && dictionary.TryGetValue("TYPE", out string s) && TryParseRADecType(s, out type))
+                {
+                    response.Assign(Response.OK);
+                }
+
+                return response;
+            }
+
+            /// <summary>
+            /// Get the status of mount (v2)
+            /// </summary>
+            /// <returns>Response string: OK or ERROR:%</returns>
+            /// 
+            public Response GetStatus2()
+            {
+                return this.Handshake("GETSTATUS2"); /*TBD*/
+            }
+
+            /// <summary>
+            /// Get the track status of mount.
+            /// </summary>
+            /// <param name="track">Track status of mount</param>
+            /// <returns>Response string: OK or ERROR:%</returns>
+            /// 
+            public Response GetTrackStatus(out bool track)
+            {
+                track = false; Response response = this.Handshake("GETTRACKSTATUS", out Dictionary<string, string> dictionary);
+
+                if (response == Response.ErrorUnknown && dictionary.TryGetValue("TRACK", out string s) && TryParseState(s, out track))
+                {
+                    response.Assign(Response.OK);
+                }
+
+                return response;
+            }
+
+            /// <summary>
+            /// Goto the set parking position and park the mount.
+            /// </summary>
+            /// <returns>Response string: OK or ERROR:%</returns>
+            /// 
+            public Response GotoPark()
+            {
+                return this.Handshake("GOTO_PARK");
+            }
+
+            /// <summary>
+            /// Move the mount along one of two axes in the specified rate.
+            /// </summary>
+            /// <param name="axis">Axis to move</param>
+            /// <param name="rate">Rate to move (DMS/sec)</param>
+            /// <returns>Response string: OK or ERROR:%</returns>
+            /// 
+            public Response MoveAxis(Axis axis, double rate)
+            {
+                switch (axis)
+                {
+                    case Axis.Primary:
+                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "MOVE_AXIS?AXIS=0&RATE={0}", rate));
+                    case Axis.Secondary:
+                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "MOVE_AXIS?AXIS=1&RATE={0}", rate));
+                    default:
+                        return Response.ErrorFormat;
+                }
+            }
+
+            /// <summary>
+            /// Move pulse the mount in one of four directions for the specified duration.
+            /// </summary>
+            /// <param name="direction">Direction to move (NORTH, SOUTH, WEST, EAST)</param>
+            /// <param name="duration">Duration to move (milliseconds)</param>
+            /// <returns>Response string: OK or ERROR:%</returns>
+            /// 
+            public Response MovePulse(Direction direction, double duration)
+            {
+                switch (direction)
+                {
+                    case Direction.North:
+                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "MOVEPULSE?DIRECT=0&DURATION={0}", duration));
+                    case Direction.South:
+                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "MOVEPULSE?DIRECT=1&DURATION={0}", duration));
+                    case Direction.East:
+                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "MOVEPULSE?DIRECT=2&DURATION={0}", duration));
+                    case Direction.West:
+                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "MOVEPULSE?DIRECT=3&DURATION={0}", duration));
+                    default:
+                        return Response.ErrorFormat;
+                }
+            }
+
+            /// <summary>
+            /// Set the current altitude and azimuth as parking position.
+            /// </summary>
+            /// <returns>Response string: OK or ERROR:%</returns>
+            /// 
+            public Response SetPark()
+            {
+                return this.Handshake("SET_PARK");
+            }
+
+            /// <summary>
+            /// Set the speed of mount. This affects the behaviour of MOVEPULSE()
+            /// </summary>
+            /// <param name="ra">Speed of RA (DMS/hr)</param>
+            /// <param name="dec">Speed of DEC (DMS/hr)</param>
+            /// <returns>Response string: OK or ERROR:%</returns>
+            ///
+            public Response SetPulseSpeed(double ra, double dec)
+            {
+                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "SETPULSESPEED?RA={0}&DEC={1}", ra, dec));
+            }
+
+            /// <summary>
+            /// Unpark the mount.
+            /// </summary>
+            /// <returns>Response string: OK or ERROR:%</returns>
+            /// 
+            public Response Unpark()
+            {
+                return this.Handshake("UNPARK");
+            }
+
+            /////
+
+            private bool TryParseState(string s, out bool state)
+            {
+                switch (s)
+                {
+                    case "0":
+                        state = false; return true;
+                    case "1":
+                        state = true; return true;
+                    default:
+                        state = false; return false;
+                }
+            }
+
+            private bool TryParsePierSide(string s, out PierSide pierSide)
+            {
+                switch (s)
+                {
+                    case "0":
+                        pierSide = PierSide.West; return true;
+                    case "1":
+                        pierSide = PierSide.East; return true;
+                    default:
+                        pierSide = PierSide.Unknown; return false;
+                }
+            }
+
+            private bool TryParseRADecType(string s, out RADecType type)
+            {
+                switch (s)
+                {
+                    case "J2000":
+                        type = RADecType.J2000; return true;
+                    case "Now":
+                        type = RADecType.Now; return true;
+                    default:
+                        type = RADecType.Unknown; return false;
+                }
+            }
+
+            [ComVisible(false)]
+            public enum Axis
+            {
+                Unknown, Primary, Secondary
+            }
+
+            [ComVisible(false)]
+            public enum PierSide
+            {
+                Unknown, West, East
+            }
+
+            [ComVisible(false)]
+            public enum RADecType
+            {
+                Unknown, J2000, Now
+            }
+
+            #endregion
+
             #region Private Methods
 
             private Response Handshake(string command)
