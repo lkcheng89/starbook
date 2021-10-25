@@ -57,6 +57,7 @@
             this.textBoxElevation = new System.Windows.Forms.TextBox();
             this.groupBoxConnection = new System.Windows.Forms.GroupBox();
             this.buttonCheck = new System.Windows.Forms.Button();
+            this.labelStatus = new System.Windows.Forms.Label();
             this.groupBoxLocation = new System.Windows.Forms.GroupBox();
             this.checkBoxSetLocation = new System.Windows.Forms.CheckBox();
             this.labelElevationMeter = new System.Windows.Forms.Label();
@@ -106,7 +107,7 @@
             this.checkBoxJ2000 = new System.Windows.Forms.CheckBox();
             this.buttonApply = new System.Windows.Forms.Button();
             this.labelSeperator = new System.Windows.Forms.Label();
-            this.labelStatus = new System.Windows.Forms.Label();
+            this.checkBoxUseExtendedCommand = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             this.groupBoxConnection.SuspendLayout();
             this.groupBoxLocation.SuspendLayout();
@@ -119,7 +120,7 @@
             // 
             this.buttonOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.buttonOK.Location = new System.Drawing.Point(258, 540);
+            this.buttonOK.Location = new System.Drawing.Point(258, 564);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(59, 28);
             this.buttonOK.TabIndex = 72;
@@ -141,7 +142,7 @@
             this.pictureBox.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.pictureBox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.pictureBox.Image = global::ASCOM.Starbook.Properties.Resources.ASCOM;
-            this.pictureBox.Location = new System.Drawing.Point(209, 467);
+            this.pictureBox.Location = new System.Drawing.Point(209, 491);
             this.pictureBox.Name = "pictureBox";
             this.pictureBox.Size = new System.Drawing.Size(48, 56);
             this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
@@ -154,7 +155,7 @@
             // 
             this.checkBoxTraceLogger.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.checkBoxTraceLogger.AutoSize = true;
-            this.checkBoxTraceLogger.Location = new System.Drawing.Point(160, 550);
+            this.checkBoxTraceLogger.Location = new System.Drawing.Point(160, 574);
             this.checkBoxTraceLogger.Name = "checkBoxTraceLogger";
             this.checkBoxTraceLogger.Size = new System.Drawing.Size(92, 18);
             this.checkBoxTraceLogger.TabIndex = 71;
@@ -413,6 +414,16 @@
             this.buttonCheck.Text = "Check";
             this.buttonCheck.UseVisualStyleBackColor = true;
             this.buttonCheck.Click += new System.EventHandler(this.buttonCheck_Click);
+            // 
+            // labelStatus
+            // 
+            this.labelStatus.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.labelStatus.Location = new System.Drawing.Point(267, 27);
+            this.labelStatus.Name = "labelStatus";
+            this.labelStatus.Size = new System.Drawing.Size(86, 22);
+            this.labelStatus.TabIndex = 9;
+            this.labelStatus.Text = "Unknown";
+            this.labelStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // groupBoxLocation
             // 
@@ -688,7 +699,7 @@
             // 
             this.labelFirmwareVersion.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.labelFirmwareVersion.AutoSize = true;
-            this.labelFirmwareVersion.Location = new System.Drawing.Point(9, 467);
+            this.labelFirmwareVersion.Location = new System.Drawing.Point(9, 491);
             this.labelFirmwareVersion.Name = "labelFirmwareVersion";
             this.labelFirmwareVersion.Size = new System.Drawing.Size(116, 14);
             this.labelFirmwareVersion.TabIndex = 65;
@@ -704,7 +715,7 @@
             // 
             this.labelPlatformVersion.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.labelPlatformVersion.AutoSize = true;
-            this.labelPlatformVersion.Location = new System.Drawing.Point(9, 487);
+            this.labelPlatformVersion.Location = new System.Drawing.Point(9, 511);
             this.labelPlatformVersion.Name = "labelPlatformVersion";
             this.labelPlatformVersion.Size = new System.Drawing.Size(110, 14);
             this.labelPlatformVersion.TabIndex = 66;
@@ -714,7 +725,7 @@
             // 
             this.labelDriverVersion.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.labelDriverVersion.AutoSize = true;
-            this.labelDriverVersion.Location = new System.Drawing.Point(9, 508);
+            this.labelDriverVersion.Location = new System.Drawing.Point(9, 532);
             this.labelDriverVersion.Name = "labelDriverVersion";
             this.labelDriverVersion.Size = new System.Drawing.Size(97, 14);
             this.labelDriverVersion.TabIndex = 67;
@@ -724,7 +735,7 @@
             // 
             this.labelCopyright.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.labelCopyright.AutoSize = true;
-            this.labelCopyright.Location = new System.Drawing.Point(262, 467);
+            this.labelCopyright.Location = new System.Drawing.Point(262, 491);
             this.labelCopyright.Name = "labelCopyright";
             this.labelCopyright.Size = new System.Drawing.Size(182, 14);
             this.labelCopyright.TabIndex = 68;
@@ -737,7 +748,7 @@
             this.labelEmail.Cursor = System.Windows.Forms.Cursors.Hand;
             this.labelEmail.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelEmail.ForeColor = System.Drawing.SystemColors.Highlight;
-            this.labelEmail.Location = new System.Drawing.Point(262, 487);
+            this.labelEmail.Location = new System.Drawing.Point(262, 511);
             this.labelEmail.Name = "labelEmail";
             this.labelEmail.Size = new System.Drawing.Size(128, 14);
             this.labelEmail.TabIndex = 69;
@@ -748,7 +759,7 @@
             // 
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(323, 540);
+            this.buttonCancel.Location = new System.Drawing.Point(323, 564);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(59, 28);
             this.buttonCancel.TabIndex = 73;
@@ -981,13 +992,14 @@
             // 
             // groupBoxAdvanced
             // 
+            this.groupBoxAdvanced.Controls.Add(this.checkBoxUseExtendedCommand);
             this.groupBoxAdvanced.Controls.Add(this.checkBoxAutoMeridianFlip);
             this.groupBoxAdvanced.Controls.Add(this.checkBoxJ2000);
             this.groupBoxAdvanced.Location = new System.Drawing.Point(8, 380);
             this.groupBoxAdvanced.Margin = new System.Windows.Forms.Padding(2);
             this.groupBoxAdvanced.Name = "groupBoxAdvanced";
             this.groupBoxAdvanced.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBoxAdvanced.Size = new System.Drawing.Size(439, 80);
+            this.groupBoxAdvanced.Size = new System.Drawing.Size(439, 104);
             this.groupBoxAdvanced.TabIndex = 62;
             this.groupBoxAdvanced.TabStop = false;
             this.groupBoxAdvanced.Text = "Advanced Setting";
@@ -1020,7 +1032,7 @@
             // 
             this.buttonApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonApply.Enabled = false;
-            this.buttonApply.Location = new System.Drawing.Point(388, 540);
+            this.buttonApply.Location = new System.Drawing.Point(388, 564);
             this.buttonApply.Name = "buttonApply";
             this.buttonApply.Size = new System.Drawing.Size(59, 28);
             this.buttonApply.TabIndex = 74;
@@ -1031,26 +1043,27 @@
             // labelSeperator
             // 
             this.labelSeperator.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.labelSeperator.Location = new System.Drawing.Point(8, 532);
+            this.labelSeperator.Location = new System.Drawing.Point(8, 556);
             this.labelSeperator.Name = "labelSeperator";
             this.labelSeperator.Size = new System.Drawing.Size(439, 2);
             this.labelSeperator.TabIndex = 70;
             // 
-            // labelStatus
+            // checkBoxUseExtendedCommand
             // 
-            this.labelStatus.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.labelStatus.Location = new System.Drawing.Point(267, 27);
-            this.labelStatus.Name = "labelStatus";
-            this.labelStatus.Size = new System.Drawing.Size(86, 22);
-            this.labelStatus.TabIndex = 9;
-            this.labelStatus.Text = "Unknown";
-            this.labelStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.checkBoxUseExtendedCommand.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.checkBoxUseExtendedCommand.AutoSize = true;
+            this.checkBoxUseExtendedCommand.Location = new System.Drawing.Point(17, 75);
+            this.checkBoxUseExtendedCommand.Name = "checkBoxUseExtendedCommand";
+            this.checkBoxUseExtendedCommand.Size = new System.Drawing.Size(264, 18);
+            this.checkBoxUseExtendedCommand.TabIndex = 64;
+            this.checkBoxUseExtendedCommand.Text = "Use Extended Command (Starbook Ten only)";
+            this.checkBoxUseExtendedCommand.UseVisualStyleBackColor = true;
             // 
             // SetupDialogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(458, 575);
+            this.ClientSize = new System.Drawing.Size(458, 599);
             this.Controls.Add(this.labelSeperator);
             this.Controls.Add(this.checkBoxTraceLogger);
             this.Controls.Add(this.groupBoxAdvanced);
@@ -1171,5 +1184,6 @@
         private System.Windows.Forms.ComboBox comboBoxPredefinedGuideRates;
         private System.Windows.Forms.Label labelPredefinedGuideRates;
         private System.Windows.Forms.Label labelStatus;
+        private System.Windows.Forms.CheckBox checkBoxUseExtendedCommand;
     }
 }

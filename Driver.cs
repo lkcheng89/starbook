@@ -91,14 +91,16 @@ namespace ASCOM.Starbook
         internal static double[] guideRatesDefault = guideRatesStarbookS;
         internal static string predefinedGuideRatesProfileName = "PredefinedGuideRates";
         internal static int predefinedGuideRatesDefault = 0;
+        internal static string parkAltitudeProfileName = "ParkAltitude";
+        internal static double parkAltitudeDefault = 0;
         internal static string parkAzimuthProfileName = "ParkAzimuth";
         internal static double parkAzimuthDefault = 270;
-        internal static string parkElevationProfileName = "ParkElevation";
-        internal static double parkElevationDefault = 0;
         internal static string j2000ProfileName = "J2000";
         internal static bool j2000Default = true;
         internal static string autoMeridianFlipProfileName = "AutoMeridianFlip";
         internal static int autoMeridianFlipDefault = 0;
+        internal static string useExtendedCommandProfileName = "UseExtendedCommand";
+        internal static bool useExtendedCommandDefault = false;
         internal static string traceLoggerProfileName = "TraceLogger";
         internal static bool traceLoggerDefault = false;
 
@@ -107,10 +109,11 @@ namespace ASCOM.Starbook
         internal static int guideRate;
         internal static double[] guideRates;
         internal static int predefinedGuideRates;
+        internal static double parkAltitude;
         internal static double parkAzimuth;
-        internal static double parkElevation;
         internal static bool j2000;
         internal static int autoMeridianFlip;
+        internal static bool useExtendedCommand;
 
         /// <summary>
         /// Private variable to hold the connected state
@@ -455,7 +458,7 @@ namespace ASCOM.Starbook
                 }
 
                 Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
-                          status.RA.Value, status.Dec.Value, starbook.J2000, out double azimuth, out double altitude);
+                          status.RA.Value, status.Dec.Value, starbook.J2000, out double altitude, out double azimuth);
 
                 LogMessage("Altitude_get", "{0}", altitude);
                 return altitude;
@@ -553,7 +556,7 @@ namespace ASCOM.Starbook
                 }
 
                 Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
-                          status.RA.Value, status.Dec.Value, starbook.J2000, out double azimuth, out double altitude);
+                          status.RA.Value, status.Dec.Value, starbook.J2000, out double altitude, out double azimuth);
 
                 LogMessage("Azimuth_get", "{0}", azimuth);
                 return azimuth;
@@ -1080,6 +1083,20 @@ namespace ASCOM.Starbook
             {
                 LogMessage("Park", "OK: Skipped");
             }
+            else if (useExtendedCommand)
+            {
+                Starbook.Response response = starbook.GotoPark();
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("Park", "InvalidOperationException: Starbook.GotoPark()={0}", response);
+                    throw new ASCOM.InvalidOperationException("Park: Starbook.GotoPark() is not working.");
+                }
+
+                LogMessage("Park", "OK: Altitude={0},Azimuth={1}", parkAltitude, parkAzimuth);
+
+                parking = true;
+            }
             else
             {
                 Starbook.Response response = GetPlace(out Starbook.Place place);
@@ -1099,7 +1116,7 @@ namespace ASCOM.Starbook
                 }
 
                 Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
-                          parkAzimuth, parkElevation, out double parkRightAscension, out double parkDeclination, starbook.J2000);
+                          parkAltitude, parkAzimuth, out double parkRightAscension, out double parkDeclination, starbook.J2000);
 
                 if (!Starbook.HMS.FromValue(parkRightAscension, out Starbook.HMS rightAscension))
                 {
@@ -1121,7 +1138,7 @@ namespace ASCOM.Starbook
                     throw new ASCOM.InvalidOperationException("Park: Starbook.Goto() is not working.");
                 }
 
-                LogMessage("Park", "OK: Altitude={0},Azimuth={1},RightAscension={2},Declination={3}", parkElevation, parkAzimuth, rightAscension, declination);
+                LogMessage("Park", "OK: Altitude={0},Azimuth={1},RightAscension={2},Declination={3}", parkAltitude, parkAzimuth, rightAscension, declination);
 
                 parking = true;
             }
@@ -1268,42 +1285,68 @@ namespace ASCOM.Starbook
         {
             CheckConnected("SetPark");
 
-            Starbook.Response response = GetStatus(out Starbook.Status status);
-
-            if (response != Starbook.Response.OK)
+            if (useExtendedCommand)
             {
-                LogMessage("SetPark", "InvalidOperationException: Starbook.GetStatus()={0}", response);
-                throw new ASCOM.InvalidOperationException("SetPark: Starbook.GetStatus() is not working.");
+                Starbook.Response response = starbook.GetAltAz(out double altitude, out double azimuth);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("SetPark", "InvalidOperationException: Starbook.GetAltAz()={0}", response);
+                    throw new ASCOM.InvalidOperationException("SetPark: Starbook.GetAltAz() is not working.");
+                }
+
+                response = starbook.SetPark();
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("SetPark", "InvalidOperationException: Starbook.SetPark()={0}", response);
+                    throw new ASCOM.InvalidOperationException("SetPark: Starbook.SetPark() is not working.");
+                }
+
+                parkAltitude = altitude;
+                parkAzimuth = azimuth;
+
+                LogMessage("SetPark", "OK: Altitude={0},Azimuth={1}", parkAltitude, parkAzimuth);
             }
-
-            response = GetPlace(out Starbook.Place place);
-
-            if (response != Starbook.Response.OK)
+            else
             {
-                LogMessage("SetPark", "InvalidOperationException: Starbook.GetPlace()={0}", response);
-                throw new ASCOM.InvalidOperationException("SetPark: Starbook.GetPlace() is not working.");
+                Starbook.Response response = GetStatus(out Starbook.Status status);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("SetPark", "InvalidOperationException: Starbook.GetStatus()={0}", response);
+                    throw new ASCOM.InvalidOperationException("SetPark: Starbook.GetStatus() is not working.");
+                }
+
+                response = GetPlace(out Starbook.Place place);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("SetPark", "InvalidOperationException: Starbook.GetPlace()={0}", response);
+                    throw new ASCOM.InvalidOperationException("SetPark: Starbook.GetPlace() is not working.");
+                }
+
+                response = starbook.GetTime(out DateTime time);
+
+                if (response != Starbook.Response.OK)
+                {
+                    LogMessage("SetPark", "InvalidOperationException: Starbook.GetTime()={0}", response);
+                    throw new ASCOM.InvalidOperationException("SetPark: Starbook.GetTime() is not working.");
+                }
+
+                Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
+                          status.RA.Value, status.Dec.Value, starbook.J2000, out parkAltitude, out parkAzimuth);
+
+                LogMessage("SetPark", "OK: Altitude={0},Azimuth={1},RightAscension={2},Declination={3}", parkAltitude, parkAzimuth, status.RA, status.Dec);
             }
-
-            response = starbook.GetTime(out DateTime time);
-
-            if (response != Starbook.Response.OK)
-            {
-                LogMessage("SetPark", "InvalidOperationException: Starbook.GetTime()={0}", response);
-                throw new ASCOM.InvalidOperationException("SetPark: Starbook.GetTime() is not working.");
-            }
-
-            Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
-                      status.RA.Value, status.Dec.Value, starbook.J2000, out parkAzimuth, out parkElevation);
 
             using (Profile driverProfile = new Profile())
             {
                 driverProfile.DeviceType = "Telescope";
 
+                driverProfile.WriteValue(driverID, parkAltitudeProfileName, parkAltitude.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, parkAzimuthProfileName, parkAzimuth.ToString(CultureInfo.InvariantCulture));
-                driverProfile.WriteValue(driverID, parkElevationProfileName, parkElevation.ToString(CultureInfo.InvariantCulture));
             }
-
-            LogMessage("SetPark", "OK: Altitude={0},Azimuth={1},RightAscension={2},Declination={3}", parkElevation, parkAzimuth, status.RA, status.Dec);
         }
 
         public PierSide SideOfPier
@@ -1556,10 +1599,10 @@ namespace ASCOM.Starbook
             double longitude = place.Longitude.Value; int timezone = place.Timezone;
 
             Transform(latitude, longitude, time, timezone,
-                      Azimuth, Altitude, out targetRightAscension, out targetDeclination, j2000);
+                      Altitude, Azimuth, out targetRightAscension, out targetDeclination, j2000);
 
             Transform(latitude, longitude, time, timezone,
-                      Azimuth, Altitude, out double RightAscension, out double Declination, starbook.J2000);
+                      Altitude, Azimuth, out double RightAscension, out double Declination, starbook.J2000);
 
             if (!Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension))
             {
@@ -1644,10 +1687,10 @@ namespace ASCOM.Starbook
             double longitude = place.Longitude.Value; int timezone = place.Timezone;
 
             Transform(latitude, longitude, time, timezone,
-                      Azimuth, Altitude, out targetRightAscension, out targetDeclination, j2000);
+                      Altitude, Azimuth, out targetRightAscension, out targetDeclination, j2000);
 
             Transform(latitude, longitude, time, timezone,
-                      Azimuth, Altitude, out double RightAscension, out double Declination, starbook.J2000);
+                      Altitude, Azimuth, out double RightAscension, out double Declination, starbook.J2000);
 
             if (!Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension))
             {
@@ -2079,10 +2122,10 @@ namespace ASCOM.Starbook
             double longitude = place.Longitude.Value; int timezone = place.Timezone;
 
             Transform(latitude, longitude, time, timezone,
-                      Azimuth, Altitude, out targetRightAscension, out targetDeclination, j2000);
+                      Altitude, Azimuth, out targetRightAscension, out targetDeclination, j2000);
 
             Transform(latitude, longitude, time, timezone,
-                      Azimuth, Altitude, out double RightAscension, out double Declination, starbook.J2000);
+                      Altitude, Azimuth, out double RightAscension, out double Declination, starbook.J2000);
 
             if (!Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension))
             {
@@ -2469,6 +2512,17 @@ namespace ASCOM.Starbook
 
             if (parking)
             {
+                if (useExtendedCommand)
+                {
+                    Starbook.Response response = starbook.Unpark();
+
+                    if (response != Starbook.Response.OK)
+                    {
+                        LogMessage("Unpark", "InvalidOperationException: Starbook.Unpark()={0}", response);
+                        throw new ASCOM.InvalidOperationException("Unpark: Starbook.Unpark() is not working.");
+                    }
+                }
+                
                 LogMessage("Unpark", "OK"); parking = false;
             }
             else
@@ -2662,14 +2716,14 @@ namespace ASCOM.Starbook
                     predefinedGuideRates = predefinedGuideRatesDefault; recovering = true;
                 }
 
+                if (!double.TryParse(driverProfile.GetValue(driverID, parkAltitudeProfileName, string.Empty, string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out parkAltitude))
+                {
+                    parkAltitude = parkAltitudeDefault; recovering = true;
+                }
+
                 if (!double.TryParse(driverProfile.GetValue(driverID, parkAzimuthProfileName, string.Empty, string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out parkAzimuth))
                 {
                     parkAzimuth = parkAzimuthDefault; recovering = true;
-                }
-
-                if (!double.TryParse(driverProfile.GetValue(driverID, parkElevationProfileName, string.Empty, string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out parkElevation))
-                {
-                    parkElevation = parkElevationDefault; recovering = true;
                 }
 
                 if (!bool.TryParse(driverProfile.GetValue(driverID, j2000ProfileName, string.Empty, string.Empty), out j2000))
@@ -2680,6 +2734,11 @@ namespace ASCOM.Starbook
                 if (!int.TryParse(driverProfile.GetValue(driverID, autoMeridianFlipProfileName, string.Empty, string.Empty), out autoMeridianFlip))
                 {
                     autoMeridianFlip = autoMeridianFlipDefault; recovering = true;
+                }
+
+                if (!bool.TryParse(driverProfile.GetValue(driverID, useExtendedCommandProfileName, string.Empty, string.Empty), out useExtendedCommand))
+                {
+                    useExtendedCommand = useExtendedCommandDefault; recovering = true;
                 }
 
                 if (!bool.TryParse(driverProfile.GetValue(driverID, traceLoggerProfileName, string.Empty, string.Empty), out bool traceLoggerEnabled))
@@ -2727,10 +2786,11 @@ namespace ASCOM.Starbook
 
                 driverProfile.WriteValue(driverID, guideRatesProfileName, string.Join(",", guideRateStrings));
                 driverProfile.WriteValue(driverID, predefinedGuideRatesProfileName, predefinedGuideRates.ToString(CultureInfo.InvariantCulture));
+                driverProfile.WriteValue(driverID, parkAltitudeProfileName, parkAltitude.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, parkAzimuthProfileName, parkAzimuth.ToString(CultureInfo.InvariantCulture));
-                driverProfile.WriteValue(driverID, parkElevationProfileName, parkElevation.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, j2000ProfileName, j2000.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, autoMeridianFlipProfileName, autoMeridianFlip.ToString(CultureInfo.InvariantCulture));
+                driverProfile.WriteValue(driverID, useExtendedCommandProfileName, useExtendedCommand.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, traceLoggerProfileName, traceLogger.Enabled.ToString(CultureInfo.InvariantCulture));
             }
         }
@@ -2765,7 +2825,7 @@ namespace ASCOM.Starbook
             }
         }
 
-        internal void Transform(double latitude, double longitude, DateTime time, int timezone, double ra, double dec, bool j2000, out double azimuth, out double altitude)
+        internal void Transform(double latitude, double longitude, DateTime time, int timezone, double ra, double dec, bool j2000, out double altitude, out double azimuth)
         {
             lock (transform)
             {
@@ -2787,7 +2847,7 @@ namespace ASCOM.Starbook
             }
         }
 
-        internal void Transform(double latitude, double longitude, DateTime time, int timezone, double azimuth, double altitude, out double ra, out double dec, bool j2000)
+        internal void Transform(double latitude, double longitude, DateTime time, int timezone, double altitude, double azimuth, out double ra, out double dec, bool j2000)
         {
             lock (transform)
             {
@@ -3129,7 +3189,7 @@ namespace ASCOM.Starbook
                 GetMechanicalCoordinate(round, xy, out double x, out double y);
 
                 Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
-                          status.RA.Value, status.Dec.Value, starbook.J2000, out double azimuth, out double altitude);
+                          status.RA.Value, status.Dec.Value, starbook.J2000, out double altitude, out double azimuth);
 
                 PierSide sideOfPier1 = (-90 <= y && y <= 90) ? PierSide.pierEast : PierSide.pierWest;
                 PierSide sideOfPier2 = (0 <= azimuth && azimuth <= 180) ? PierSide.pierWest : PierSide.pierEast;
