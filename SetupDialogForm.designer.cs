@@ -107,7 +107,7 @@
             this.checkBoxJ2000 = new System.Windows.Forms.CheckBox();
             this.buttonApply = new System.Windows.Forms.Button();
             this.labelSeperator = new System.Windows.Forms.Label();
-            this.checkBoxUseExtendedCommand = new System.Windows.Forms.CheckBox();
+            this.checkBoxUseExtendedFeature = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             this.groupBoxConnection.SuspendLayout();
             this.groupBoxLocation.SuspendLayout();
@@ -992,7 +992,7 @@
             // 
             // groupBoxAdvanced
             // 
-            this.groupBoxAdvanced.Controls.Add(this.checkBoxUseExtendedCommand);
+            this.groupBoxAdvanced.Controls.Add(this.checkBoxUseExtendedFeature);
             this.groupBoxAdvanced.Controls.Add(this.checkBoxAutoMeridianFlip);
             this.groupBoxAdvanced.Controls.Add(this.checkBoxJ2000);
             this.groupBoxAdvanced.Location = new System.Drawing.Point(8, 380);
@@ -1048,16 +1048,16 @@
             this.labelSeperator.Size = new System.Drawing.Size(439, 2);
             this.labelSeperator.TabIndex = 70;
             // 
-            // checkBoxUseExtendedCommand
+            // checkBoxUseExtendedFeature
             // 
-            this.checkBoxUseExtendedCommand.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.checkBoxUseExtendedCommand.AutoSize = true;
-            this.checkBoxUseExtendedCommand.Location = new System.Drawing.Point(17, 75);
-            this.checkBoxUseExtendedCommand.Name = "checkBoxUseExtendedCommand";
-            this.checkBoxUseExtendedCommand.Size = new System.Drawing.Size(264, 18);
-            this.checkBoxUseExtendedCommand.TabIndex = 64;
-            this.checkBoxUseExtendedCommand.Text = "Use Extended Command (Starbook Ten only)";
-            this.checkBoxUseExtendedCommand.UseVisualStyleBackColor = true;
+            this.checkBoxUseExtendedFeature.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.checkBoxUseExtendedFeature.AutoSize = true;
+            this.checkBoxUseExtendedFeature.Location = new System.Drawing.Point(17, 75);
+            this.checkBoxUseExtendedFeature.Name = "checkBoxUseExtendedFeature";
+            this.checkBoxUseExtendedFeature.Size = new System.Drawing.Size(264, 18);
+            this.checkBoxUseExtendedFeature.TabIndex = 64;
+            this.checkBoxUseExtendedFeature.Text = "Use Extended Feature (Starbook Ten only)";
+            this.checkBoxUseExtendedFeature.UseVisualStyleBackColor = true;
             // 
             // SetupDialogForm
             // 
@@ -1184,6 +1184,6 @@
         private System.Windows.Forms.ComboBox comboBoxPredefinedGuideRates;
         private System.Windows.Forms.Label labelPredefinedGuideRates;
         private System.Windows.Forms.Label labelStatus;
-        private System.Windows.Forms.CheckBox checkBoxUseExtendedCommand;
+        private System.Windows.Forms.CheckBox checkBoxUseExtendedFeature;
     }
 }

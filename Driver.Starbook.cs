@@ -76,8 +76,8 @@ namespace ASCOM.Starbook
             /// </summary>
             /// <param name="status">
             /// Status which contains the following fields:
-            /// [*] RA: Right Ascension which is formatted as [HH]+[MM.M]
-            /// [*] DEC: Declination which is formatted as [S][DDD]+[MM]
+            /// [*] RA: Right Ascension which is formatted as [HH]+[MM.M] ([HH]+[MM.MMMMM] if extended)
+            /// [*] DEC: Declination which is formatted as [S][DDD]+[MM] ([S][DDD]+[MM.MMMMM] if extended)
             /// [*] STATE: State of starbook
             ///     [+] INIT (Power Up)
             ///     [+] GUIDE (?)
@@ -86,9 +86,10 @@ namespace ASCOM.Starbook
             ///     [+] USER (User Presses MENU)
             /// [*] GOTO: Slewing (1) or Not Slewing (0)
             /// </param>
+            /// <param name="extended">Extend the format of Right Ascension and Declination</param>
             /// <returns>Response string: OK or ERROR:%</returns>
             /// 
-            public Response GetStatus(out Status status)
+            public Response GetStatus(out Status status, bool extended = false)
             {
                 status = new Status(); Response response = this.Handshake("GETSTATUS", out Dictionary<string, string> dictionary);
                 
@@ -102,7 +103,7 @@ namespace ASCOM.Starbook
                         {
                             case "RA":
                             {
-                                if (HMS.TryParse(item.Value, out HMS ra))
+                                if (HMS.TryParse(item.Value, out HMS ra, extended))
                                 {
                                     status.RA = ra; statusRA = true;
                                 }
@@ -110,7 +111,7 @@ namespace ASCOM.Starbook
                             }
                             case "DEC":
                             {
-                                if (DMS.TryParse(item.Value, out DMS dec))
+                                if (DMS.TryParse(item.Value, out DMS dec, extended))
                                 {
                                     status.Dec = dec; statusDEC = true;
                                 }
@@ -294,8 +295,8 @@ namespace ASCOM.Starbook
             /// <summary>
             /// Move the mount to specitfied celestial coordinate. [*NOTE*] This command is invalid in INIT state.
             /// </summary>
-            /// <param name="ra">Right Ascension which is formatted as [HH]+[MM.M]</param>
-            /// <param name="dec">Declination which is formatted as [S][DDD]+[MM]</param>
+            /// <param name="ra">Right Ascension which is formatted as [HH]+[MM.M] ([HH]+[MM.MMMMM] if extended)</param>
+            /// <param name="dec">Declination which is formatted as [S][DDD]+[MM] ([S][DDD]+[MM.MMMMM] if extended)</param>
             /// <returns>Response string: OK or ERROR:%</returns>
             /// 
             public Response Goto(HMS ra, DMS dec)
@@ -337,8 +338,8 @@ namespace ASCOM.Starbook
             /// <summary>
             /// Align/Sync the mount with the specified celesctial coordinate. [*NOTE*] This command is invalid in INIT state.
             /// </summary>
-            /// <param name="ra">Right Ascension which is formatted as [HH]+[MM.M]</param>
-            /// <param name="dec">Declination which is formatted as [S][DDD]+[MM]</param>
+            /// <param name="ra">Right Ascension which is formatted as [HH]+[MM.M] ([HH]+[MM.MMMMM] if extended)</param>
+            /// <param name="dec">Declination which is formatted as [S][DDD]+[MM] ([S][DDD]+[MM.MMMMM] if extended)</param>
             /// <returns>Response string: OK or ERROR:%</returns>
             public Response Align(HMS ra, DMS dec)
             {
@@ -1060,14 +1061,15 @@ namespace ASCOM.Starbook
             [ComVisible(false)]
             public struct HMS
             {
-                public HMS(int hour, int minute, double second) : this()
+                public HMS(int hour, int minute, double second, bool extended = false) : this()
                 {
                     this.Hour = hour;
                     this.Minute = minute;
                     this.Second = second;
+                    this.Extended = extended;
                 }
 
-                public static bool FromValue(double value, out HMS hms)
+                public static bool FromValue(double value, out HMS hms, bool extended = false)
                 {
                     hms = new HMS();
 
@@ -1079,11 +1081,12 @@ namespace ASCOM.Starbook
                     hms.Hour = (int)Math.Floor(value); value -= hms.Hour; value *= 60;
                     hms.Minute = (int)Math.Floor(value); value -= hms.Minute; value *= 60;
                     hms.Second = value;
+                    hms.Extended = extended;
 
                     return true;
                 }
 
-                public static bool TryParse(string s, out HMS hms)
+                public static bool TryParse(string s, out HMS hms, bool extended = false)
                 {
                     hms = new HMS(); Match match = Regex.Match(s, @"(?<Hour>\d+)\+(?<Minute>\d+(\.\d+)?)");
 
@@ -1096,6 +1099,7 @@ namespace ASCOM.Starbook
                     hms.Hour = hour;
                     hms.Minute = (int)Math.Floor(minute);
                     hms.Second = (minute - hms.Minute) * 60;
+                    hms.Extended = extended;
 
                     return true;
                 }
@@ -1103,6 +1107,7 @@ namespace ASCOM.Starbook
                 public int Hour { get; private set; }
                 public int Minute { get; private set; }
                 public double Second { get; private set; }
+                public bool Extended { get; private set; }
 
                 public double Value
                 {
@@ -1114,28 +1119,36 @@ namespace ASCOM.Starbook
 
                 public override string ToString()
                 {
-                    return string.Format(CultureInfo.InvariantCulture, "{0:00}+{1:00.0}", this.Hour, this.Minute + this.Second / 60.0);
+                    if (this.Extended)
+                    {
+                        return string.Format(CultureInfo.InvariantCulture, "{0:00}+{1:00.00000}", this.Hour, this.Minute + this.Second / 60.0);
+                    }
+                    else
+                    {
+                        return string.Format(CultureInfo.InvariantCulture, "{0:00}+{1:00.0}", this.Hour, this.Minute + this.Second / 60.0);
+                    }
                 }
             }
 
             [ComVisible(false)]
             public struct DMS
             {
-                public DMS(Direction direction, int degree, int minute, double second) : this()
+                public DMS(Direction direction, int degree, int minute, double second, bool extended = false) : this()
                 {
                     this.Direction = direction;
 
                     this.Degree = degree;
                     this.Minute = minute;
                     this.Second = second;
+                    this.Extended = extended;
                 }
 
-                public static bool FromValue(double value, out DMS dms)
+                public static bool FromValue(double value, out DMS dms, bool extended = false)
                 {
-                    return FromValue(value, out dms, Direction.Positive, Direction.Negative);
+                    return FromValue(value, out dms, Direction.Positive, Direction.Negative, extended);
                 }
 
-                public static bool FromValue(double value, out DMS dms, Direction positive, Direction negative)
+                public static bool FromValue(double value, out DMS dms, Direction positive, Direction negative, bool extended = false)
                 {
                     dms = new DMS();
 
@@ -1165,11 +1178,12 @@ namespace ASCOM.Starbook
                     dms.Degree = (int)Math.Floor(value); value -= dms.Degree; value *= 60;
                     dms.Minute = (int)Math.Floor(value); value -= dms.Minute; value *= 60;
                     dms.Second = value;
+                    dms.Extended = extended;
 
                     return true;
                 }
 
-                public static bool TryParse(string s, out DMS dms)
+                public static bool TryParse(string s, out DMS dms, bool extended = false)
                 {
                     dms = new DMS(); Match match = Regex.Match(s, @"(?<Direction>[NSEW\-])?(?<Degree>\d+)\+(?<Minute>\d+(\.\d+)?)");
 
@@ -1224,6 +1238,7 @@ namespace ASCOM.Starbook
                     dms.Degree = degree;
                     dms.Minute = (int)Math.Floor(minute);
                     dms.Second = (minute - dms.Minute) * 60;
+                    dms.Extended = extended;
 
                     return true;
                 }
@@ -1233,6 +1248,7 @@ namespace ASCOM.Starbook
                 public int Degree { get; private set; }
                 public int Minute { get; private set; }
                 public double Second { get; private set; }
+                public bool Extended { get; private set; }
 
                 public double Value
                 {
@@ -1270,7 +1286,14 @@ namespace ASCOM.Starbook
                             direction = "-"; break;
                     }
 
-                    return string.Format(CultureInfo.InvariantCulture, degree ? "{0}{1:000}+{2:00}" : "{0}{1:00}+{2:00}", direction, this.Degree, this.Minute);
+                    if (this.Extended)
+                    {
+                        return string.Format(CultureInfo.InvariantCulture, degree ? "{0}{1:000}+{2:00.00000}" : "{0}{1:00}+{2:00.00000}", direction, this.Degree, this.Minute + this.Second / 60.0);
+                    }
+                    else
+                    {
+                        return string.Format(CultureInfo.InvariantCulture, degree ? "{0}{1:000}+{2:00}" : "{0}{1:00}+{2:00}", direction, this.Degree, this.Minute);
+                    }
                 }
             }
 

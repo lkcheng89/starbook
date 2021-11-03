@@ -61,7 +61,7 @@ namespace ASCOM.Starbook
 
             checkBoxJ2000.Checked = Telescope.j2000;
             checkBoxAutoMeridianFlip.Checked = Telescope.autoMeridianFlip > 0;
-            checkBoxUseExtendedCommand.Checked = Telescope.useExtendedCommand;
+            checkBoxUseExtendedFeature.Checked = Telescope.useExtendedFeature;
             checkBoxTraceLogger.Checked = Telescope.traceLogger.Enabled;
 
             Util util = new Util();
@@ -824,7 +824,7 @@ namespace ASCOM.Starbook
 
             Telescope.j2000 = checkBoxJ2000.Checked;
             Telescope.autoMeridianFlip = checkBoxAutoMeridianFlip.Checked ? 60 : 0;
-            Telescope.useExtendedCommand = checkBoxUseExtendedCommand.Checked;
+            Telescope.useExtendedFeature = checkBoxUseExtendedFeature.Checked;
             Telescope.traceLogger.Enabled = checkBoxTraceLogger.Checked;
 
             buttonApply.Enabled = false;
