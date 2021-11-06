@@ -86,10 +86,11 @@ namespace ASCOM.Starbook
             ///     [+] USER (User Presses MENU)
             /// [*] GOTO: Slewing (1) or Not Slewing (0)
             /// </param>
-            /// <param name="extended">Extend the format of Right Ascension and Declination</param>
+            /// <param name="extendedRA">Extend the format of Right Ascension</param>
+            /// <param name="extendedDEC">Extend the format of Declination</param>
             /// <returns>Response string: OK or ERROR:%</returns>
             /// 
-            public Response GetStatus(out Status status, bool extended = false)
+            public Response GetStatus(out Status status, bool extendedRA = false, bool extendedDEC = false)
             {
                 status = new Status(); Response response = this.Handshake("GETSTATUS", out Dictionary<string, string> dictionary);
                 
@@ -103,7 +104,7 @@ namespace ASCOM.Starbook
                         {
                             case "RA":
                             {
-                                if (HMS.TryParse(item.Value, out HMS ra, extended))
+                                if (HMS.TryParse(item.Value, out HMS ra, extendedRA))
                                 {
                                     status.RA = ra; statusRA = true;
                                 }
@@ -111,7 +112,7 @@ namespace ASCOM.Starbook
                             }
                             case "DEC":
                             {
-                                if (DMS.TryParse(item.Value, out DMS dec, extended))
+                                if (DMS.TryParse(item.Value, out DMS dec, extendedDEC))
                                 {
                                     status.Dec = dec; statusDEC = true;
                                 }
