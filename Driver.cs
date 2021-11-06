@@ -101,7 +101,7 @@ namespace ASCOM.Starbook
         internal static int autoMeridianFlipDefault = 0;
         internal static string extendedFeaturesProfileName = "ExtendedFeatures";
         internal static string[] extendedFeaturesOff = { };
-        internal static string[] extendedFeaturesOn = { "Altitude", "Azimuth", "RightAscension", "Declination", "J2000", "MoveAxis", "Park", "SetPark", "Unpark" };
+        internal static string[] extendedFeaturesOn = { "Altitude", "Azimuth", "RightAscension", "Declination", "J2000", "MoveAxis", "Park", "SetPark", "Unpark", "TBD" };
         internal static string[] extendedFeatureDefault = extendedFeaturesOff;
         internal static string traceLoggerProfileName = "TraceLogger";
         internal static bool traceLoggerDefault = false;
@@ -3016,6 +3016,12 @@ namespace ASCOM.Starbook
                             }
 
                             starbook.J2000 = raDecType == Starbook.RADecType.J2000;
+                        }
+
+                        if (extendedFeatures.Contains("TBD"))
+                        {
+                            LogMessage("Thread", "Starbook.GetMountCode()={0}", starbook.GetMountCode(out string code));
+                            LogMessage("Thread", "Starbook.GetStatus2()={0}", starbook.GetStatus2());
                         }
                     }
                     while (false);

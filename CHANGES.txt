@@ -1,6 +1,11 @@
 Changelog
 =========
 
+Starbook Driver v1.0
+--------------------
+
+* Add Use Extended Feature to support more features of Starbook Ten.
+
 Starbook Driver v0.9
 --------------------
 
