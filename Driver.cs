@@ -97,6 +97,8 @@ namespace ASCOM.Starbook
         internal static double parkAzimuthDefault = 270;
         internal static string j2000ProfileName = "J2000";
         internal static bool j2000Default = true;
+        internal static string starbookJ2000ProfileName = "StarbookJ2000";
+        internal static bool starbookJ2000Default = true;
         internal static string autoMeridianFlipProfileName = "AutoMeridianFlip";
         internal static int autoMeridianFlipDefault = 0;
         internal static string extendedFeaturesProfileName = "ExtendedFeatures";
@@ -2789,6 +2791,13 @@ namespace ASCOM.Starbook
                     j2000 = j2000Default; recovering = true;
                 }
 
+                if (!bool.TryParse(driverProfile.GetValue(driverID, starbookJ2000ProfileName, string.Empty, string.Empty), out bool starbookJ2000))
+                {
+                    starbookJ2000 = starbookJ2000Default; recovering = true;
+                }
+
+                starbook.J2000 = starbookJ2000;
+
                 if (!int.TryParse(driverProfile.GetValue(driverID, autoMeridianFlipProfileName, string.Empty, string.Empty), out autoMeridianFlip))
                 {
                     autoMeridianFlip = autoMeridianFlipDefault; recovering = true;
@@ -2853,6 +2862,7 @@ namespace ASCOM.Starbook
                 driverProfile.WriteValue(driverID, parkAltitudeProfileName, parkAltitude.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, parkAzimuthProfileName, parkAzimuth.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, j2000ProfileName, j2000.ToString(CultureInfo.InvariantCulture));
+                driverProfile.WriteValue(driverID, starbookJ2000ProfileName, starbook.J2000.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, autoMeridianFlipProfileName, autoMeridianFlip.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, extendedFeaturesProfileName, string.Join(",", extendedFeatures));
                 driverProfile.WriteValue(driverID, traceLoggerProfileName, traceLogger.Enabled.ToString(CultureInfo.InvariantCulture));

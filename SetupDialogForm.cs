@@ -60,6 +60,7 @@ namespace ASCOM.Starbook
             comboBoxPredefinedGuideRates.SelectedIndex = Telescope.predefinedGuideRates;
 
             checkBoxJ2000.Checked = Telescope.j2000;
+            checkBoxStarbookJ2000.Checked = Telescope.starbook.J2000;
             checkBoxAutoMeridianFlip.Checked = Telescope.autoMeridianFlip > 0;
             checkBoxUseExtendedFeatures.Checked = Telescope.extendedFeatures.Count > 0;
             checkBoxTraceLogger.Checked = Telescope.traceLogger.Enabled;
@@ -823,6 +824,7 @@ namespace ASCOM.Starbook
             }
 
             Telescope.j2000 = checkBoxJ2000.Checked;
+            Telescope.starbook.J2000 = checkBoxStarbookJ2000.Checked;
             Telescope.autoMeridianFlip = checkBoxAutoMeridianFlip.Checked ? 60 : 0;
 
             if (checkBoxUseExtendedFeatures.Checked && Telescope.extendedFeatures.Count <= 0)

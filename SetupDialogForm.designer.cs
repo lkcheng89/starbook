@@ -103,11 +103,12 @@
             this.comboBoxGuideRate = new System.Windows.Forms.ComboBox();
             this.textBoxGuideRate0 = new System.Windows.Forms.TextBox();
             this.groupBoxAdvanced = new System.Windows.Forms.GroupBox();
+            this.checkBoxUseExtendedFeatures = new System.Windows.Forms.CheckBox();
             this.checkBoxAutoMeridianFlip = new System.Windows.Forms.CheckBox();
             this.checkBoxJ2000 = new System.Windows.Forms.CheckBox();
             this.buttonApply = new System.Windows.Forms.Button();
             this.labelSeperator = new System.Windows.Forms.Label();
-            this.checkBoxUseExtendedFeatures = new System.Windows.Forms.CheckBox();
+            this.checkBoxStarbookJ2000 = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             this.groupBoxConnection.SuspendLayout();
             this.groupBoxLocation.SuspendLayout();
@@ -123,7 +124,7 @@
             this.buttonOK.Location = new System.Drawing.Point(258, 564);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(59, 28);
-            this.buttonOK.TabIndex = 72;
+            this.buttonOK.TabIndex = 74;
             this.buttonOK.Text = "OK";
             this.buttonOK.UseVisualStyleBackColor = true;
             this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
@@ -158,7 +159,7 @@
             this.checkBoxTraceLogger.Location = new System.Drawing.Point(160, 574);
             this.checkBoxTraceLogger.Name = "checkBoxTraceLogger";
             this.checkBoxTraceLogger.Size = new System.Drawing.Size(92, 18);
-            this.checkBoxTraceLogger.TabIndex = 71;
+            this.checkBoxTraceLogger.TabIndex = 73;
             this.checkBoxTraceLogger.Text = "Trace Logger";
             this.checkBoxTraceLogger.UseVisualStyleBackColor = true;
             // 
@@ -702,7 +703,7 @@
             this.labelFirmwareVersion.Location = new System.Drawing.Point(9, 491);
             this.labelFirmwareVersion.Name = "labelFirmwareVersion";
             this.labelFirmwareVersion.Size = new System.Drawing.Size(116, 14);
-            this.labelFirmwareVersion.TabIndex = 65;
+            this.labelFirmwareVersion.TabIndex = 67;
             this.labelFirmwareVersion.Text = "Firmware Version: --";
             // 
             // timer
@@ -718,7 +719,7 @@
             this.labelPlatformVersion.Location = new System.Drawing.Point(9, 511);
             this.labelPlatformVersion.Name = "labelPlatformVersion";
             this.labelPlatformVersion.Size = new System.Drawing.Size(110, 14);
-            this.labelPlatformVersion.TabIndex = 66;
+            this.labelPlatformVersion.TabIndex = 68;
             this.labelPlatformVersion.Text = "Platform Version: --";
             // 
             // labelDriverVersion
@@ -728,7 +729,7 @@
             this.labelDriverVersion.Location = new System.Drawing.Point(9, 532);
             this.labelDriverVersion.Name = "labelDriverVersion";
             this.labelDriverVersion.Size = new System.Drawing.Size(97, 14);
-            this.labelDriverVersion.TabIndex = 67;
+            this.labelDriverVersion.TabIndex = 69;
             this.labelDriverVersion.Text = "Driver Version: --";
             // 
             // labelCopyright
@@ -738,7 +739,7 @@
             this.labelCopyright.Location = new System.Drawing.Point(262, 491);
             this.labelCopyright.Name = "labelCopyright";
             this.labelCopyright.Size = new System.Drawing.Size(182, 14);
-            this.labelCopyright.TabIndex = 68;
+            this.labelCopyright.TabIndex = 70;
             this.labelCopyright.Text = "Copyright © 2021 Lung-Kai Cheng";
             // 
             // labelEmail
@@ -751,7 +752,7 @@
             this.labelEmail.Location = new System.Drawing.Point(262, 511);
             this.labelEmail.Name = "labelEmail";
             this.labelEmail.Size = new System.Drawing.Size(128, 14);
-            this.labelEmail.TabIndex = 69;
+            this.labelEmail.TabIndex = 71;
             this.labelEmail.Text = "lkcheng89@gmail.com";
             this.labelEmail.Click += new System.EventHandler(this.labelEmail_Click);
             // 
@@ -762,7 +763,7 @@
             this.buttonCancel.Location = new System.Drawing.Point(323, 564);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(59, 28);
-            this.buttonCancel.TabIndex = 73;
+            this.buttonCancel.TabIndex = 75;
             this.buttonCancel.Text = "Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
@@ -994,6 +995,7 @@
             // 
             this.groupBoxAdvanced.Controls.Add(this.checkBoxUseExtendedFeatures);
             this.groupBoxAdvanced.Controls.Add(this.checkBoxAutoMeridianFlip);
+            this.groupBoxAdvanced.Controls.Add(this.checkBoxStarbookJ2000);
             this.groupBoxAdvanced.Controls.Add(this.checkBoxJ2000);
             this.groupBoxAdvanced.Location = new System.Drawing.Point(8, 380);
             this.groupBoxAdvanced.Margin = new System.Windows.Forms.Padding(2);
@@ -1004,6 +1006,17 @@
             this.groupBoxAdvanced.TabStop = false;
             this.groupBoxAdvanced.Text = "Advanced Setting";
             // 
+            // checkBoxUseExtendedFeatures
+            // 
+            this.checkBoxUseExtendedFeatures.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.checkBoxUseExtendedFeatures.AutoSize = true;
+            this.checkBoxUseExtendedFeatures.Location = new System.Drawing.Point(17, 75);
+            this.checkBoxUseExtendedFeatures.Name = "checkBoxUseExtendedFeatures";
+            this.checkBoxUseExtendedFeatures.Size = new System.Drawing.Size(258, 18);
+            this.checkBoxUseExtendedFeatures.TabIndex = 66;
+            this.checkBoxUseExtendedFeatures.Text = "Use Extended Features (Starbook Ten only)";
+            this.checkBoxUseExtendedFeatures.UseVisualStyleBackColor = true;
+            // 
             // checkBoxAutoMeridianFlip
             // 
             this.checkBoxAutoMeridianFlip.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
@@ -1011,7 +1024,7 @@
             this.checkBoxAutoMeridianFlip.Location = new System.Drawing.Point(17, 51);
             this.checkBoxAutoMeridianFlip.Name = "checkBoxAutoMeridianFlip";
             this.checkBoxAutoMeridianFlip.Size = new System.Drawing.Size(128, 18);
-            this.checkBoxAutoMeridianFlip.TabIndex = 64;
+            this.checkBoxAutoMeridianFlip.TabIndex = 65;
             this.checkBoxAutoMeridianFlip.Text = "Auto Meridian Flip";
             this.checkBoxAutoMeridianFlip.UseVisualStyleBackColor = true;
             // 
@@ -1035,7 +1048,7 @@
             this.buttonApply.Location = new System.Drawing.Point(388, 564);
             this.buttonApply.Name = "buttonApply";
             this.buttonApply.Size = new System.Drawing.Size(59, 28);
-            this.buttonApply.TabIndex = 74;
+            this.buttonApply.TabIndex = 76;
             this.buttonApply.Text = "Apply";
             this.buttonApply.UseVisualStyleBackColor = true;
             this.buttonApply.Click += new System.EventHandler(this.buttonApply_Click);
@@ -1046,18 +1059,20 @@
             this.labelSeperator.Location = new System.Drawing.Point(8, 556);
             this.labelSeperator.Name = "labelSeperator";
             this.labelSeperator.Size = new System.Drawing.Size(439, 2);
-            this.labelSeperator.TabIndex = 70;
+            this.labelSeperator.TabIndex = 72;
             // 
-            // checkBoxUseExtendedFeatures
+            // checkBoxStarbookJ2000
             // 
-            this.checkBoxUseExtendedFeatures.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.checkBoxUseExtendedFeatures.AutoSize = true;
-            this.checkBoxUseExtendedFeatures.Location = new System.Drawing.Point(17, 75);
-            this.checkBoxUseExtendedFeatures.Name = "checkBoxUseExtendedFeatures";
-            this.checkBoxUseExtendedFeatures.Size = new System.Drawing.Size(264, 18);
-            this.checkBoxUseExtendedFeatures.TabIndex = 64;
-            this.checkBoxUseExtendedFeatures.Text = "Use Extended Features (Starbook Ten only)";
-            this.checkBoxUseExtendedFeatures.UseVisualStyleBackColor = true;
+            this.checkBoxStarbookJ2000.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.checkBoxStarbookJ2000.AutoSize = true;
+            this.checkBoxStarbookJ2000.Checked = true;
+            this.checkBoxStarbookJ2000.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxStarbookJ2000.Location = new System.Drawing.Point(242, 27);
+            this.checkBoxStarbookJ2000.Name = "checkBoxStarbookJ2000";
+            this.checkBoxStarbookJ2000.Size = new System.Drawing.Size(140, 18);
+            this.checkBoxStarbookJ2000.TabIndex = 64;
+            this.checkBoxStarbookJ2000.Text = "J2000 (Starbook side)";
+            this.checkBoxStarbookJ2000.UseVisualStyleBackColor = true;
             // 
             // SetupDialogForm
             // 
@@ -1185,5 +1200,6 @@
         private System.Windows.Forms.Label labelPredefinedGuideRates;
         private System.Windows.Forms.Label labelStatus;
         private System.Windows.Forms.CheckBox checkBoxUseExtendedFeatures;
+        private System.Windows.Forms.CheckBox checkBoxStarbookJ2000;
     }
 }
