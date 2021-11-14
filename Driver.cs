@@ -3020,12 +3020,13 @@ namespace ASCOM.Starbook
 
                         if (extendedFeatures.Contains("J2000"))
                         {
-                            if ((response = starbook.GetRADecType(out Starbook.RADecType raDecType)) != Starbook.Response.OK)
-                            {
-                                LogMessage("Thread", "Starbook.GetRADecType()={0}", response); break;
-                            }
+                            response = starbook.GetRADecType(out Starbook.RADecType raDecType);
+                            LogMessage("Thread", "Starbook.GetRADecType()={0}", response);
 
-                            starbook.J2000 = raDecType == Starbook.RADecType.J2000;
+                            if (response == Starbook.Response.OK)
+                            {
+                                starbook.J2000 = raDecType == Starbook.RADecType.J2000;
+                            }
                         }
 
                         if (extendedFeatures.Contains("TBD"))
