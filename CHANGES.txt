@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Starbook Driver v1.0.1
+----------------------
+
+* Add J2000 (Starbook side) to specify the equatorial systme of Starbook which supports both J2000 and JNow.
+* Hotfix / Starbook Ten not connectable when Use Extended Feature is checked.
+
 Starbook Driver v1.0
 --------------------
 
