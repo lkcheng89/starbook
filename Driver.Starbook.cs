@@ -788,7 +788,7 @@ namespace ASCOM.Starbook
                 {
                     case "J2000":
                         type = RADecType.J2000; return true;
-                    case "Now":
+                    case "NOW":
                         type = RADecType.Now; return true;
                     default:
                         type = RADecType.Unknown; return false;
