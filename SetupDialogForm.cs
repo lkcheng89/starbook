@@ -61,6 +61,7 @@ namespace ASCOM.Starbook
 
             checkBoxJ2000.Checked = Telescope.j2000;
             checkBoxStarbookJ2000.Checked = Telescope.starbook.J2000;
+            checkBoxStarbookJ2000.Enabled = !Telescope.extendedFeatures.Contains("J2000");
             checkBoxAutoMeridianFlip.Checked = Telescope.autoMeridianFlip > 0;
             checkBoxUseExtendedFeatures.Checked = Telescope.extendedFeatures.Count > 0;
             checkBoxTraceLogger.Checked = Telescope.traceLogger.Enabled;
@@ -917,6 +918,11 @@ namespace ASCOM.Starbook
             }
 
             buttonApply.Enabled = true;
+        }
+
+        private void checkBoxUseExtendedFeatures_CheckedChanged(object sender, EventArgs e)
+        {
+            this.checkBoxStarbookJ2000.Enabled = !this.checkBoxUseExtendedFeatures.Checked;
         }
     }
 }

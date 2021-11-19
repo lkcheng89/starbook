@@ -1016,6 +1016,7 @@
             this.checkBoxUseExtendedFeatures.TabIndex = 66;
             this.checkBoxUseExtendedFeatures.Text = "Use Extended Features (Starbook Ten only)";
             this.checkBoxUseExtendedFeatures.UseVisualStyleBackColor = true;
+            this.checkBoxUseExtendedFeatures.CheckedChanged += new System.EventHandler(this.checkBoxUseExtendedFeatures_CheckedChanged);
             // 
             // checkBoxAutoMeridianFlip
             // 
