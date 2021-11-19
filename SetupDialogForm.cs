@@ -78,7 +78,15 @@ namespace ASCOM.Starbook
             }
 
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            labelDriverVersion.Text = string.Format(CultureInfo.InvariantCulture, "Driver Version: {0}.{1}", version.Major, version.Minor);
+
+            if (version.Build == 0)
+            {
+                labelDriverVersion.Text = string.Format(CultureInfo.InvariantCulture, "Driver Version: {0}.{1}", version.Major, version.Minor);
+            }
+            else
+            {
+                labelDriverVersion.Text = string.Format(CultureInfo.InvariantCulture, "Driver Version: {0}.{1}.{2}", version.Major, version.Minor, version.Build);
+            }
 
             /////
 
