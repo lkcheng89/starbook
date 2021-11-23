@@ -105,7 +105,7 @@ namespace ASCOM.Starbook
         internal static int autoMeridianFlipDefault = 0;
         internal static string extendedFeaturesProfileName = "ExtendedFeatures";
         internal static string[] extendedFeaturesOff = { };
-        internal static string[] extendedFeaturesOn = { "AltAz", "RADec", "RADecType", "MoveAxis", "Park", "TBD" };
+        internal static string[] extendedFeaturesOn = { "AltAz", "RADec", "RADecType", "MoveAxis", "Track", "Park", "PierSide", "TBD" };
         internal static string[] extendedFeatureDefault = extendedFeaturesOff;
         internal static string traceLoggerProfileName = "TraceLogger";
         internal static bool traceLoggerDefault = false;
@@ -1424,27 +1424,44 @@ namespace ASCOM.Starbook
             {
                 CheckConnected("SideOfPier_get");
 
-                Starbook.Response response = starbook.GetRound(out int round);
-
-                if (response != Starbook.Response.OK)
+                if (extendedFeatures.Contains("PierSide"))
                 {
-                    LogMessage("SideOfPier_get", "InvalidOperationException: Starbook.GetRound()={0}", response);
-                    throw new ASCOM.InvalidOperationException("SideOfPier_get: Starbook.GetRound() is not working.");
+                    Starbook.Response response = starbook.GetPierSide(out Starbook.PierSide pierSide);
+
+                    if (response != Starbook.Response.OK)
+                    {
+                        LogMessage("SideOfPier_get", "InvalidOperationException: Starbook.GetPierSide()={0}", response);
+                        throw new ASCOM.InvalidOperationException("SideOfPier_get: Starbook.GetPierSide() is not working.");
+                    }
+
+                    PierSide sideOfPier = pierSide == Starbook.PierSide.East ? PierSide.pierEast : PierSide.pierWest;
+                    LogMessage("SideOfPier_get", "{0}", sideOfPier);
+                    return sideOfPier;
                 }
-
-                response = starbook.GetXY(out Starbook.XY xy);
-
-                if (response != Starbook.Response.OK)
+                else
                 {
-                    LogMessage("SideOfPier_get", "InvalidOperationException: Starbook.GetXY()={0}", response);
-                    throw new ASCOM.InvalidOperationException("SideOfPier_get: Starbook.GetXY() is not working.");
+                    Starbook.Response response = starbook.GetRound(out int round);
+
+                    if (response != Starbook.Response.OK)
+                    {
+                        LogMessage("SideOfPier_get", "InvalidOperationException: Starbook.GetRound()={0}", response);
+                        throw new ASCOM.InvalidOperationException("SideOfPier_get: Starbook.GetRound() is not working.");
+                    }
+
+                    response = starbook.GetXY(out Starbook.XY xy);
+
+                    if (response != Starbook.Response.OK)
+                    {
+                        LogMessage("SideOfPier_get", "InvalidOperationException: Starbook.GetXY()={0}", response);
+                        throw new ASCOM.InvalidOperationException("SideOfPier_get: Starbook.GetXY() is not working.");
+                    }
+
+                    GetMechanicalCoordinate(round, xy, out double x, out double y);
+
+                    PierSide sideOfPier = (-90 <= y && y <= 90) ? PierSide.pierEast : PierSide.pierWest;
+                    LogMessage("SideOfPier_get", "{0}: X={1},Y={2}", sideOfPier, x, y);
+                    return sideOfPier;
                 }
-
-                GetMechanicalCoordinate(round, xy, out double x, out double y);
-
-                PierSide sideOfPier = (-90 <= y && y <= 90) ? PierSide.pierEast : PierSide.pierWest;
-                LogMessage("SideOfPier_get", "{0}: X={1},Y={2}", sideOfPier, x, y);
-                return sideOfPier;
             }
             set
             {
@@ -2426,38 +2443,56 @@ namespace ASCOM.Starbook
             {
                 CheckConnected("Tracking_get");
 
-                bool tracking = this.tracking;
-
-                if (tracking)
+                if (extendedFeatures.Contains("Track"))
                 {
-                    Starbook.Response response = GetStatus(out Starbook.Status status);
+                    Starbook.Response response = starbook.GetTrackStatus(out bool tracking);
 
                     if (response != Starbook.Response.OK)
                     {
-                        LogMessage("Tracking_get", "InvalidOperationException: Starbook.GetStatus()={0}", response);
-                        throw new ASCOM.InvalidOperationException("Tracking_get: Starbook.GetStatus() is not working.");
+                        LogMessage("Tracking_get", "InvalidOperationException: Starbook.GetTrackStatus()={0}", response);
+                        throw new ASCOM.InvalidOperationException("Tracking_get: Starbook.GetTrackStatus() is not working.");
                     }
 
-                    tracking = (status.State == Starbook.State.Guide || status.State == Starbook.State.Scope || status.State == Starbook.State.Chart || status.State == Starbook.State.User);
-                    LogMessage("Tracking_get", "{0}: Status.State={1}", tracking, status.State);
+                    return tracking;
                 }
                 else
                 {
-                    LogMessage("Tracking_get", "{0}", tracking);
-                }
+                    bool tracking = this.tracking;
 
-                return tracking;
+                    if (tracking)
+                    {
+                        Starbook.Response response = GetStatus(out Starbook.Status status);
+
+                        if (response != Starbook.Response.OK)
+                        {
+                            LogMessage("Tracking_get", "InvalidOperationException: Starbook.GetStatus()={0}", response);
+                            throw new ASCOM.InvalidOperationException("Tracking_get: Starbook.GetStatus() is not working.");
+                        }
+
+                        tracking = (status.State == Starbook.State.Guide || status.State == Starbook.State.Scope || status.State == Starbook.State.Chart || status.State == Starbook.State.User);
+                        LogMessage("Tracking_get", "{0}: Status.State={1}", tracking, status.State);
+                    }
+                    else
+                    {
+                        LogMessage("Tracking_get", "{0}", tracking);
+                    }
+
+                    return tracking;
+                }
             }
             set
             {
                 CheckConnected("Tracking_set");
 
-                if (value == tracking)
+                if (!extendedFeatures.Contains("Track"))
                 {
-                    LogMessage("Tracking_set", "OK: {0}, Ignored", value); return;
-                }
+                    if (value == tracking)
+                    {
+                        LogMessage("Tracking_set", "OK: {0}, Ignored", value); return;
+                    }
 
-                tracking = value;
+                    tracking = value;
+                }
 
                 if (value)
                 {
