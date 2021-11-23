@@ -76,6 +76,8 @@ namespace ASCOM.Starbook
 
         internal static string ipAddressProfileName = "IPAddress"; // Constants used for Profile persistence
         internal static IPAddress ipAddressDefault = new IPAddress(new byte[] { 169, 254, 1, 1 });
+        internal static int pollDefault = 100;
+        internal static string pollProfileName = "Poll";
         internal static string siteElevationProfileName = "SiteElevation";
         internal static double siteElevationDefault = 0;
         internal static string siteTemperatureProfileName = "SiteTemperature";
@@ -109,6 +111,7 @@ namespace ASCOM.Starbook
         internal static bool traceLoggerDefault = false;
 
         internal static Starbook starbook = new Starbook(ipAddressDefault); // Variables to hold the currrent device configuration
+        internal static int poll;
         internal static short slewSettleTime;
         internal static int guideRate;
         internal static double[] guideRates;
@@ -154,7 +157,6 @@ namespace ASCOM.Starbook
 
         private bool threadRunning;
         private Thread thread;
-        private int poll;
 
         private object status;
         private object response;
@@ -192,7 +194,6 @@ namespace ASCOM.Starbook
 
             threadRunning = false;
             thread = null;
-            poll = 100;
 
             status = null;
             response = null;
@@ -1178,13 +1179,13 @@ namespace ASCOM.Starbook
                 Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
                           parkAltitude, parkAzimuth, out double parkRightAscension, out double parkDeclination, starbook.J2000);
 
-                if (!Starbook.HMS.FromValue(parkRightAscension, out Starbook.HMS rightAscension, extendedFeatures.Contains("RightAscension")))
+                if (!Starbook.HMS.FromValue(parkRightAscension, out Starbook.HMS rightAscension, extendedFeatures.Contains("RightAscension") ? 5 : 1))
                 {
                     LogMessage("Park", "InvalidOperationException: Cannot determine rightAscension={0}", parkRightAscension);
                     throw new ASCOM.InvalidOperationException("Park: Cannot determine rightAscension.");
                 }
 
-                if (!Starbook.DMS.FromValue(parkDeclination, out Starbook.DMS declination, extendedFeatures.Contains("Declination")))
+                if (!Starbook.DMS.FromValue(parkDeclination, out Starbook.DMS declination, extendedFeatures.Contains("Declination") ? 5 : 0))
                 {
                     LogMessage("Park", "InvalidOperationException: Cannot determine declination={0}", parkDeclination);
                     throw new ASCOM.InvalidOperationException("Park: Cannot determine declination.");
@@ -1347,15 +1348,7 @@ namespace ASCOM.Starbook
 
             if (extendedFeatures.Contains("SetPark"))
             {
-                Starbook.Response response = starbook.GetAltAz(out double altitude, out double azimuth);
-
-                if (response != Starbook.Response.OK)
-                {
-                    LogMessage("SetPark", "InvalidOperationException: Starbook.GetAltAz()={0}", response);
-                    throw new ASCOM.InvalidOperationException("SetPark: Starbook.GetAltAz() is not working.");
-                }
-
-                response = starbook.SetPark();
+                Starbook.Response response = starbook.SetPark();
 
                 if (response != Starbook.Response.OK)
                 {
@@ -1363,10 +1356,19 @@ namespace ASCOM.Starbook
                     throw new ASCOM.InvalidOperationException("SetPark: Starbook.SetPark() is not working.");
                 }
 
-                parkAltitude = altitude;
-                parkAzimuth = azimuth;
+                response = starbook.GetAltAz(out double altitude, out double azimuth);
 
-                LogMessage("SetPark", "OK: Altitude={0},Azimuth={1}", parkAltitude, parkAzimuth);
+                if (response == Starbook.Response.OK)
+                {
+                    parkAltitude = altitude;
+                    parkAzimuth = azimuth;
+
+                    LogMessage("SetPark", "OK: Altitude={0},Azimuth={1}", parkAltitude, parkAzimuth);
+                }
+                else
+                {
+                    LogMessage("SetPark", "InvalidOperationException: Starbook.GetAltAz()={0}", response);
+                }
             }
             else
             {
@@ -1513,7 +1515,7 @@ namespace ASCOM.Starbook
             {
                 CheckConnected("SiteLatitude_set");
 
-                if (!Starbook.DMS.FromValue(value, out Starbook.DMS latitude, Starbook.Direction.North, Starbook.Direction.South))
+                if (!Starbook.DMS.FromValue(value, out Starbook.DMS latitude, Starbook.Direction.North, Starbook.Direction.South, 0))
                 {
                     LogMessage("SiteLatitude_set", "InvalidValueException: {0}", value);
                     throw new ASCOM.InvalidValueException("SiteLatitude", "SiteLatitude", "-90 to 90");
@@ -1566,7 +1568,7 @@ namespace ASCOM.Starbook
             {
                 CheckConnected("SiteLongitude_set");
 
-                if (!Starbook.DMS.FromValue(value, out Starbook.DMS longitude, Starbook.Direction.East, Starbook.Direction.West))
+                if (!Starbook.DMS.FromValue(value, out Starbook.DMS longitude, Starbook.Direction.East, Starbook.Direction.West, 0))
                 {
                     LogMessage("SiteLongitude_set", "InvalidValueException: {0}", value);
                     throw new ASCOM.InvalidValueException("SiteLongitude", "SiteLongitude", "-180 to 180");
@@ -1664,13 +1666,13 @@ namespace ASCOM.Starbook
             Transform(latitude, longitude, time, timezone,
                       Altitude, Azimuth, out double RightAscension, out double Declination, starbook.J2000);
 
-            if (!Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension, extendedFeatures.Contains("RightAscension")))
+            if (!Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension, extendedFeatures.Contains("RightAscension") ? 5 : 1))
             {
                 LogMessage("SlewToAltAz", "InvalidValueException: RightAscension={0}", RightAscension);
                 throw new ASCOM.InvalidValueException("SlewToAltAz", "RightAscension", "0 to 24");
             }
 
-            if (!Starbook.DMS.FromValue(Declination, out Starbook.DMS declination, extendedFeatures.Contains("Declination")))
+            if (!Starbook.DMS.FromValue(Declination, out Starbook.DMS declination, extendedFeatures.Contains("Declination") ? 5 : 0))
             {
                 LogMessage("SlewToAltAz", "InvalidValueException: Declination={0}", Declination);
                 throw new ASCOM.InvalidValueException("SlewToAltAz", "Declination", "-90 to 90");
@@ -1752,13 +1754,13 @@ namespace ASCOM.Starbook
             Transform(latitude, longitude, time, timezone,
                       Altitude, Azimuth, out double RightAscension, out double Declination, starbook.J2000);
 
-            if (!Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension, extendedFeatures.Contains("RightAscension")))
+            if (!Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension, extendedFeatures.Contains("RightAscension") ? 5 : 1))
             {
                 LogMessage("SlewToAltAzAsync", "InvalidValueException: RightAscension={0}", RightAscension);
                 throw new ASCOM.InvalidValueException("SlewToAltAzAsync", "RightAscension", "0 to 24");
             }
 
-            if (!Starbook.DMS.FromValue(Declination, out Starbook.DMS declination, extendedFeatures.Contains("Declination")))
+            if (!Starbook.DMS.FromValue(Declination, out Starbook.DMS declination, extendedFeatures.Contains("Declination") ? 5 : 0))
             {
                 LogMessage("SlewToAltAzAsync", "InvalidValueException: Declination={0}", Declination);
                 throw new ASCOM.InvalidValueException("SlewToAltAzAsync", "Declination", "-90 to 90");
@@ -1791,13 +1793,13 @@ namespace ASCOM.Starbook
 
             if (j2000 == starbook.J2000)
             {
-                if (!Starbook.HMS.FromValue(RightAscension, out rightAscension, extendedFeatures.Contains("RightAscension")))
+                if (!Starbook.HMS.FromValue(RightAscension, out rightAscension, extendedFeatures.Contains("RightAscension") ? 5 : 1))
                 {
                     LogMessage("SlewToCoordinates", "InvalidValueException: RightAscension={0}", RightAscension);
                     throw new ASCOM.InvalidValueException("SlewToCoordinates", "RightAscension", "0 to 24");
                 }
 
-                if (!Starbook.DMS.FromValue(Declination, out declination, extendedFeatures.Contains("Declination")))
+                if (!Starbook.DMS.FromValue(Declination, out declination, extendedFeatures.Contains("Declination") ? 5 : 0))
                 {
                     LogMessage("SlewToCoordinates", "InvalidValueException: Declination={0}", Declination);
                     throw new ASCOM.InvalidValueException("SlewToCoordinates", "Declination", "-90 to 90");
@@ -1824,13 +1826,13 @@ namespace ASCOM.Starbook
                 Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
                           RightAscension, Declination, j2000, out double transformRightAscension, out double transformDeclination, starbook.J2000);
 
-                if (!Starbook.HMS.FromValue(transformRightAscension, out rightAscension, extendedFeatures.Contains("RightAscension")))
+                if (!Starbook.HMS.FromValue(transformRightAscension, out rightAscension, extendedFeatures.Contains("RightAscension") ? 5 : 1))
                 {
                     LogMessage("SlewToCoordinates", "InvalidValueException: RightAscension={0}=>{1}", RightAscension, transformRightAscension);
                     throw new ASCOM.InvalidValueException("SlewToCoordinates", "RightAscension", "0 to 24");
                 }
 
-                if (!Starbook.DMS.FromValue(transformDeclination, out declination, extendedFeatures.Contains("Declination")))
+                if (!Starbook.DMS.FromValue(transformDeclination, out declination, extendedFeatures.Contains("Declination") ? 5 : 0))
                 {
                     LogMessage("SlewToCoordinates", "InvalidValueException: Declination={0}=>{1}", Declination, transformDeclination);
                     throw new ASCOM.InvalidValueException("SlewToCoordinates", "Declination", "-90 to 90");
@@ -1885,13 +1887,13 @@ namespace ASCOM.Starbook
 
             if (j2000 == starbook.J2000)
             {
-                if (!Starbook.HMS.FromValue(RightAscension, out rightAscension, extendedFeatures.Contains("RightAscension")))
+                if (!Starbook.HMS.FromValue(RightAscension, out rightAscension, extendedFeatures.Contains("RightAscension") ? 5 : 1))
                 {
                     LogMessage("SlewToCoordinatesAsync", "InvalidValueException: RightAscension={0}", RightAscension);
                     throw new ASCOM.InvalidValueException("SlewToCoordinatesAsync", "RightAscension", "0 to 24");
                 }
 
-                if (!Starbook.DMS.FromValue(Declination, out declination, extendedFeatures.Contains("Declination")))
+                if (!Starbook.DMS.FromValue(Declination, out declination, extendedFeatures.Contains("Declination") ? 5 : 0))
                 {
                     LogMessage("SlewToCoordinatesAsync", "InvalidValueException: Declination={0}", Declination);
                     throw new ASCOM.InvalidValueException("SlewToCoordinatesAsync", "Declination", "-90 to 90");
@@ -1918,13 +1920,13 @@ namespace ASCOM.Starbook
                 Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
                           RightAscension, Declination, j2000, out double transformRightAscension, out double transformDeclination, starbook.J2000);
 
-                if (!Starbook.HMS.FromValue(transformRightAscension, out rightAscension, extendedFeatures.Contains("RightAscension")))
+                if (!Starbook.HMS.FromValue(transformRightAscension, out rightAscension, extendedFeatures.Contains("RightAscension") ? 5 : 1))
                 {
                     LogMessage("SlewToCoordinatesAsync", "InvalidValueException: RightAscension={0}=>{1}", RightAscension, transformRightAscension);
                     throw new ASCOM.InvalidValueException("SlewToCoordinatesAsync", "RightAscension", "0 to 24");
                 }
 
-                if (!Starbook.DMS.FromValue(transformDeclination, out declination, extendedFeatures.Contains("Declination")))
+                if (!Starbook.DMS.FromValue(transformDeclination, out declination, extendedFeatures.Contains("Declination") ? 5 : 0))
                 {
                     LogMessage("SlewToCoordinatesAsync", "InvalidValueException: Declination={0}=>{1}", Declination, transformDeclination);
                     throw new ASCOM.InvalidValueException("SlewToCoordinatesAsync", "Declination", "-90 to 90");
@@ -1961,13 +1963,13 @@ namespace ASCOM.Starbook
 
             if (j2000 == starbook.J2000)
             {
-                if (!Starbook.HMS.FromValue(targetRightAscension, out rightAscension, extendedFeatures.Contains("RightAscension")))
+                if (!Starbook.HMS.FromValue(targetRightAscension, out rightAscension, extendedFeatures.Contains("RightAscension") ? 5 : 1))
                 {
                     LogMessage("SlewToTarget", "InvalidValueException: TargetRightAscension={0}", targetRightAscension);
                     throw new ASCOM.InvalidValueException("SlewToTarget", "TargetRightAscension", "0 to 24");
                 }
 
-                if (!Starbook.DMS.FromValue(targetDeclination, out declination, extendedFeatures.Contains("Declination")))
+                if (!Starbook.DMS.FromValue(targetDeclination, out declination, extendedFeatures.Contains("Declination") ? 5 : 0))
                 {
                     LogMessage("SlewToTarget", "InvalidValueException: TargetDeclination={0}", targetDeclination);
                     throw new ASCOM.InvalidValueException("SlewToTarget", "TargetDeclination", "-90 to 90");
@@ -1994,13 +1996,13 @@ namespace ASCOM.Starbook
                 Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
                           targetRightAscension, targetDeclination, j2000, out double RightAscension, out double Declination, starbook.J2000);
 
-                if (!Starbook.HMS.FromValue(RightAscension, out rightAscension, extendedFeatures.Contains("RightAscension")))
+                if (!Starbook.HMS.FromValue(RightAscension, out rightAscension, extendedFeatures.Contains("RightAscension") ? 5 : 1))
                 {
                     LogMessage("SlewToTarget", "InvalidValueException: RightAscension={0}=>{1}", targetRightAscension, RightAscension);
                     throw new ASCOM.InvalidValueException("SlewToTarget", "RightAscension", "0 to 24");
                 }
 
-                if (!Starbook.DMS.FromValue(Declination, out declination, extendedFeatures.Contains("Declination")))
+                if (!Starbook.DMS.FromValue(Declination, out declination, extendedFeatures.Contains("Declination") ? 5 : 0))
                 {
                     LogMessage("SlewToTarget", "InvalidValueException: Declination={0}=>{1}", targetDeclination, Declination);
                     throw new ASCOM.InvalidValueException("SlewToTarget", "Declination", "-90 to 90");
@@ -2052,13 +2054,13 @@ namespace ASCOM.Starbook
 
             if (j2000 == starbook.J2000)
             {
-                if (!Starbook.HMS.FromValue(targetRightAscension, out rightAscension, extendedFeatures.Contains("RightAscension")))
+                if (!Starbook.HMS.FromValue(targetRightAscension, out rightAscension, extendedFeatures.Contains("RightAscension") ? 5 : 1))
                 {
                     LogMessage("SlewToTargetAsync", "InvalidValueException: TargetRightAscension={0}", targetRightAscension);
                     throw new ASCOM.InvalidValueException("SlewToTargetAsync", "TargetRightAscension", "0 to 24");
                 }
 
-                if (!Starbook.DMS.FromValue(targetDeclination, out declination, extendedFeatures.Contains("Declination")))
+                if (!Starbook.DMS.FromValue(targetDeclination, out declination, extendedFeatures.Contains("Declination") ? 5 : 0))
                 {
                     LogMessage("SlewToTargetAsync", "InvalidValueException: TargetDeclination={0}", targetDeclination);
                     throw new ASCOM.InvalidValueException("SlewToTargetAsync", "TargetDeclination", "-90 to 90");
@@ -2085,13 +2087,13 @@ namespace ASCOM.Starbook
                 Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
                           targetRightAscension, targetDeclination, j2000, out double RightAscension, out double Declination, starbook.J2000);
 
-                if (!Starbook.HMS.FromValue(RightAscension, out rightAscension, extendedFeatures.Contains("RightAscension")))
+                if (!Starbook.HMS.FromValue(RightAscension, out rightAscension, extendedFeatures.Contains("RightAscension") ? 5 : 1))
                 {
                     LogMessage("SlewToTargetAsync", "InvalidValueException: RightAscension={0}=>{1}", targetRightAscension, RightAscension);
                     throw new ASCOM.InvalidValueException("SlewToTargetAsync", "RightAscension", "0 to 24");
                 }
 
-                if (!Starbook.DMS.FromValue(Declination, out declination, extendedFeatures.Contains("Declination")))
+                if (!Starbook.DMS.FromValue(Declination, out declination, extendedFeatures.Contains("Declination") ? 5 : 0))
                 {
                     LogMessage("SlewToTargetAsync", "InvalidValueException: Declination={0}=>{1}", targetDeclination, Declination);
                     throw new ASCOM.InvalidValueException("SlewToTargetAsync", "Declination", "-90 to 90");
@@ -2187,13 +2189,13 @@ namespace ASCOM.Starbook
             Transform(latitude, longitude, time, timezone,
                       Altitude, Azimuth, out double RightAscension, out double Declination, starbook.J2000);
 
-            if (!Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension, extendedFeatures.Contains("RightAscension")))
+            if (!Starbook.HMS.FromValue(RightAscension, out Starbook.HMS rightAscension, extendedFeatures.Contains("RightAscension") ? 3 : 1))
             {
                 LogMessage("SyncToAltAz", "InvalidValueException: RightAscension={0}", RightAscension);
                 throw new ASCOM.InvalidValueException("SyncToAltAz", "RightAscension", "0 to 24");
             }
 
-            if (!Starbook.DMS.FromValue(Declination, out Starbook.DMS declination, extendedFeatures.Contains("Declination")))
+            if (!Starbook.DMS.FromValue(Declination, out Starbook.DMS declination, extendedFeatures.Contains("Declination") ? 3 : 0))
             {
                 LogMessage("SyncToAltAz", "InvalidValueException: Declination={0}", Declination);
                 throw new ASCOM.InvalidValueException("SyncToAltAz", "Declination", "-90 to 90");
@@ -2226,13 +2228,13 @@ namespace ASCOM.Starbook
 
             if (j2000 == starbook.J2000)
             {
-                if (!Starbook.HMS.FromValue(RightAscension, out rightAscension, extendedFeatures.Contains("RightAscension")))
+                if (!Starbook.HMS.FromValue(RightAscension, out rightAscension, extendedFeatures.Contains("RightAscension") ? 3 : 1))
                 {
                     LogMessage("SyncToCoordinates", "InvalidValueException: RightAscension={0}", RightAscension);
                     throw new ASCOM.InvalidValueException("SyncToCoordinates", "RightAscension", "0 to 24");
                 }
 
-                if (!Starbook.DMS.FromValue(Declination, out declination, extendedFeatures.Contains("Declination")))
+                if (!Starbook.DMS.FromValue(Declination, out declination, extendedFeatures.Contains("Declination") ? 3 : 0))
                 {
                     LogMessage("SyncToCoordinates", "InvalidValueException: Declination={0}", Declination);
                     throw new ASCOM.InvalidValueException("SyncToCoordinate", "Declination", "-90 to 90");
@@ -2259,13 +2261,13 @@ namespace ASCOM.Starbook
                 Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
                           RightAscension, Declination, j2000, out double transformRightAscension, out double transformDeclination, starbook.J2000);
 
-                if (!Starbook.HMS.FromValue(transformRightAscension, out rightAscension, extendedFeatures.Contains("RightAscension")))
+                if (!Starbook.HMS.FromValue(transformRightAscension, out rightAscension, extendedFeatures.Contains("RightAscension") ? 3 : 1))
                 {
                     LogMessage("SyncToCoordinates", "InvalidValueException: RightAscension={0}=>{1}", RightAscension, transformRightAscension);
                     throw new ASCOM.InvalidValueException("SyncToCoordinates", "RightAscension", "0 to 24");
                 }
 
-                if (!Starbook.DMS.FromValue(transformDeclination, out declination, extendedFeatures.Contains("Declination")))
+                if (!Starbook.DMS.FromValue(transformDeclination, out declination, extendedFeatures.Contains("Declination") ? 3 : 0))
                 {
                     LogMessage("SyncToCoordinates", "InvalidValueException: Declination={0}=>{1}", Declination, transformDeclination);
                     throw new ASCOM.InvalidValueException("SyncToCoordinates", "Declination", "-90 to 90");
@@ -2302,13 +2304,13 @@ namespace ASCOM.Starbook
 
             if (j2000 == starbook.J2000)
             {
-                if (!Starbook.HMS.FromValue(targetRightAscension, out rightAscension, extendedFeatures.Contains("RightAscension")))
+                if (!Starbook.HMS.FromValue(targetRightAscension, out rightAscension, extendedFeatures.Contains("RightAscension") ? 3 : 1))
                 {
                     LogMessage("SyncToTarget", "InvalidValueException: TargetRightAscension={0}", targetRightAscension);
                     throw new ASCOM.InvalidValueException("SyncToTarget", "TargetRightAscension", "0 to 24");
                 }
 
-                if (!Starbook.DMS.FromValue(targetDeclination, out declination, extendedFeatures.Contains("Declination")))
+                if (!Starbook.DMS.FromValue(targetDeclination, out declination, extendedFeatures.Contains("Declination") ? 3 : 0))
                 {
                     LogMessage("SyncToTarget", "InvalidValueException: TargetDeclination={0}", targetDeclination);
                     throw new ASCOM.InvalidValueException("SyncToTarget", "TargetDeclination", "-90 to 90");
@@ -2335,13 +2337,13 @@ namespace ASCOM.Starbook
                 Transform(place.Latitude.Value, place.Longitude.Value, time, place.Timezone,
                           targetRightAscension, targetDeclination, j2000, out double RightAscension, out double Declination, starbook.J2000);
 
-                if (!Starbook.HMS.FromValue(RightAscension, out rightAscension, extendedFeatures.Contains("RightAscension")))
+                if (!Starbook.HMS.FromValue(RightAscension, out rightAscension, extendedFeatures.Contains("RightAscension") ? 3 : 1))
                 {
                     LogMessage("SyncToTarget", "InvalidValueException: RightAscension={0}=>{1}", targetRightAscension, RightAscension);
                     throw new ASCOM.InvalidValueException("SyncToTarget", "RightAscension", "0 to 24");
                 }
 
-                if (!Starbook.DMS.FromValue(Declination, out declination, extendedFeatures.Contains("Declination")))
+                if (!Starbook.DMS.FromValue(Declination, out declination, extendedFeatures.Contains("Declination") ? 3 : 0))
                 {
                     LogMessage("SyncToTarget", "InvalidValueException: Declination={0}=>{1}", targetDeclination, Declination);
                     throw new ASCOM.InvalidValueException("SyncToTarget", "Declination", "-90 to 90");
@@ -2722,6 +2724,11 @@ namespace ASCOM.Starbook
 
                 starbook.IPAddress = ipAddress;
 
+                if (!int.TryParse(driverProfile.GetValue(driverID, pollProfileName, string.Empty, string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out poll))
+                {
+                    poll = pollDefault; recovering = true;
+                }
+
                 if (!double.TryParse(driverProfile.GetValue(driverID, siteElevationProfileName, string.Empty, string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out double siteElevation))
                 {
                     siteElevation = siteElevationDefault; recovering = true;
@@ -2838,6 +2845,7 @@ namespace ASCOM.Starbook
                 driverProfile.DeviceType = "Telescope";
 
                 driverProfile.WriteValue(driverID, ipAddressProfileName, starbook.IPAddress.ToString());
+                driverProfile.WriteValue(driverID, pollProfileName, poll.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, siteElevationProfileName, transform.SiteElevation.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, siteTemperatureProfileName, transform.SiteTemperature.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, slewSettleTimeProfileName, slewSettleTime.ToString(CultureInfo.InvariantCulture));
@@ -3032,7 +3040,7 @@ namespace ASCOM.Starbook
                         if (extendedFeatures.Contains("TBD"))
                         {
                             LogMessage("Thread", "Starbook.GetMountCode()={0}", starbook.GetMountCode(out string code));
-                            LogMessage("Thread", "Starbook.GetStatus2()={0}", starbook.GetStatus2());
+                            LogMessage("Thread", "Starbook.GetAltAz()={0}", starbook.GetAltAz(out double altitude, out double azimuth));
                         }
                     }
                     while (false);
@@ -3131,7 +3139,16 @@ namespace ASCOM.Starbook
                         }
                     }
 
-                    response = starbook.GetStatus(out Starbook.Status status, extendedFeatures.Contains("RightAscension"), extendedFeatures.Contains("Declination"));
+                    Starbook.Status status;
+
+                    if (extendedFeatures.Contains("RightAscension") || extendedFeatures.Contains("Declination"))
+                    {
+                        response = starbook.GetStatus2(out status);
+                    }
+                    else
+                    {
+                        response = starbook.GetStatus(out status);
+                    }
 
                     if (response != Starbook.Response.OK)
                     {

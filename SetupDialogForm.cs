@@ -243,7 +243,7 @@ namespace ASCOM.Starbook
                     return false;
             }
 
-            place.Latitude = new Telescope.Starbook.DMS(direction, degree, minute, 0);
+            place.Latitude = new Telescope.Starbook.DMS(direction, degree, minute, 0.0, 0);
 
             if (!int.TryParse(textBoxLongitudeDegree.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out degree) || degree < 0 || 180 < degree)
             {
@@ -273,7 +273,7 @@ namespace ASCOM.Starbook
                     return false;
             }
 
-            place.Longitude = new Telescope.Starbook.DMS(direction, degree, minute, 0);
+            place.Longitude = new Telescope.Starbook.DMS(direction, degree, minute, 0.0, 0);
 
             if (!int.TryParse(textBoxElevation.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out int elevation))
             {
