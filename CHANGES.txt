@@ -1,6 +1,11 @@
 Changelog
 =========
 
+Starbook Driver v1.0.2
+----------------------
+
+* Hotfix / Inaccuracy issue on Starbook Ten when Use Extended Feature is checked.
+
 Starbook Driver v1.0.1
 ----------------------
 
