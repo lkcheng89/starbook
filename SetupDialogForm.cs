@@ -61,7 +61,7 @@ namespace ASCOM.Starbook
 
             checkBoxJ2000.Checked = Telescope.j2000;
             checkBoxStarbookJ2000.Checked = Telescope.starbook.J2000;
-            checkBoxStarbookJ2000.Enabled = !Telescope.extendedFeatures.Contains("J2000");
+            checkBoxStarbookJ2000.Enabled = !Telescope.extendedFeatures.Contains("RADecType");
             checkBoxAutoMeridianFlip.Checked = Telescope.autoMeridianFlip > 0;
             checkBoxUseExtendedFeatures.Checked = Telescope.extendedFeatures.Count > 0;
             checkBoxTraceLogger.Checked = Telescope.traceLogger.Enabled;
