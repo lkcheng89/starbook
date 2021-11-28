@@ -78,6 +78,8 @@ namespace ASCOM.Starbook
         internal static IPAddress ipAddressDefault = new IPAddress(new byte[] { 169, 254, 1, 1 });
         internal static int pollDefault = 100;
         internal static string pollProfileName = "Poll";
+        internal static int timeoutDefault = 30000;
+        internal static string timeoutProfileName = "Timeout";
         internal static string siteElevationProfileName = "SiteElevation";
         internal static double siteElevationDefault = 0;
         internal static string siteTemperatureProfileName = "SiteTemperature";
@@ -105,13 +107,14 @@ namespace ASCOM.Starbook
         internal static int autoMeridianFlipDefault = 0;
         internal static string extendedFeaturesProfileName = "ExtendedFeatures";
         internal static string[] extendedFeaturesOff = { };
-        internal static string[] extendedFeaturesOn = { "AltAz", "RADec", "RADecType", "MoveAxis", "Track", "Park", "PierSide", "TBD" };
+        internal static string[] extendedFeaturesOn = { /*"AltAz", */"RADec", "RADecType", "MoveAxis", "Track", "Park", /*"PierSide", */"TBD" };
         internal static string[] extendedFeatureDefault = extendedFeaturesOff;
         internal static string traceLoggerProfileName = "TraceLogger";
         internal static bool traceLoggerDefault = false;
 
         internal static Starbook starbook = new Starbook(ipAddressDefault); // Variables to hold the currrent device configuration
         internal static int poll;
+        internal static int timeout;
         internal static short slewSettleTime;
         internal static int guideRate;
         internal static double[] guideRates;
@@ -360,7 +363,15 @@ namespace ASCOM.Starbook
             {
                 Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
                 // TODO customise this driver description
-                string driverInfo = "ASCOM Driver for Vixen Starbook v" + String.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major, version.Minor);
+                string driverInfo;
+                if (version.Build == 0)
+                {
+                    driverInfo = "ASCOM Driver for Vixen Starbook v" + String.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major, version.Minor);
+                }
+                else
+                {
+                    driverInfo = "ASCOM Driver for Vixen Starbook v" + String.Format(CultureInfo.InvariantCulture, "{0}.{1}.{2}", version.Major, version.Minor, version.Build);
+                }
                 LogMessage("DriverInfo_get", driverInfo);
                 return driverInfo;
             }
@@ -902,7 +913,7 @@ namespace ASCOM.Starbook
                     break;
                 }
 
-                Thread.Sleep(100);
+                Thread.Sleep(poll);
             }
 
             LogMessage("FindHome", "OK");
@@ -1725,7 +1736,7 @@ namespace ASCOM.Starbook
                     break;
                 }
 
-                Thread.Sleep(100);
+                Thread.Sleep(poll);
             }
 
             LogMessage("SlewToAltAz", "OK: Azimuth={0},Altitude={1}", Azimuth, Altitude);
@@ -1889,7 +1900,7 @@ namespace ASCOM.Starbook
                     break;
                 }
 
-                Thread.Sleep(100);
+                Thread.Sleep(poll);
             }
 
             LogMessage("SlewToCoordinates", "OK: RightAscension={0},Declination={1}", RightAscension, Declination);
@@ -2056,7 +2067,7 @@ namespace ASCOM.Starbook
                     break;
                 }
 
-                Thread.Sleep(100);
+                Thread.Sleep(poll);
             }
 
             LogMessage("SlewToTarget", "OK: TargetRightAscension={0},TargetDeclination={1}", targetRightAscension, targetDeclination);
@@ -2771,6 +2782,11 @@ namespace ASCOM.Starbook
                     poll = pollDefault; recovering = true;
                 }
 
+                if (!int.TryParse(driverProfile.GetValue(driverID, timeoutProfileName, string.Empty, string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out timeout))
+                {
+                    timeout = timeoutDefault; recovering = true;
+                }
+
                 if (!double.TryParse(driverProfile.GetValue(driverID, siteElevationProfileName, string.Empty, string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out double siteElevation))
                 {
                     siteElevation = siteElevationDefault; recovering = true;
@@ -2888,6 +2904,7 @@ namespace ASCOM.Starbook
 
                 driverProfile.WriteValue(driverID, ipAddressProfileName, starbook.IPAddress.ToString());
                 driverProfile.WriteValue(driverID, pollProfileName, poll.ToString(CultureInfo.InvariantCulture));
+                driverProfile.WriteValue(driverID, timeoutProfileName, timeout.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, siteElevationProfileName, transform.SiteElevation.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, siteTemperatureProfileName, transform.SiteTemperature.ToString(CultureInfo.InvariantCulture));
                 driverProfile.WriteValue(driverID, slewSettleTimeProfileName, slewSettleTime.ToString(CultureInfo.InvariantCulture));
@@ -3046,55 +3063,25 @@ namespace ASCOM.Starbook
                 {
                     initializing = false;
 
-                    do
+                    LogMessage("Thread", "Starbook.Start()={0}", starbook.Start());
+                    LogMessage("Thread", "Starbook.NoMove()={0}", starbook.NoMove());
+                    LogMessage("Thread", "Starbook.SetSpeed({0})={1}", guideRate, starbook.SetSpeed(guideRate));
+
+                    if (extendedFeatures.Contains("RADecType"))
                     {
-                        if ((response = starbook.Start()) != Starbook.Response.OK)
-                        {
-                            LogMessage("Thread", "Starbook.Start()={0}", response);
-                        }
+                        response = starbook.GetRADecType(out Starbook.RADecType raDecType);
+                        LogMessage("Thread", "Starbook.GetRADecType()={0}", response);
 
-                        /*if ((response = starbook.Stop()) != Starbook.Response.OK)
+                        if (response == Starbook.Response.OK)
                         {
-                            LogMessage("Thread", "Starbook.Stop()={0}", response); break;
-                        }*/
-
-                        if ((response = starbook.NoMove()) != Starbook.Response.OK)
-                        {
-                            LogMessage("Thread", "Starbook.NoMove()={0}", response); break;
-                        }
-
-                        if ((response = starbook.SetSpeed(guideRate)) != Starbook.Response.OK)
-                        {
-                            LogMessage("Thread", "Starbook.SetSpeed({0})={1}", guideRate, response); break;
-                        }
-
-                        if (extendedFeatures.Contains("RADecType"))
-                        {
-                            response = starbook.GetRADecType(out Starbook.RADecType raDecType);
-                            LogMessage("Thread", "Starbook.GetRADecType()={0}", response);
-
-                            if (response == Starbook.Response.OK)
-                            {
-                                starbook.J2000 = raDecType == Starbook.RADecType.J2000;
-                            }
-                        }
-
-                        if (extendedFeatures.Contains("TBD"))
-                        {
-                            LogMessage("Thread", "Starbook.GetMountCode()={0}", starbook.GetMountCode(out string code));
-                            LogMessage("Thread", "Starbook.GetAltAz()={0}", starbook.GetAltAz(out double altitude, out double azimuth));
+                            starbook.J2000 = raDecType == Starbook.RADecType.J2000;
                         }
                     }
-                    while (false);
 
-                    if (response != Starbook.Response.OK)
+                    if (extendedFeatures.Contains("TBD"))
                     {
-                        lock (this)
-                        {
-                            connectedState = false;
-                        }
-
-                        break;
+                        LogMessage("Thread", "Starbook.GetMountCode()={0}", starbook.GetMountCode(out string code));
+                        LogMessage("Thread", "Starbook.GetAltAz()={0}", starbook.GetAltAz(out double altitude, out double azimuth));
                     }
                 }
                 else
@@ -3402,7 +3389,7 @@ namespace ASCOM.Starbook
 
                 TimeSpan timeSpan = DateTime.Now - dateTime;
 
-                if (timeSpan.TotalSeconds >= 20 || !connected)
+                if (timeSpan.TotalMilliseconds >= timeout || !connected)
                 {
                     status = new Starbook.Status(); return Starbook.Response.ErrorUnknown;
                 }
@@ -3412,7 +3399,7 @@ namespace ASCOM.Starbook
                     status = (Starbook.Status)statusPolled; return (Starbook.Response)responsePolled;
                 }
 
-                Thread.Sleep(100);
+                Thread.Sleep(poll);
             }
         }
 
@@ -3479,7 +3466,7 @@ namespace ASCOM.Starbook
 
                 TimeSpan timeSpan = DateTime.Now - dateTime;
 
-                if (timeSpan.TotalSeconds >= 5)
+                if (timeSpan.TotalMilliseconds >= timeout)
                 {
                     lock (request)
                     {
@@ -3489,7 +3476,7 @@ namespace ASCOM.Starbook
                     break;
                 }
 
-                Thread.Sleep(100);
+                Thread.Sleep(poll);
             }
 
             return (Starbook.Response)request.Response;

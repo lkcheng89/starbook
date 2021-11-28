@@ -61,7 +61,7 @@ namespace ASCOM.Starbook
             /// 
             public Response GetVersion(out string version)
             {
-                version = string.Empty; Response response = this.Handshake("VERSION", out Dictionary<string, string> dictionary);
+                version = string.Empty; Response response = this.Handshake("version", out Dictionary<string, string> dictionary);
 
                 if (response == Response.ErrorUnknown && dictionary.TryGetValue("VERSION", out version))
                 {
@@ -90,7 +90,7 @@ namespace ASCOM.Starbook
             /// 
             public Response GetStatus(out Status status)
             {
-                status = new Status(); Response response = this.Handshake("GETSTATUS", out Dictionary<string, string> dictionary);
+                status = new Status(); Response response = this.Handshake("getstatus", out Dictionary<string, string> dictionary);
                 
                 if (response == Response.ErrorUnknown)
                 {
@@ -157,7 +157,7 @@ namespace ASCOM.Starbook
             /// 
             public Response GetTime(out DateTime time)
             {
-                time = DateTime.MinValue; Response response = this.Handshake("GETTIME", out Dictionary<string, string> dictionary);
+                time = DateTime.MinValue; Response response = this.Handshake("gettime", out Dictionary<string, string> dictionary);
 
                 if (response == Response.ErrorUnknown && dictionary.TryGetValue("TIME", out string s) && DateTime.TryParseExact(s, "yyyy+MM+dd+HH+mm+ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out time))
                 {
@@ -175,7 +175,7 @@ namespace ASCOM.Starbook
             /// 
             public Response SetTime(DateTime time)
             {
-                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "SETTIME?TIME={0:yyyy+MM+dd+HH+mm+ss}", time));
+                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "settime?time={0:yyyy+MM+dd+HH+mm+ss}", time));
             }
 
             /// <summary>
@@ -191,7 +191,7 @@ namespace ASCOM.Starbook
             /// 
             public Response GetPlace(out Place place)
             {
-                place = new Place(); Response response = this.Handshake("GETPLACE", out Dictionary<string, string> dictionary);
+                place = new Place(); Response response = this.Handshake("getplace", out Dictionary<string, string> dictionary);
                 
                 if (response == Response.ErrorUnknown)
                 {
@@ -245,7 +245,7 @@ namespace ASCOM.Starbook
             /// 
             public Response SetPlace(Place place)
             {
-                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "SETPLACE?LATITUDE={0}&LONGITUDE={1}&TIMEZONE={2:00}", place.Latitude, place.Longitude, place.Timezone));
+                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "setplace?latitude={0}&longitude={1}&timezone={2:00}", place.Latitude, place.Longitude, place.Timezone));
             }
 
             /// <summary>
@@ -255,7 +255,7 @@ namespace ASCOM.Starbook
             /// 
             public Response Home()
             {
-                return this.Handshake("GOHOME?HOME=0");
+                return this.Handshake("gohome?home=0");
             }
 
             /// <summary>
@@ -269,13 +269,13 @@ namespace ASCOM.Starbook
                 switch (direction)
                 {
                     case Direction.North:
-                        return this.Handshake("MOVE?NORTH=1&SOUTH=0&EAST=0&WEST=0");
+                        return this.Handshake("move?north=1&south=0&east=0&west=0");
                     case Direction.South:
-                        return this.Handshake("MOVE?NORTH=0&SOUTH=1&EAST=0&WEST=0");
+                        return this.Handshake("move?north=0&south=1&east=0&west=0");
                     case Direction.East:
-                        return this.Handshake("MOVE?NORTH=0&SOUTH=0&EAST=1&WEST=0");
+                        return this.Handshake("move?north=0&south=0&east=1&west=0");
                     case Direction.West:
-                        return this.Handshake("MOVE?NORTH=0&SOUTH=0&EAST=0&WEST=1");
+                        return this.Handshake("move?north=0&south=0&east=0&west=1");
                     default:
                         return Response.ErrorFormat;
                 }
@@ -288,7 +288,7 @@ namespace ASCOM.Starbook
             /// 
             public Response NoMove()
             {
-                return this.Handshake("MOVE?NORTH=0&SOUTH=0&EAST=0&WEST=0");
+                return this.Handshake("move?north=0&south=0&east=0&west=0");
             }
 
             /// <summary>
@@ -300,7 +300,7 @@ namespace ASCOM.Starbook
             /// 
             public Response Goto(HMS ra, DMS dec)
             {
-                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "GOTORADEC?RA={0}&DEC={1}", ra, dec));
+                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "gotoradec?ra={0}&dec={1}", ra, dec));
             }
 
             /// <summary>
@@ -311,7 +311,7 @@ namespace ASCOM.Starbook
             /// 
             public Response Stop()
             {
-                return this.Handshake("STOP");
+                return this.Handshake("stop");
             }
 
             /// <summary>
@@ -321,7 +321,7 @@ namespace ASCOM.Starbook
             /// 
             public Response Reset()
             {
-                return this.Handshake("RESET?RESET");
+                return this.Handshake("reset?reset");
             }
 
             /// <summary>
@@ -331,7 +331,7 @@ namespace ASCOM.Starbook
             /// 
             public Response Start()
             {
-                return this.Handshake("START");
+                return this.Handshake("start");
             }
 
             /// <summary>
@@ -342,7 +342,7 @@ namespace ASCOM.Starbook
             /// <returns>Response string: OK or ERROR:%</returns>
             public Response Align(HMS ra, DMS dec)
             {
-                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "ALIGN?RA={0}&DEC={1}", ra, dec));
+                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "align?ra={0}&dec={1}", ra, dec));
             }
 
             /// <summary>
@@ -352,7 +352,7 @@ namespace ASCOM.Starbook
             /// <returns>Response string: OK or ERROR:%</returns>
             public Response SetSpeed(int speed)
             {
-                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "SETSPEED?SPEED={0}", speed));
+                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "setspeed?speed={0}", speed));
             }
 
             /// <summary>
@@ -363,7 +363,7 @@ namespace ASCOM.Starbook
             /// 
             public Response GetRound(out int round)
             {
-                round = 0; Response response = this.Handshake("GETROUND", out Dictionary<string, string> dictionary);
+                round = 0; Response response = this.Handshake("getround", out Dictionary<string, string> dictionary);
 
                 if (response == Response.ErrorUnknown && dictionary.TryGetValue("ROUND", out string s) && int.TryParse(s, NumberStyles.Number, CultureInfo.InvariantCulture, out round))
                 {
@@ -381,7 +381,7 @@ namespace ASCOM.Starbook
             /// 
             public Response GetXY(out XY xy)
             {
-                xy = new XY(); Response response = this.Handshake("GETXY", out Dictionary<string, string> dictionary);
+                xy = new XY(); Response response = this.Handshake("getxy", out Dictionary<string, string> dictionary);
 
                 if (response == Response.ErrorUnknown)
                 {
@@ -426,7 +426,7 @@ namespace ASCOM.Starbook
             /// 
             public Response Save()
             {
-                return this.Handshake("SAVESETTING");
+                return this.Handshake("savesetting");
             }
 
             /// <summary>
@@ -441,7 +441,7 @@ namespace ASCOM.Starbook
             {
                 Bitmap screenshot = new Bitmap(width, height);
 
-                byte[] bytes = this.HandshakeBytes("GETSCREEN.BIN", false);
+                byte[] bytes = this.HandshakeBytes("getscreen.bin", false);
                 int byteCount = (width * height * 12 + 7) / 8;
 
                 if (bytes.Length == byteCount)
@@ -528,9 +528,9 @@ namespace ASCOM.Starbook
             /// <param name="pierSide">Pierside of mount</param>
             /// <returns>Response string: OK or ERROR:%</returns>
             /// 
-            public Response CalcSideOfPier(out PierSide pierSide)
+            public Response CalcSideOfPier(double ra, double dec, out PierSide pierSide)
             {
-                pierSide = PierSide.Unknown; Response response = this.Handshake("CALC_SIDEOFPIER", out Dictionary<string, string> dictionary);
+                pierSide = PierSide.Unknown; Response response = this.Handshake(string.Format(CultureInfo.InvariantCulture, "calc_sideofpier?ra={0}&dec={1}", ra, dec), out Dictionary<string, string> dictionary);
 
                 if (response == Response.ErrorUnknown && dictionary.TryGetValue("PIERSIDE", out string s) && TryParsePierSide(s, out pierSide))
                 {
@@ -549,7 +549,7 @@ namespace ASCOM.Starbook
             /// 
             public Response GetAltAz(out double altitude, out double azimuth)
             {
-                altitude = azimuth = 0; Response response = this.Handshake("GETALTAZ", out Dictionary<string, string> dictionary);
+                altitude = azimuth = 0; Response response = this.Handshake("getaltaz", out Dictionary<string, string> dictionary);
 
                 if (response == Response.ErrorUnknown && dictionary.TryGetValue("ALTITUDE", out string s) && double.TryParse(s, NumberStyles.Number, CultureInfo.InvariantCulture, out altitude) &&
                                                          dictionary.TryGetValue("AZIMUTH", out s) && double.TryParse(s, NumberStyles.Number, CultureInfo.InvariantCulture, out azimuth))
@@ -571,7 +571,7 @@ namespace ASCOM.Starbook
             /// 
             public Response GetGuideStatus(out bool rap, out bool ran, out bool decp, out bool decn)
             {
-                rap = ran = decp = decn = false; Response response = this.Handshake("GETGUIDESTATUS", out Dictionary<string, string> dictionary);
+                rap = ran = decp = decn = false; Response response = this.Handshake("getguidestatus", out Dictionary<string, string> dictionary);
 
                 if (response == Response.ErrorUnknown && dictionary.TryGetValue("RA+", out string s) && TryParseState(s, out rap) &&
                                                          dictionary.TryGetValue("RA-", out s) && TryParseState(s, out ran) &&
@@ -592,7 +592,7 @@ namespace ASCOM.Starbook
             /// 
             public Response GetPierSide(out PierSide pierSide)
             {
-                pierSide = PierSide.Unknown; Response response = this.Handshake("GET_PIERSIDE", out Dictionary<string, string> dictionary);
+                pierSide = PierSide.Unknown; Response response = this.Handshake("get_pierside", out Dictionary<string, string> dictionary);
 
                 if (response == Response.ErrorUnknown && dictionary.TryGetValue("PIERSIDE", out string s) && TryParsePierSide(s, out pierSide))
                 {
@@ -610,7 +610,7 @@ namespace ASCOM.Starbook
             /// 
             public Response GetMountCode(out string code)
             {
-                code = string.Empty; Response response = this.Handshake("GETMOUNTCODE", out Dictionary<string, string> dictionary);
+                code = string.Empty; Response response = this.Handshake("getmountcode", out Dictionary<string, string> dictionary);
 
                 if (response == Response.ErrorUnknown && dictionary.TryGetValue("CODE"/*TBD*/, out code))
                 {
@@ -628,7 +628,7 @@ namespace ASCOM.Starbook
             /// 
             public Response GetRADecType(out RADecType type)
             {
-                type = RADecType.Unknown; Response response = this.Handshake("GETRADECTYPE", out Dictionary<string, string> dictionary);
+                type = RADecType.Unknown; Response response = this.Handshake("getradectype", out Dictionary<string, string> dictionary);
 
                 if (response == Response.ErrorUnknown && dictionary.TryGetValue("TYPE", out string s) && TryParseRADecType(s, out type))
                 {
@@ -657,7 +657,7 @@ namespace ASCOM.Starbook
             /// 
             public Response GetStatus2(out Status status)
             {
-                status = new Status(); Response response = this.Handshake("GETSTATUS2", out Dictionary<string, string> dictionary);
+                status = new Status(); Response response = this.Handshake("getstatus2", out Dictionary<string, string> dictionary);
 
                 if (response == Response.ErrorUnknown)
                 {
@@ -669,7 +669,7 @@ namespace ASCOM.Starbook
                         {
                             case "RA":
                             {
-                                if (double.TryParse(item.Value, out double value) && HMS.FromValue(value, out HMS ra, 6))
+                                if (double.TryParse(item.Value, out double value) && HMS.FromValue(value, out HMS ra, 5))
                                 {
                                     status.RA = ra; statusRA = true;
                                 }
@@ -677,7 +677,7 @@ namespace ASCOM.Starbook
                             }
                             case "DEC":
                             {
-                                if (double.TryParse(item.Value, out double value) && DMS.FromValue(value, out DMS dec, 6))
+                                if (double.TryParse(item.Value, out double value) && DMS.FromValue(value, out DMS dec, 5))
                                 {
                                     status.Dec = dec; statusDEC = true;
                                 }
@@ -724,7 +724,7 @@ namespace ASCOM.Starbook
             /// 
             public Response GetTrackStatus(out bool track)
             {
-                track = false; Response response = this.Handshake("GETTRACKSTATUS", out Dictionary<string, string> dictionary);
+                track = false; Response response = this.Handshake("gettrackstatus", out Dictionary<string, string> dictionary);
 
                 if (response == Response.ErrorUnknown && dictionary.TryGetValue("TRACK", out string s) && TryParseState(s, out track))
                 {
@@ -741,7 +741,7 @@ namespace ASCOM.Starbook
             /// 
             public Response GotoPark()
             {
-                return this.Handshake("GOTO_PARK");
+                return this.Handshake("goto_park");
             }
 
             /// <summary>
@@ -756,9 +756,9 @@ namespace ASCOM.Starbook
                 switch (axis)
                 {
                     case Axis.Primary:
-                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "MOVE_AXIS?AXIS=0&RATE={0}", rate));
+                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "move_axis?axis=0&rate={0}", rate));
                     case Axis.Secondary:
-                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "MOVE_AXIS?AXIS=1&RATE={0}", rate));
+                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "move_axis?axis=1&rate={0}", rate));
                     default:
                         return Response.ErrorFormat;
                 }
@@ -776,13 +776,13 @@ namespace ASCOM.Starbook
                 switch (direction)
                 {
                     case Direction.North:
-                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "MOVEPULSE?DIRECT=0&DURATION={0}", duration));
+                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "movepulse?direct=0&duration={0}", duration));
                     case Direction.South:
-                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "MOVEPULSE?DIRECT=1&DURATION={0}", duration));
+                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "movepulse?direct=1&duration={0}", duration));
                     case Direction.East:
-                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "MOVEPULSE?DIRECT=2&DURATION={0}", duration));
+                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "movepulse?direct=2&duration={0}", duration));
                     case Direction.West:
-                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "MOVEPULSE?DIRECT=3&DURATION={0}", duration));
+                        return this.Handshake(string.Format(CultureInfo.InvariantCulture, "movepulse?direct=3&duration={0}", duration));
                     default:
                         return Response.ErrorFormat;
                 }
@@ -795,7 +795,7 @@ namespace ASCOM.Starbook
             /// 
             public Response SetPark()
             {
-                return this.Handshake("SET_PARK");
+                return this.Handshake("set_park");
             }
 
             /// <summary>
@@ -807,7 +807,7 @@ namespace ASCOM.Starbook
             ///
             public Response SetPulseSpeed(double ra, double dec)
             {
-                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "SETPULSESPEED?RA={0}&DEC={1}", ra, dec));
+                return this.Handshake(string.Format(CultureInfo.InvariantCulture, "setpulsespeed?ra={0}&dec={1}", ra, dec));
             }
 
             /// <summary>
@@ -817,7 +817,7 @@ namespace ASCOM.Starbook
             /// 
             public Response Unpark()
             {
-                return this.Handshake("UNPARK");
+                return this.Handshake("unpark");
             }
 
             /////
@@ -829,6 +829,7 @@ namespace ASCOM.Starbook
                     case "0":
                         state = false; return true;
                     case "1":
+                    case "2": /* ??? */
                         state = true; return true;
                     default:
                         state = false; return false;
@@ -1128,6 +1129,9 @@ namespace ASCOM.Starbook
             [ComVisible(false)]
             public struct HMS
             {
+                public const int FormatLeadingZeros  = 0x00000100;
+                public const int FormatDecimalPlaces = 0x000000FF;
+
                 public HMS(int hour, int minute, double second, int format) : this()
                 {
                     this.Hour = hour;
@@ -1186,20 +1190,23 @@ namespace ASCOM.Starbook
 
                 public override string ToString()
                 {
-                    if (this.Format > 0)
+                    bool leadingZeros = (this.Format & FormatLeadingZeros) == FormatLeadingZeros;
+                    int decimalPlaces = (this.Format & FormatDecimalPlaces);
+
+                    if (decimalPlaces > 0)
                     {
                         string zeros = string.Empty;
 
-                        for (int zero = 1; zero <= this.Format; zero++)
+                        for (int zero = 1; zero <= decimalPlaces; zero++)
                         {
                             zeros += "0";
                         }
 
-                        return string.Format(CultureInfo.InvariantCulture, "{0:00}+{1:00." + zeros + "}", this.Hour, this.Minute + this.Second / 60.0);
+                        return string.Format(CultureInfo.InvariantCulture, leadingZeros ? "{0:00}+{1:00." + zeros + "}" : "{0}+{1:0." + zeros + "}", this.Hour, this.Minute + this.Second / 60.0);
                     }
                     else
                     {
-                        return string.Format(CultureInfo.InvariantCulture, "{0:00}+{1:00}", this.Hour, this.Minute);
+                        return string.Format(CultureInfo.InvariantCulture, leadingZeros ? "{0:00}+{1:00}" : "{0}+{1}", this.Hour, this.Minute);
                     }
                 }
             }
@@ -1207,6 +1214,9 @@ namespace ASCOM.Starbook
             [ComVisible(false)]
             public struct DMS
             {
+                public const int FormatLeadingZeros = 0x00000100;
+                public const int FormatDecimalPlaces = 0x000000FF;
+
                 public DMS(Direction direction, int degree, int minute, double second, int format) : this()
                 {
                     this.Direction = direction;
@@ -1360,20 +1370,23 @@ namespace ASCOM.Starbook
                             direction = "-"; break;
                     }
 
-                    if (this.Format > 0)
+                    bool leadingZeros = (this.Format & FormatLeadingZeros) == FormatLeadingZeros;
+                    int decimalPlaces = (this.Format & FormatDecimalPlaces);
+
+                    if (decimalPlaces > 0)
                     {
                         string zeros = string.Empty;
 
-                        for (int zero = 1; zero <= this.Format; zero++)
+                        for (int zero = 1; zero <= decimalPlaces; zero++)
                         {
                             zeros += "0";
                         }
 
-                        return string.Format(CultureInfo.InvariantCulture, degree ? "{0}{1:000}+{2:00." + zeros + "}" : "{0}{1:00}+{2:00." + zeros + "}", direction, this.Degree, this.Minute + this.Second / 60.0);
+                        return string.Format(CultureInfo.InvariantCulture, leadingZeros ? degree ? "{0}{1:000}+{2:00." + zeros + "}" : "{0}{1:00}+{2:00." + zeros + "}" : "{0}{1}+{2:0." + zeros + "}", direction, this.Degree, this.Minute + this.Second / 60.0);
                     }
                     else
                     {
-                        return string.Format(CultureInfo.InvariantCulture, degree ? "{0}{1:000}+{2:00}" : "{0}{1:00}+{2:00}", direction, this.Degree, this.Minute);
+                        return string.Format(CultureInfo.InvariantCulture, leadingZeros ? degree ? "{0}{1:000}+{2:00}" : "{0}{1:00}+{2:00}" : "{0}{1}+{2}", direction, this.Degree, this.Minute);
                     }
                 }
             }
