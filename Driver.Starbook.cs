@@ -1351,6 +1351,9 @@ namespace ASCOM.Starbook
 
                 public override string ToString()
                 {
+                    bool leadingZeros = (this.Format & FormatLeadingZeros) == FormatLeadingZeros;
+                    int decimalPlaces = (this.Format & FormatDecimalPlaces);
+
                     string direction; bool degree = false;
 
                     switch (this.Direction)
@@ -1365,13 +1368,10 @@ namespace ASCOM.Starbook
                             direction = "W"; degree = true; break;
                         case Direction.Positive:
                         default:
-                            direction = "0"; break;
+                            direction = leadingZeros ? "0" : string.Empty; break;
                         case Direction.Negative:
                             direction = "-"; break;
                     }
-
-                    bool leadingZeros = (this.Format & FormatLeadingZeros) == FormatLeadingZeros;
-                    int decimalPlaces = (this.Format & FormatDecimalPlaces);
 
                     if (decimalPlaces > 0)
                     {
