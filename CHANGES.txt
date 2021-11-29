@@ -1,6 +1,11 @@
 Changelog
 =========
 
+Starbook Driver v1.0.3
+----------------------
+
+* Hotfix / SyncToCoordinates doesn't work on Starbook Ten when Use Extended Feature is checked.
+
 Starbook Driver v1.0.2
 ----------------------
 
